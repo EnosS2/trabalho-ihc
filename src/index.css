@@ -1,0 +1,285 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens — ver docs/design-ihc.md
+ * Harmonia: complementar dividido. Azul-petróleo (primária, confiança/institucional, igual ao
+ * cabeçalho do BMC) + âmbar (acento/atenção). Semânticas sempre acompanhadas de ícone + texto.
+ * Agravos: paleta categórica Okabe-Ito (segura para daltonismo), com variantes de texto AA.
+ */
+
+@custom-variant dark (&:where([data-tema='escuro'], [data-tema='escuro'] *));
+
+:root {
+  color-scheme: light;
+  --bg: #f2f5f7;
+  --surface: #ffffff;
+  --surface-2: #f6f8fa;
+  --surface-3: #ebf0f3;
+  --border: #d3dce3;
+  --border-strong: #768a98;
+  --fg: #13212b;
+  --muted: #4b5d6a;
+
+  --primary: #1d5b7c;
+  --primary-hover: #174b67;
+  --primary-strong: #173447;
+  --primary-soft: #e2eef5;
+  --primary-soft-fg: #174b67;
+  --on-primary: #ffffff;
+  --sidebar: #173447;
+  --sidebar-fg: #d7e5ee;
+  --sidebar-active: #24536f;
+
+  --accent: #a85a00;
+  --accent-soft: #fff3dc;
+  --accent-fill: #e9a23b;
+
+  --success: #1c6b3e;
+  --success-soft: #e4f3ea;
+  --warning: #8a5100;
+  --warning-soft: #fff1d4;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --info: #1f5fa6;
+  --info-soft: #e7f0fb;
+
+  --focus: #c26a00;
+
+  --hiv: #a63f00;
+  --hiv-soft: #fce9dd;
+  --hiv-solid: #d55e00;
+  --sif: #005b8f;
+  --sif-soft: #ddeef8;
+  --sif-solid: #0072b2;
+  --hbv: #00704f;
+  --hbv-soft: #d9f2ea;
+  --hbv-solid: #009e73;
+  --hcv: #92376e;
+  --hcv-soft: #f7e4ef;
+  --hcv-solid: #cc79a7;
+
+  --shadow: 0 1px 2px rgb(19 33 43 / 0.06), 0 1px 3px rgb(19 33 43 / 0.08);
+}
+
+[data-tema='escuro'] {
+  color-scheme: dark;
+  --bg: #0d161d;
+  --surface: #131f28;
+  --surface-2: #182630;
+  --surface-3: #1e2f3b;
+  --border: #2a3c49;
+  --border-strong: #6b8190;
+  --fg: #e5ecf1;
+  --muted: #a5b4c0;
+
+  --primary: #6cb4dc;
+  --primary-hover: #8cc6e6;
+  --primary-strong: #0a1319;
+  --primary-soft: #173549;
+  --primary-soft-fg: #a9d5ee;
+  --on-primary: #0a1a24;
+  --sidebar: #0a1319;
+  --sidebar-fg: #c3d3de;
+  --sidebar-active: #173549;
+
+  --accent: #f2b35c;
+  --accent-soft: #3a2a12;
+  --accent-fill: #f2b35c;
+
+  --success: #6fcf97;
+  --success-soft: #143324;
+  --warning: #f2c063;
+  --warning-soft: #3a2c10;
+  --danger: #f28b82;
+  --danger-soft: #3d1a18;
+  --info: #8ab8f0;
+  --info-soft: #16294a;
+
+  --focus: #f2b35c;
+
+  --hiv: #ff9e66;
+  --hiv-soft: #3d2112;
+  --hiv-solid: #d9691a;
+  --sif: #7cc4f0;
+  --sif-soft: #10304a;
+  --sif-solid: #3d8fd6;
+  --hbv: #5ed3ae;
+  --hbv-soft: #0e3529;
+  --hbv-solid: #16a07a;
+  --hcv: #efa3cf;
+  --hcv-soft: #3a1d2f;
+  --hcv-solid: #c470b8;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+/* Alto contraste: preto sobre branco, bordas fortes, sem cinzas intermediários. */
+[data-contraste='alto'] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --surface-3: #f0f0f0;
+  --border: #000000;
+  --border-strong: #000000;
+  --fg: #000000;
+  --muted: #1a1a1a;
+  --primary: #00406a;
+  --primary-hover: #002a47;
+  --primary-strong: #000000;
+  --primary-soft: #ffffff;
+  --primary-soft-fg: #00406a;
+  --sidebar: #000000;
+  --sidebar-fg: #ffffff;
+  --sidebar-active: #00406a;
+  --accent: #7a3e00;
+  --success: #0b4d27;
+  --warning: #5c3500;
+  --danger: #8c1409;
+  --info: #0a3d75;
+  --success-soft: #ffffff;
+  --warning-soft: #ffffff;
+  --danger-soft: #ffffff;
+  --info-soft: #ffffff;
+  --accent-soft: #ffffff;
+  --focus: #d14900;
+  --hiv: #7a2e00;
+  --sif: #003a5c;
+  --hbv: #004d36;
+  --hcv: #6b2450;
+  --hiv-soft: #ffffff;
+  --sif-soft: #ffffff;
+  --hbv-soft: #ffffff;
+  --hcv-soft: #ffffff;
+  --shadow: none;
+}
+
+@theme inline {
+  --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-fg: var(--primary-soft-fg);
+  --color-on-primary: var(--on-primary);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-active: var(--sidebar-active);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fill: var(--accent-fill);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-focus: var(--focus);
+
+  --color-hiv: var(--hiv);
+  --color-hiv-soft: var(--hiv-soft);
+  --color-hiv-solid: var(--hiv-solid);
+  --color-sif: var(--sif);
+  --color-sif-soft: var(--sif-soft);
+  --color-sif-solid: var(--sif-solid);
+  --color-hbv: var(--hbv);
+  --color-hbv-soft: var(--hbv-soft);
+  --color-hbv-solid: var(--hbv-solid);
+  --color-hcv: var(--hcv);
+  --color-hcv-soft: var(--hcv-soft);
+  --color-hcv-solid: var(--hcv-solid);
+
+  --shadow-card: var(--shadow);
+}
+
+/* Escala tipográfica ajustável pelo usuário (A− / A+): tudo em rem acompanha. */
+html {
+  font-size: 100%;
+}
+html[data-fonte='1'] {
+  font-size: 112.5%;
+}
+html[data-fonte='2'] {
+  font-size: 125%;
+}
+html[data-fonte='3'] {
+  font-size: 137.5%;
+}
+
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  [data-contraste='alto'] a {
+    text-decoration: underline;
+  }
+
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--fg);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+html[data-movimento='reduzido'] *,
+html[data-movimento='reduzido'] *::before,
+html[data-movimento='reduzido'] *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+}
+
+dialog::backdrop {
+  background: rgb(8 18 26 / 0.55);
+}
