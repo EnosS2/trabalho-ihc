@@ -99,7 +99,7 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
           <Menu className="size-6" aria-hidden />
         </button>
         <div className="lg:hidden">
-          <Logo className="[&_p:last-child]:hidden" />
+          <Logo semSubtitulo />
         </div>
 
         <div className="ml-auto flex items-center">

@@ -52,7 +52,7 @@ export default function AjudaPage() {
         descricao="Respostas rápidas, fluxogramas e atalhos."
         acoes={
           <LinkButton to="/ajuda/guia-de-interface" variante="secundario">
-            Guia de interface (IHC)
+            Guia de interface
           </LinkButton>
         }
       />

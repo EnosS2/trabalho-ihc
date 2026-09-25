@@ -201,7 +201,7 @@ export function Sidebar({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
             className="absolute inset-y-0 left-0 flex w-[min(20rem,85vw)] flex-col overflow-y-auto bg-sidebar shadow-2xl [--focus:var(--focus-sobre-escuro)]"
           >
             <div className="flex items-center justify-between px-5 pt-4">
-              <Logo claro />
+              <Logo claro aoClicar={aoFechar} />
               <button
                 type="button"
                 onClick={aoFechar}
