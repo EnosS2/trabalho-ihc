@@ -1,5 +1,6 @@
 import { diasEntre, mesDe, somarDias } from '@/lib/datas'
 import { TIPO_TESTE_ROTULO, TIPOS_TESTE } from '../rotulos'
+import { plural } from '@/lib/texto'
 import type { ISODate, LoteInsumo, MovimentacaoEstoque, Parametros, Testagem, TipoTeste } from '../types'
 
 export function loteVencido(lote: LoteInsumo, hoje: ISODate): boolean {
@@ -89,7 +90,7 @@ export function alertasEstoque(lotes: LoteInsumo[], params: Parametros, hoje: IS
         tipoTeste: l.tipo,
         loteId: l.id,
         severidade: 'alta',
-        mensagem: `Lote ${l.lote} (${TIPO_TESTE_ROTULO[l.tipo]}) vencido com ${l.quantidadeAtual} unidade(s): dar baixa.`,
+        mensagem: `${TIPO_TESTE_ROTULO[l.tipo]}, lote ${l.lote}: venceu com ${plural(l.quantidadeAtual, 'unidade')}. Dê baixa no estoque.`,
       })
     } else if (dias <= params.alertaValidadeDias) {
       alertas.push({
@@ -98,7 +99,7 @@ export function alertasEstoque(lotes: LoteInsumo[], params: Parametros, hoje: IS
         tipoTeste: l.tipo,
         loteId: l.id,
         severidade: 'media',
-        mensagem: `Lote ${l.lote} (${TIPO_TESTE_ROTULO[l.tipo]}) vence em ${dias} dia(s) — ${l.quantidadeAtual} unidade(s).`,
+        mensagem: `${TIPO_TESTE_ROTULO[l.tipo]}, lote ${l.lote}: vence em ${plural(dias, 'dia')}, com ${plural(l.quantidadeAtual, 'unidade')}.`,
       })
     }
   }
@@ -118,7 +119,7 @@ export function alertasEstoque(lotes: LoteInsumo[], params: Parametros, hoje: IS
         tipo: 'estoque_baixo',
         tipoTeste: tipo,
         severidade: 'media',
-        mensagem: `${TIPO_TESTE_ROTULO[tipo]}: ${saldo} unidade(s), abaixo do mínimo de ${params.estoqueMinimo[tipo]}.`,
+        mensagem: `${TIPO_TESTE_ROTULO[tipo]}: ${plural(saldo, 'unidade')}, abaixo do mínimo de ${params.estoqueMinimo[tipo]}.`,
       })
     }
   }

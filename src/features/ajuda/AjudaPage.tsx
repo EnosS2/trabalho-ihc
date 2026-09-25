@@ -51,7 +51,7 @@ export default function AjudaPage() {
         titulo="Central de ajuda"
         descricao="Respostas rápidas, fluxogramas e atalhos."
         acoes={
-          <LinkButton to="/ajuda/guia-de-interface" variante="secundario" iconeDireita={ArrowRight}>
+          <LinkButton to="/ajuda/guia-de-interface" variante="secundario">
             Guia de interface (IHC)
           </LinkButton>
         }
@@ -107,7 +107,7 @@ export default function AjudaPage() {
                   ['Esc', 'Fechar diálogo, menu ou gaveta'],
                 ].map(([k, v]) => (
                   <div key={k} className="contents">
-                    <dt><kbd className="rounded border border-border-strong bg-surface-2 px-1.5 py-0.5 font-mono text-xs">{k}</kbd></dt>
+                    <dt><kbd className="rounded border border-border-strong bg-surface-2 px-1.5 py-0.5 text-xs">{k}</kbd></dt>
                     <dd>{v}</dd>
                   </div>
                 ))}

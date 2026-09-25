@@ -58,7 +58,7 @@ export function AgravoBadge({ agravo, completo = false }: { agravo: Agravo; comp
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono text-[0.72rem] font-bold tracking-wide',
+        'inline-flex items-center rounded-sm border px-1.5 text-xs leading-5 font-bold',
         agravoClasses[agravo],
       )}
       title={AGRAVO_ROTULO[agravo]}

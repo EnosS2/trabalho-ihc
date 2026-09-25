@@ -14,18 +14,18 @@ import type {
 } from '../types'
 
 export const ESQUEMA_SIFILIS =
-  'Benzilpenicilina benzatina 2.400.000 UI IM — 3 doses semanais (total 7.200.000 UI)'
+  'Benzilpenicilina benzatina 2.400.000 UI IM, 3 doses semanais (total 7.200.000 UI)'
 
 export function tratamentoPadrao(agravo: Agravo): Omit<Tratamento, 'doses'> {
   switch (agravo) {
     case 'sifilis':
       return { esquema: ESQUEMA_SIFILIS, local: 'ubs' }
     case 'hiv':
-      return { esquema: 'TARV — vinculação ao SAE', local: 'servico_especializado' }
+      return { esquema: 'TARV com vinculação ao SAE', local: 'servico_especializado' }
     case 'hepatite_b':
       return { esquema: 'Avaliação e tratamento no serviço especializado', local: 'servico_especializado' }
     case 'hepatite_c':
-      return { esquema: 'Antivirais de ação direta — serviço especializado', local: 'servico_especializado' }
+      return { esquema: 'Antivirais de ação direta no serviço especializado', local: 'servico_especializado' }
   }
 }
 
@@ -66,7 +66,7 @@ export function criarCaso(input: NovoCasoInput, params: Parametros): Caso {
           resultadoEm: input.data,
         }
       } else {
-        confirmatorio = { exame: 'Amostra venosa — imunoensaio laboratorial' }
+        confirmatorio = { exame: 'Amostra venosa (imunoensaio laboratorial)' }
       }
       break
     case 'sifilis':
@@ -135,6 +135,24 @@ export function derivarStatus(caso: Caso): StatusCaso {
   if (caso.tratamento && caso.gestante) return 'aguardando_tratamento'
   if (!c.coletadoEm) return 'aguardando_coleta'
   return 'aguardando_resultado'
+}
+
+/**
+ * Trilha do caso, na ordem do cuidado: teste rápido → confirmação → tratamento → seguimento
+ * sorológico (só sífilis) → desfecho. `atual` é o índice da etapa em andamento; num caso encerrado
+ * é `etapas.length` (todas concluídas). O teste rápido já está feito quando o caso nasce.
+ */
+export function etapasDoCaso(agravo: Agravo, status: StatusCaso): { etapas: string[]; atual: number } {
+  const etapas = ['Teste rápido', 'Confirmação', 'Tratamento', ...(agravo === 'sifilis' ? ['Seguimento sorológico'] : []), 'Desfecho']
+  const atual =
+    status === 'encerrado'
+      ? etapas.length
+      : status === 'aguardando_coleta' || status === 'aguardando_resultado'
+        ? 1
+        : status === 'aguardando_tratamento' || status === 'em_tratamento'
+          ? 2
+          : 3
+  return { etapas, atual }
 }
 
 // ---------- Pendências e prazos ----------

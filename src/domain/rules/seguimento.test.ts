@@ -6,6 +6,7 @@ import {
   avaliarRespostaSorologica,
   criarCaso,
   derivarStatus,
+  etapasDoCaso,
   pendenciasDoCaso,
   pendenciasParaBuscaAtiva,
 } from './seguimento'
@@ -127,5 +128,30 @@ describe('resposta sorológica', () => {
       P,
     )
     expect(avaliarRespostaSorologica(c)).toBe('adequada')
+  })
+})
+
+describe('etapasDoCaso', () => {
+  it('sífilis tem seguimento sorológico; os demais agravos não', () => {
+    expect(etapasDoCaso('sifilis', 'aguardando_coleta').etapas).toEqual([
+      'Teste rápido',
+      'Confirmação',
+      'Tratamento',
+      'Seguimento sorológico',
+      'Desfecho',
+    ])
+    expect(etapasDoCaso('hiv', 'aguardando_coleta').etapas).toHaveLength(4)
+  })
+
+  it('posiciona a etapa atual pelo status', () => {
+    expect(etapasDoCaso('sifilis', 'aguardando_resultado').atual).toBe(1)
+    expect(etapasDoCaso('sifilis', 'aguardando_tratamento').atual).toBe(2)
+    expect(etapasDoCaso('sifilis', 'em_tratamento').atual).toBe(2)
+    expect(etapasDoCaso('sifilis', 'em_seguimento').atual).toBe(3)
+  })
+
+  it('caso encerrado tem todas as etapas concluídas', () => {
+    expect(etapasDoCaso('hepatite_c', 'encerrado').atual).toBe(4)
+    expect(etapasDoCaso('sifilis', 'encerrado').atual).toBe(5)
   })
 })

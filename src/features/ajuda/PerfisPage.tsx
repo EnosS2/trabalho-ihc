@@ -52,13 +52,13 @@ export default function PerfisPage() {
               )}
             >
               <span className="w-fit rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary-soft-fg">
-                Nível {nivel.nivel} · {nivel.escopo}
+                Nível {nivel.nivel}, {nivel.escopo.charAt(0).toLowerCase() + nivel.escopo.slice(1)}
               </span>
               <div>
                 <h2 className="text-lg font-bold">{PERFIL_ROTULO[u.perfil]}</h2>
                 <p className="text-sm text-muted">
-                  {u.nome} — {u.cargo}
-                  {u.ubsNome ? ` · ${u.ubsNome}` : ''}
+                  {u.nome}, {u.cargo.charAt(0).toLowerCase() + u.cargo.slice(1)}
+                  {u.ubsNome ? `, ${u.ubsNome}` : ''}
                 </p>
               </div>
               <ul className="flex flex-col gap-1 text-sm">

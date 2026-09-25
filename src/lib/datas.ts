@@ -37,6 +37,11 @@ export function formatarData(data?: ISODate): string {
   return format(parseISO(data), 'dd/MM/yyyy')
 }
 
+/** "quinta-feira, 24 de setembro": para cabeçalhos, onde a data é lida, não comparada. */
+export function formatarDataLonga(data: ISODate): string {
+  return format(parseISO(data), "EEEE, d 'de' MMMM", { locale: ptBR })
+}
+
 export function formatarDataHora(data?: string): string {
   if (!data) return '—'
   return format(parseISO(data), "dd/MM/yyyy 'às' HH:mm")

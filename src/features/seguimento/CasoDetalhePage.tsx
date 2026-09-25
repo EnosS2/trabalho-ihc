@@ -3,18 +3,19 @@ import { useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router'
 import { usePode } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
-import { AgravoBadge, Badge, GestanteBadge, PrazoBadge, StatusCasoBadge } from '@/components/ui/Badge'
+import { AgravoBadge, Badge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro } from '@/components/ui/Feedback'
+import { FitaDoCaso } from '@/components/ui/FitaDoCaso'
 import { Checkbox, Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
-import { DescricaoLista, LinhaDoTempo, Medidor, PageHeader, Stepper, type ItemLinhaDoTempo } from '@/components/ui/Layout'
+import { DescricaoLista, LinhaDoTempo, Medidor, PageHeader, type ItemLinhaDoTempo } from '@/components/ui/Layout'
 import { useToast } from '@/components/ui/Toast'
 import type { CasoDetalhe } from '@/data/api'
 import { useAcaoCaso, useCaso, useMarcarEnviada } from '@/data/hooks'
 import { formatarCns, formatarCpf } from '@/domain/rules/documentos'
-import { tratamentoPadrao, type AcaoCaso } from '@/domain/rules/seguimento'
+import { etapasDoCaso, tratamentoPadrao, type AcaoCaso } from '@/domain/rules/seguimento'
 import {
   AGRAVO_NOTIFICACAO_ROTULO,
   AGRAVO_ROTULO,
@@ -27,6 +28,7 @@ import {
 } from '@/domain/rotulos'
 import type { TipoDesfecho } from '@/domain/types'
 import { formatarData, formatarDataHora, hojeISO } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 import { ICONE_PENDENCIA } from './componentes'
 
 type TipoDialogo = 'coleta' | 'resultado' | 'tratamento' | 'dose' | 'seguimento' | 'parceria' | 'encerrar' | 'anotar' | null
@@ -50,12 +52,12 @@ function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: 
 
   const configuracao: Record<Exclude<TipoDialogo, null>, { titulo: string; rotulo: string; montar: () => AcaoCaso | string }> = {
     coleta: {
-      titulo: `Registrar coleta — ${caso.confirmatorio.exame}`,
+      titulo: `Registrar coleta: ${caso.confirmatorio.exame}`,
       rotulo: 'Registrar coleta',
       montar: () => ({ tipo: 'registrar_coleta', data }),
     },
     resultado: {
-      titulo: `Resultado — ${caso.confirmatorio.exame}`,
+      titulo: `Registrar resultado: ${caso.confirmatorio.exame}`,
       rotulo: 'Salvar resultado',
       montar: () =>
         !resultado
@@ -232,7 +234,7 @@ function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: 
       aberto
       aoFechar={aoFechar}
       titulo={cfg.titulo}
-      descricao={`${detalhe.pessoa.nome} · ${AGRAVO_ROTULO[caso.agravo]}`}
+      descricao={`${detalhe.pessoa.nome}, ${AGRAVO_ROTULO[caso.agravo]}`}
       rodape={
         <>
           <Button variante="secundario" onClick={aoFechar}>
@@ -299,7 +301,7 @@ function CartaoNotificacao({ d }: { d: CasoDetalhe }) {
                 <PrazoBadge prazo={n.prazo} diasRestantes={Math.round((Date.parse(n.prazo) - Date.parse(hojeISO())) / 86400000)} />
               )}
             </div>
-            <p className="-mt-2 text-sm text-muted">Destino: {DESTINO_ROTULO[n.destino]}{n.protocolo ? ` · ${n.protocolo}` : ''}</p>
+            <p className="-mt-2 text-sm text-muted">Destino: {DESTINO_ROTULO[n.destino]}{n.protocolo ? `, protocolo ${n.protocolo}` : ''}</p>
           </>
         )}
         <Medidor
@@ -439,14 +441,7 @@ export default function CasoDetalhePage() {
   const t = caso.tratamento
   const sifilis = caso.agravo === 'sifilis'
 
-  const etapas = ['Teste rápido', 'Confirmação', 'Tratamento', ...(sifilis ? ['Seguimento sorológico'] : []), 'Desfecho']
-  const indice = encerrado
-    ? etapas.length
-    : status === 'aguardando_coleta' || status === 'aguardando_resultado'
-      ? 1
-      : status === 'aguardando_tratamento' || status === 'em_tratamento'
-        ? 2
-        : 3
+  const { etapas, atual } = etapasDoCaso(caso.agravo, status)
 
   // Ações contextuais: só aparecem quando fazem sentido (reconhecer em vez de lembrar).
   const acoes: { tipo: Exclude<TipoDialogo, null>; rotulo: string; icone: typeof Plus; primaria?: boolean }[] = []
@@ -467,12 +462,11 @@ export default function CasoDetalhePage() {
       <PageHeader
         titulo={pessoa.nomeSocial ?? pessoa.nome}
         tituloAba={`Caso de ${AGRAVO_ROTULO[caso.agravo]}`}
-        trilha={[{ rotulo: 'Seguimento', para: '/seguimento' }, { rotulo: `${AGRAVO_ROTULO[caso.agravo]} — ${pessoa.nome}` }]}
+        trilha={[{ rotulo: 'Seguimento', para: '/seguimento' }, { rotulo: `Caso de ${AGRAVO_ROTULO[caso.agravo]}` }]}
         descricao={
           <span className="flex flex-wrap items-center gap-2">
             <AgravoBadge agravo={caso.agravo} completo />
             {caso.gestante && <GestanteBadge />}
-            <StatusCasoBadge status={status} />
             <span>aberto em {formatarData(caso.abertoEm)}</span>
           </span>
         }
@@ -483,11 +477,9 @@ export default function CasoDetalhePage() {
         }
       />
 
-      <Card className="mb-6">
-        <CardBody className="pt-5">
-          <Stepper passos={etapas} atual={indice} />
-        </CardBody>
-      </Card>
+      <div className="mb-6">
+        <FitaDoCaso etapas={etapas} atual={atual} vencida={data.pendencias.some((p) => p.vencida)} />
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="flex flex-col gap-6">
@@ -541,7 +533,7 @@ export default function CasoDetalhePage() {
                       valor: c.resultado ? (
                         <Badge tom={c.resultado === 'confirmado' ? 'perigo' : 'sucesso'}>
                           {c.resultado === 'confirmado' ? 'Confirmado' : 'Descartado'}
-                          {c.titulo ? ` · ${c.titulo}` : ''}
+                          {c.titulo ? `, título ${c.titulo}` : ''}
                         </Badge>
                       ) : (
                         'Aguardando'
@@ -561,7 +553,7 @@ export default function CasoDetalhePage() {
                   <>
                     <p className="text-sm">{t.esquema}</p>
                     <p className="text-sm text-muted">
-                      {t.local === 'ubs' ? 'Na UBS' : 'Serviço especializado'} · início {formatarData(t.iniciadoEm)}
+                      {t.local === 'ubs' ? 'Na UBS' : 'No serviço especializado'}, início em {formatarData(t.iniciadoEm)}
                     </p>
                     {t.doses.length > 0 && (
                       <ol className="flex flex-col gap-1.5">
@@ -648,7 +640,7 @@ export default function CasoDetalhePage() {
                   <div key={tf.id} className="rounded-lg border border-border p-3 text-sm">
                     <p className="font-bold">{tf.motivo}</p>
                     <p className="text-muted">
-                      {tf.status === 'aberta' ? 'Aberta' : `Resolvida em ${formatarData(tf.concluidaEm)}`} · {tf.tentativas.length} tentativa(s)
+                      {tf.status === 'aberta' ? 'Aberta' : `Resolvida em ${formatarData(tf.concluidaEm)}`}, {plural(tf.tentativas.length, 'tentativa')}
                     </p>
                   </div>
                 ))}

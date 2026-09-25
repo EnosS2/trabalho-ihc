@@ -50,11 +50,11 @@ export const AGRAVO_ROTULO: Record<Agravo, string> = {
 export const AGRAVOS: Agravo[] = ['hiv', 'sifilis', 'hepatite_b', 'hepatite_c']
 
 export const TIPO_TESTE_ROTULO: Record<TipoTeste, string> = {
-  hiv_tr1: 'HIV — TR1',
-  hiv_tr2: 'HIV — TR2',
-  sifilis_tr: 'Sífilis — treponêmico',
-  hbsag_tr: 'Hepatite B — HBsAg',
-  anti_hcv_tr: 'Hepatite C — anti-HCV',
+  hiv_tr1: 'HIV (TR1)',
+  hiv_tr2: 'HIV (TR2)',
+  sifilis_tr: 'Sífilis (treponêmico)',
+  hbsag_tr: 'Hepatite B (HBsAg)',
+  anti_hcv_tr: 'Hepatite C (anti-HCV)',
 }
 
 export const TIPO_TESTE_AGRAVO: Record<TipoTeste, Agravo> = {
@@ -85,7 +85,7 @@ export const CONCLUSAO_ROTULO: Record<ConclusaoAgravo, string> = {
   nao_reagente: 'Não reagente',
   reagente: 'Reagente',
   discordante: 'Discordante',
-  invalido: 'Inválido — repetir',
+  invalido: 'Inválido, repetir',
   incompleto: 'Fluxo incompleto',
 }
 
@@ -131,11 +131,11 @@ export const STATUS_CASO_ROTULO: Record<StatusCaso, string> = {
 }
 
 export const STATUS_CASO_CURTO: Record<StatusCaso, string> = {
-  aguardando_coleta: 'Coleta',
-  aguardando_resultado: 'Resultado',
-  aguardando_tratamento: 'Tratamento',
+  aguardando_coleta: 'Aguarda coleta',
+  aguardando_resultado: 'Aguarda resultado',
+  aguardando_tratamento: 'Aguarda tratamento',
   em_tratamento: 'Em tratamento',
-  em_seguimento: 'Seguimento',
+  em_seguimento: 'Em seguimento',
   encerrado: 'Encerrado',
 }
 
@@ -172,7 +172,7 @@ export const DESTINO_ROTULO: Record<DestinoNotificacao, string> = {
 }
 
 export const RESULTADO_TENTATIVA_ROTULO: Record<ResultadoTentativa, string> = {
-  contato_realizado: 'Contato realizado — vai comparecer',
+  contato_realizado: 'Contato feito, vai comparecer',
   agendado: 'Agendado na UBS',
   nao_encontrado: 'Não encontrado',
   endereco_incorreto: 'Endereço incorreto',

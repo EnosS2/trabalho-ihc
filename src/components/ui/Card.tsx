@@ -1,9 +1,12 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-/** Gestalt — região comum: cada cartão agrupa um único assunto, como os blocos do BMC. */
+/**
+ * Gestalt — região comum: cada painel agrupa um único assunto. Painéis ficam no plano da página
+ * (borda, sem sombra); sombra é reservada ao que flutua sobre ela (menus, diálogos, avisos).
+ */
 export function Card({ className, ...rest }: HTMLAttributes<HTMLElement>) {
-  return <section className={cn('rounded-xl border border-border bg-surface shadow-card', className)} {...rest} />
+  return <section className={cn('rounded-lg border border-border bg-surface', className)} {...rest} />
 }
 
 export function CardHeader({
@@ -29,7 +32,7 @@ export function CardHeader({
       <div className="flex min-w-0 items-start gap-3">
         {icone && <span className="mt-0.5 text-primary">{icone}</span>}
         <div className="min-w-0">
-          <H id={id} className="text-lg font-bold text-fg">
+          <H id={id} className={cn('font-bold text-fg', nivel === 2 ? 'text-xl' : 'text-base')}>
             {titulo}
           </H>
           {descricao && <p className="text-sm text-muted">{descricao}</p>}

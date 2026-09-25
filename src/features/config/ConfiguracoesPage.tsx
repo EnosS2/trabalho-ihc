@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro } from '@/components/ui/Feedback'
-import { Checkbox, Field, Input, Select } from '@/components/ui/Form'
+import { Checkbox, Field, GrupoCampos, Input, Select } from '@/components/ui/Form'
 import { PageHeader } from '@/components/ui/Layout'
 import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useToast } from '@/components/ui/Toast'
@@ -66,7 +66,7 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
         <Field label="Perfil de acesso" obrigatorio dica={NIVEL_ACESSO[f.perfil].descricao} className="sm:col-span-2">
           <Select value={f.perfil} onChange={(e) => setF({ ...f, perfil: e.target.value as Perfil })}>
             {(Object.keys(PERFIL_ROTULO) as Perfil[]).map((p) => (
-              <option key={p} value={p}>Nível {NIVEL_ACESSO[p].nivel} — {PERFIL_ROTULO[p]}</option>
+              <option key={p} value={p}>{PERFIL_ROTULO[p]} (nível {NIVEL_ACESSO[p].nivel})</option>
             ))}
           </Select>
         </Field>
@@ -114,26 +114,24 @@ function FormParametros({ p }: { p: Parametros }) {
         }
       }}
     >
-      <fieldset className="grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-2 lg:grid-cols-3">
-        <legend className="px-1 font-bold">Prazos do seguimento (dias)</legend>
+      <GrupoCampos legenda="Prazos do seguimento (dias)" className="lg:grid-cols-3">
         {num('prazoColetaConfirmatorioDias', 'Coleta do confirmatório')}
         {num('prazoResultadoConfirmatorioDias', 'Resultado do confirmatório', 'Contado a partir da coleta.')}
         {num('prazoInicioTratamentoDias', 'Início do tratamento', 'Gestante com sífilis: sempre no mesmo dia.')}
         {num('prazoNotificacaoDias', 'Envio da notificação')}
         {num('toleranciaBuscaAtivaDias', 'Tolerância para busca ativa', 'Dias de atraso antes de acionar o ACS.')}
         {num('intervaloDoseSifilisDias', 'Intervalo entre doses (sífilis)')}
-        {num('seguimentoVdrlGestanteDias', 'VDRL de seguimento — gestante')}
-        {num('seguimentoVdrlDias', 'VDRL de seguimento — demais')}
-      </fieldset>
-      <fieldset className="grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-2 lg:grid-cols-3">
-        <legend className="px-1 font-bold">Estoque</legend>
+        {num('seguimentoVdrlGestanteDias', 'VDRL de seguimento da gestante')}
+        {num('seguimentoVdrlDias', 'VDRL de seguimento, demais casos')}
+      </GrupoCampos>
+      <GrupoCampos legenda="Estoque" className="lg:grid-cols-3">
         {num('alertaValidadeDias', 'Alertar validade com antecedência de')}
         {TIPOS_TESTE.map((t) => (
-          <Field key={t} label={`Mínimo — ${TIPO_TESTE_ROTULO[t]}`}>
+          <Field key={t} label={`Mínimo de ${TIPO_TESTE_ROTULO[t]}`}>
             <Input type="number" min={0} inputMode="numeric" value={f.estoqueMinimo[t]} onChange={(e) => setF({ ...f, estoqueMinimo: { ...f.estoqueMinimo, [t]: Number(e.target.value) } })} />
           </Field>
         ))}
-      </fieldset>
+      </GrupoCampos>
       <div className="flex justify-end gap-2">
         <Button variante="secundario" onClick={() => setF(p)}>Descartar alterações</Button>
         <Button type="submit" carregando={salvar.isPending}>Salvar parâmetros</Button>

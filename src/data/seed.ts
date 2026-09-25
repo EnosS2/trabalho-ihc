@@ -4,6 +4,7 @@
  * todo dado gerado respeita as regras de negócio.
  */
 import { diasEntre, hojeISO, somarDias } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 import { PARAMETROS_PADRAO } from '@/domain/parametros'
 import { gerarCnsProvisorio, gerarCpf } from '@/domain/rules/documentos'
 import { selecionarLoteFEFO } from '@/domain/rules/estoque'
@@ -126,7 +127,7 @@ export function gerarBancoDemo(hoje: ISODate = hojeISO()): Banco {
   const demo: Usuario[] = [
     { id: 'usr-ana', nome: 'Ana Paula Ribeiro', perfil: 'executor', cargo: 'Enfermeira', email: 'ana.ribeiro@demo.poa', ubsId: UBS_DEMO, ativo: true },
     { id: 'usr-carlos', nome: 'Carlos Eduardo Lima', perfil: 'executor', cargo: 'Técnico de enfermagem', email: 'carlos.lima@demo.poa', ubsId: UBS_DEMO, ativo: true },
-    { id: 'usr-beatriz', nome: 'Beatriz Rocha', perfil: 'responsavel_tecnico', cargo: 'Enfermeira — responsável técnica', email: 'beatriz.rocha@demo.poa', ubsId: UBS_DEMO, ativo: true },
+    { id: 'usr-beatriz', nome: 'Beatriz Rocha', perfil: 'responsavel_tecnico', cargo: 'Enfermeira responsável técnica', email: 'beatriz.rocha@demo.poa', ubsId: UBS_DEMO, ativo: true },
     { id: 'usr-joana', nome: 'Joana Martins', perfil: 'acs', cargo: 'Agente comunitária de saúde', email: 'joana.martins@demo.poa', ubsId: UBS_DEMO, microareaId: `${UBS_DEMO}-ma01`, ativo: true },
     { id: 'usr-marcos', nome: 'Marcos Pereira', perfil: 'gestor', cargo: 'Gestão APS / DVS', email: 'marcos.pereira@demo.poa', ativo: true },
     { id: 'usr-paula', nome: 'Paula Schmitt', perfil: 'admin', cargo: 'Suporte de TI', email: 'paula.schmitt@demo.poa', ativo: true },
@@ -143,7 +144,7 @@ export function gerarBancoDemo(hoje: ISODate = hojeISO()): Banco {
         : [
             { nome: nomeProfissional(true), perfil: 'executor', cargo: 'Enfermeira', email: '', ubsId: u.id, ativo: true },
             { nome: nomeProfissional(false), perfil: 'executor', cargo: 'Técnico de enfermagem', email: '', ubsId: u.id, ativo: true },
-            { nome: nomeProfissional(true), perfil: 'responsavel_tecnico', cargo: 'Enfermeira — responsável técnica', email: '', ubsId: u.id, ativo: true },
+            { nome: nomeProfissional(true), perfil: 'responsavel_tecnico', cargo: 'Enfermeira responsável técnica', email: '', ubsId: u.id, ativo: true },
             { nome: nomeProfissional(true), perfil: 'acs', cargo: 'Agente comunitária de saúde', email: '', ubsId: u.id, microareaId: `${u.id}-ma01`, ativo: true },
             { nome: nomeProfissional(false), perfil: 'acs', cargo: 'Agente comunitário de saúde', email: '', ubsId: u.id, microareaId: `${u.id}-ma02`, ativo: true },
           ]
@@ -561,7 +562,7 @@ export function gerarBancoDemo(hoje: ISODate = hojeISO()): Banco {
       acao: 'testagem.registrar',
       entidade: 'testagem',
       entidadeId: t.id,
-      descricao: `Registrou testagem (${t.agravos.length} agravo(s))`,
+      descricao: `Registrou testagem (${plural(t.agravos.length, 'agravo')})`,
     })
   }
   banco.auditoria.sort((x, y) => x.data.localeCompare(y.data))

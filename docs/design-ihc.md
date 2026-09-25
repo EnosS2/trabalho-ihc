@@ -51,23 +51,38 @@ Cada perfil entra num **painel próprio** com as tarefas do dia, sem telas que n
   Acompanhamento, Gestão, Sistema) + barra superior (contexto UBS/coordenadoria e menu do usuário/troca de perfil); preferências de
   visualização (tema e acessibilidade) no rodapé da barra lateral
   + área de conteúdo com largura máxima de 80rem.
-- **Página:** trilha de navegação → título (h1) e descrição → **uma** ação primária à direita → indicadores em linha →
-  conteúdo principal à esquerda e apoio à direita (leitura em "F").
+- **Página:** trilha de navegação → título (h1) e descrição → **uma** ação primária à direita → conteúdo principal à
+  esquerda e apoio à direita (leitura em "F"). No painel, o conteúdo principal é a fila de pendências; os números
+  da UBS ficam na coluna de apoio, como linhas (número + o que ele conta), não como uma fileira de cartões.
+- **Superfícies:** painéis ficam no plano da página (borda fina, sem sombra); sombra só no que flutua sobre ela
+  (menus, diálogos, avisos). O raio também informa: painel 8px, controle 6px, selo de agravo 2px, selo de status
+  em pílula. Dentro de um painel, itens são linhas separadas por fios, não cartões dentro de cartões.
+- **Fita do caso (elemento de identidade):** a trilha do cuidado (teste rápido → confirmação → tratamento →
+  seguimento sorológico → desfecho) é desenhada como a janela do cassete de teste rápido, com uma faixa por etapa,
+  como as linhas C e T. Faixa azul = concluída; âmbar = em andamento; vermelha = em andamento com prazo vencido;
+  apagada = futura. A versão compacta aparece em cada pendência do painel, em cada cartão do quadro de seguimento
+  e na lista de casos; a completa abre o detalhe do caso. A regra que calcula a etapa é `etapasDoCaso`
+  (`src/domain/rules/seguimento.ts`, com teste). É o único elemento "ousado" da interface; o resto fica quieto.
 - **Formulários longos:** barra de ações fixa no rodapé (Voltar / Continuar / Finalizar).
 
 ### Princípios de Gestalt aplicados
 | Princípio | Onde |
 |---|---|
 | Proximidade | Campos agrupados em blocos (Identificação, Dados para a vigilância, Contato e endereço, Gestação); itens de menu agrupados por etapa |
-| Região comum | Cartões delimitam um assunto cada, como os blocos do Business Model Canvas |
+| Região comum | Painéis delimitam um assunto cada, como os blocos do Business Model Canvas; números-resumo numa faixa única dividida por fios |
 | Similaridade | O mesmo agravo tem sempre a mesma sigla e cor; o mesmo status tem sempre o mesmo selo e ícone |
-| Continuidade | Stepper do assistente, trilha do caso e linha do tempo |
+| Continuidade | Stepper do assistente, fita do caso e linha do tempo |
 | Figura-fundo | Diálogos sobre fundo escurecido; barra lateral escura contra conteúdo claro |
 | Fechamento | Barras de completude da ficha e de estoque lidas como "quanto falta" |
 | Pregnância | Uma única ação primária por tela; hierarquia tipográfica simples |
 
 ### Recursos responsivos
 - Abordagem mobile-first; pontos de quebra em 640, 768, 1024 e 1280px.
+- **Item ativo do menu:** uma aba da cor da página, encaixada no conteúdo (cantos côncavos), em vez de fundo
+  destacado com barra lateral. Diz "você está aqui" pela continuidade com a página. Na gaveta mobile vira uma
+  pílula da mesma cor. No modo escuro a barra lateral é um pouco mais clara que a página, para a aba aparecer.
+- **Âmbar não marca seleção nem contagem.** Contadores do menu são neutros; só o de pendências vencidas é vermelho
+  (urgência). O âmbar fica para atenção: gestante, medidor abaixo do mínimo, etapa em andamento na fita.
 - Em telas ≥ 1024px a barra lateral fica fixa; abaixo disso vira gaveta modal (foco preso, Esc fecha).
 - Tabelas viram cartões com pares rótulo/valor em telas pequenas, sem rolagem horizontal.
 - Grades de indicadores passam de 1 para 2 e 4 colunas; o quadro de casos rola na horizontal.
@@ -85,7 +100,7 @@ sem competir com o vermelho de perigo. Os neutros são frios, para manter a unid
 | Primária | `--primary` | `#1D5B7C` | `#6CB4DC` |
 | Primária forte (barra lateral) | `--primary-strong` / `--sidebar` | `#173447` | `#0A1319` |
 | Acento | `--accent-fill` | `#E9A23B` | `#F2B35C` |
-| Foco | `--focus` | `#C26A00` | `#F2B35C` |
+| Foco | `--focus` | `#1D5B7C` (sobre a barra lateral: `#8CC6E6`) | `#8CC6E6` |
 | Fundo / superfície | `--bg` / `--surface` | `#F2F5F7` / `#FFFFFF` | `#0D161D` / `#131F28` |
 | Texto / secundário | `--fg` / `--muted` | `#13212B` / `#4B5D6A` | `#E5ECF1` / `#A5B4C0` |
 | Sucesso / atenção / perigo / info | `--success` … | `#1C6B3E` / `#8A5100` / `#B42318` / `#1F5FA6` | `#6FCF97` / `#F2C063` / `#F28B82` / `#8AB8F0` |
@@ -116,9 +131,13 @@ passar. Como alguns pares ficam perto do limite, **a cor nunca aparece sozinha**
 
 - **Atkinson Hyperlegible** na interface. Foi criada pelo Braille Institute para leitores com baixa visão e distingue
   bem `I l 1` e `O 0`. Isso importa num resultado lido com pressa, numa tela pequena.
-- **JetBrains Mono** em códigos (CNS, CPF, lote), para conferir os dígitos alinhados.
-- A escala tem base de 16px e razão ≈ 1,2: 12 · 14 · 16 · 18 · 24 · 30px.
-- São usados dois pesos (400 e 700), com altura de linha 1,5 e números tabulares em tabelas.
+- **Uma família só.** CNS, CPF, lotes e contagens usam a própria Atkinson com **algarismos tabulares** (largura
+  fixa, alinham em coluna). Como a fonte já distingue `0/O` e `1/l`, uma monoespaçada seria redundante.
+- A escala tem base de 16px e razão 1,25 (terça maior): 12, 14, 16, 20, 25 e 31px. O título de página usa 31px
+  (25px no celular); títulos de painel, 20px.
+- São usados dois pesos (400 e 700), com altura de linha 1,5.
+- Rótulos em caixa normal (sem CAIXA ALTA espaçada), metadados separados por espaço (sem "·") e plurais
+  escritos por extenso ("1 caso", "3 casos"; nunca "caso(s)"), com `plural()` em `src/lib/texto.ts`.
 - O usuário pode ampliar o texto até 137,5% (A+). O layout acompanha porque tudo é medido em `rem`.
 - As fontes são servidas pelo próprio app (`@fontsource`), sem depender de CDN.
 
@@ -151,7 +170,7 @@ universal, e a sigla é o signo que a equipe já usa no dia a dia.
 
 - `lang="pt-BR"`, landmarks semânticos, um `h1` por página e títulos de aba (`document.title`) por página.
 - Link **"Pular para o conteúdo"**. Ao trocar de página, o foco vai para o conteúdo, e o leitor de tela anuncia.
-- Navegação completa por teclado, com **foco visível** em âmbar de 3px e ordem lógica.
+- Navegação completa por teclado, com **foco visível** de 3px (azul da marca; azul claro sobre a barra lateral escura; laranja no alto contraste) e ordem lógica.
 - Diálogos usam o `<dialog>` nativo: foco preso, `Esc` fecha e o foco volta à origem. A gaveta do menu mobile também prende o foco.
 - Abas seguem o padrão ARIA (setas, Home/End). Os grupos de opção usam rádios nativos, que funcionam com as setas.
 - Todo campo tem rótulo visível. Erros ficam ligados ao campo por `aria-describedby`, com ícone e texto, e há um resumo de erros no topo do formulário.

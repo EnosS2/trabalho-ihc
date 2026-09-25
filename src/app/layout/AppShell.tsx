@@ -44,7 +44,7 @@ export function AppShell() {
           <Outlet />
         </main>
         <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted sm:px-6">
-          Protótipo acadêmico (IHC) — Edgar Oliveira e Handriel Scheffer. Todos os dados exibidos são fictícios.
+          Protótipo acadêmico de IHC, de Edgar Oliveira e Handriel Scheffer. Todos os dados exibidos são fictícios.
         </footer>
       </div>
     </div>

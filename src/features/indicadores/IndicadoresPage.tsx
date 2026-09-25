@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Carregando, EstadoErro } from '@/components/ui/Feedback'
 import { Field, Segmented, Select } from '@/components/ui/Form'
-import { Medidor, PageHeader, Stat } from '@/components/ui/Layout'
+import { Medidor, PageHeader, Resumo, Stat } from '@/components/ui/Layout'
 import { useIndicadores, useReferencias } from '@/data/hooks'
 import type { Indicadores, Proporcao } from '@/domain/rules/indicadores'
 import { AGRAVO_ROTULO } from '@/domain/rotulos'
 import { formatarMesCurto, hojeISO, somarDias } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 
 const pct = (p: Proporcao) => (p.pct === null ? '—' : `${p.pct.toLocaleString('pt-BR')}%`)
 
@@ -49,10 +50,22 @@ function Cascata({ i }: { i: Indicadores }) {
       ))}
       <li className="flex flex-wrap gap-x-6 gap-y-1 border-t border-border pt-3 text-sm">
         <span>
-          Mediana até o resultado confirmatório: <strong>{i.medianaDiasConfirmacao === null ? '—' : `${i.medianaDiasConfirmacao} dias`}</strong>
+          {i.medianaDiasConfirmacao === null ? (
+            'Ainda sem resultado confirmatório no período'
+          ) : (
+            <>
+              Mediana até o resultado confirmatório: <strong>{plural(i.medianaDiasConfirmacao, 'dia')}</strong>
+            </>
+          )}
         </span>
         <span>
-          Perda de seguimento: <strong>{pct(i.perdaSeguimento)}</strong> dos casos encerrados
+          {i.perdaSeguimento.pct === null ? (
+            'Nenhum caso encerrado no período'
+          ) : (
+            <>
+              Perda de seguimento: <strong>{pct(i.perdaSeguimento)}</strong> dos casos encerrados
+            </>
+          )}
         </span>
       </li>
     </ul>
@@ -148,12 +161,12 @@ export default function IndicadoresPage() {
       {error && <EstadoErro erro={error} />}
       {data && (
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Stat rotulo="Testagens" valor={data.geral.testagens.toLocaleString('pt-BR')} icone={ICONE.novaTestagem} />
-            <Stat rotulo="Pessoas testadas" valor={data.geral.pessoasTestadas.toLocaleString('pt-BR')} icone={ICONE.pessoas} />
-            <Stat rotulo="Gestantes testadas" valor={data.geral.gestantesTestadas.toLocaleString('pt-BR')} icone={ICONE.gestante} tom="acento" />
-            <Stat rotulo="Casos abertos" valor={data.geral.casosAbertos} icone={ICONE.seguimento} tom="primario" />
-          </div>
+          <Resumo>
+            <Stat rotulo="Testagens" valor={data.geral.testagens.toLocaleString('pt-BR')} />
+            <Stat rotulo="Pessoas testadas" valor={data.geral.pessoasTestadas.toLocaleString('pt-BR')} />
+            <Stat rotulo="Gestantes testadas" valor={data.geral.gestantesTestadas.toLocaleString('pt-BR')} tom="acento" />
+            <Stat rotulo="Casos abertos" valor={data.geral.casosAbertos} tom="primario" />
+          </Resumo>
 
           <section aria-labelledby="t-posit">
             <h2 id="t-posit" className="mb-3 text-lg font-bold">Positividade por agravo</h2>
@@ -162,7 +175,7 @@ export default function IndicadoresPage() {
                 <li key={a.agravo} className="rounded-xl border border-border bg-surface p-4 shadow-card">
                   <p className="flex items-center gap-2 font-bold"><AgravoBadge agravo={a.agravo} /> {AGRAVO_ROTULO[a.agravo]}</p>
                   <p className="mt-1 text-3xl font-bold">{pct(a.positividade)}</p>
-                  <p className="text-sm text-muted">{a.reagentes} reagente(s) em {a.testados} testado(s)</p>
+                  <p className="text-sm text-muted">{plural(a.reagentes, 'reagente')} em {plural(a.testados, 'testado')}</p>
                 </li>
               ))}
             </ul>

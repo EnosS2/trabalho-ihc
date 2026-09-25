@@ -28,7 +28,6 @@
   --on-primary: #ffffff;
   --sidebar: #173447;
   --sidebar-fg: #d7e5ee;
-  --sidebar-active: #24536f;
 
   --accent: #a85a00;
   --accent-soft: #fff3dc;
@@ -43,7 +42,8 @@
   --info: #1f5fa6;
   --info-soft: #e7f0fb;
 
-  --focus: #c26a00;
+  --focus: #1d5b7c;
+  --focus-sobre-escuro: #8cc6e6;
 
   --hiv: #a63f00;
   --hiv-soft: #fce9dd;
@@ -78,9 +78,8 @@
   --primary-soft: #173549;
   --primary-soft-fg: #a9d5ee;
   --on-primary: #0a1a24;
-  --sidebar: #0a1319;
+  --sidebar: #172a38;
   --sidebar-fg: #c3d3de;
-  --sidebar-active: #173549;
 
   --accent: #f2b35c;
   --accent-soft: #3a2a12;
@@ -95,7 +94,8 @@
   --info: #8ab8f0;
   --info-soft: #16294a;
 
-  --focus: #f2b35c;
+  --focus: #8cc6e6;
+  --focus-sobre-escuro: #8cc6e6;
 
   --hiv: #ff9e66;
   --hiv-soft: #3d2112;
@@ -131,7 +131,6 @@
   --primary-soft-fg: #00406a;
   --sidebar: #000000;
   --sidebar-fg: #ffffff;
-  --sidebar-active: #00406a;
   --accent: #7a3e00;
   --success: #0b4d27;
   --warning: #5c3500;
@@ -143,6 +142,7 @@
   --info-soft: #ffffff;
   --accent-soft: #ffffff;
   --focus: #d14900;
+  --focus-sobre-escuro: #ff8a3d;
   --hiv: #7a2e00;
   --sif: #003a5c;
   --hbv: #004d36;
@@ -156,7 +156,6 @@
 
 @theme inline {
   --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -175,7 +174,6 @@
   --color-on-primary: var(--on-primary);
   --color-sidebar: var(--sidebar);
   --color-sidebar-fg: var(--sidebar-fg);
-  --color-sidebar-active: var(--sidebar-active);
 
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);

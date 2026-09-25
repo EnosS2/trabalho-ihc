@@ -5,7 +5,7 @@ import { AgravoBadge, Badge, GestanteBadge, PrazoBadge } from '@/components/ui/B
 import { Card, CardBody } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Aviso, Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
-import { Medidor, PageHeader, Stat } from '@/components/ui/Layout'
+import { Medidor, PageHeader, Resumo, Stat } from '@/components/ui/Layout'
 import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useNotificacoes } from '@/data/hooks'
 import { AGRAVO_NOTIFICACAO_ROTULO, DESTINO_ROTULO } from '@/domain/rotulos'
@@ -33,12 +33,12 @@ export default function NotificacoesPage() {
       {todas.error && <EstadoErro erro={todas.error} />}
       {todas.data && (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <Stat rotulo="Pendentes" valor={pendentes.length} icone={ICONE.notificacoes} tom={pendentes.length ? 'atencao' : 'sucesso'} />
-            <Stat rotulo="Fora do prazo" valor={pendentes.filter((n) => n.atrasada).length} icone={ICONE.erro} tom={pendentes.some((n) => n.atrasada) ? 'perigo' : 'sucesso'} />
-            <Stat rotulo="Prontas para enviar" valor={pendentes.filter((n) => n.completude.pronta).length} detalhe="campos obrigatórios completos" icone={ICONE.ok} tom="primario" />
-            <Stat rotulo="Completude média" valor={`${media}%`} detalhe="de todas as fichas" icone={ICONE.testagens} />
-          </div>
+          <Resumo className="mb-6">
+            <Stat rotulo="Pendentes" valor={pendentes.length} detalhe="aguardando envio" tom={pendentes.length ? 'atencao' : 'sucesso'} />
+            <Stat rotulo="Fora do prazo" valor={pendentes.filter((n) => n.atrasada).length} detalhe="passaram do prazo de envio" tom={pendentes.some((n) => n.atrasada) ? 'perigo' : 'sucesso'} />
+            <Stat rotulo="Prontas para enviar" valor={pendentes.filter((n) => n.completude.pronta).length} detalhe="campos obrigatórios completos" tom="primario" />
+            <Stat rotulo="Completude média" valor={`${media}%`} detalhe="de todas as fichas" />
+          </Resumo>
           <Card>
             <CardBody className="pt-2">
               <Tabs

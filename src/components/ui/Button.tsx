@@ -7,10 +7,10 @@ type Variante = 'primario' | 'secundario' | 'fantasma' | 'perigo' | 'sutil'
 type Tamanho = 'sm' | 'md' | 'lg'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-lg font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-55 aria-disabled:pointer-events-none aria-disabled:opacity-55 whitespace-nowrap'
+  'inline-flex items-center justify-center gap-2 rounded-md font-bold transition-colors select-none disabled:cursor-not-allowed disabled:opacity-55 aria-disabled:pointer-events-none aria-disabled:opacity-55 whitespace-nowrap'
 
 const variantes: Record<Variante, string> = {
-  primario: 'bg-primary text-on-primary hover:bg-primary-hover shadow-card',
+  primario: 'bg-primary text-on-primary hover:bg-primary-hover',
   secundario: 'bg-surface text-fg border border-border-strong hover:bg-surface-3',
   fantasma: 'text-primary hover:bg-primary-soft',
   sutil: 'bg-primary-soft text-primary-soft-fg hover:bg-surface-3',

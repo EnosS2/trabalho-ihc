@@ -33,7 +33,8 @@ export default function PessoaDetalhePage() {
         tituloAba="Cadastro da pessoa"
         descricao={
           <span className="flex flex-wrap items-center gap-2">
-            {idade} anos · {SEXO_ROTULO[p.sexo]}
+            <span>{idade} anos</span>
+            <span>{SEXO_ROTULO[p.sexo]}</span>
             {p.gestante && (
               <>
                 <GestanteBadge />
@@ -138,8 +139,8 @@ export default function PessoaDetalhePage() {
               itens={[
                 { rotulo: 'Nome civil', valor: p.nome },
                 { rotulo: 'Nascimento', valor: formatarData(p.dataNascimento) },
-                { rotulo: 'CNS', valor: <span className="font-mono">{revelar ? formatarCns(p.cns) : mascararDocumento(p.cns)}</span> },
-                { rotulo: 'CPF', valor: <span className="font-mono">{revelar ? formatarCpf(p.cpf) : mascararDocumento(p.cpf)}</span> },
+                { rotulo: 'CNS', valor: <span className="tabular">{revelar ? formatarCns(p.cns) : mascararDocumento(p.cns)}</span> },
+                { rotulo: 'CPF', valor: <span className="tabular">{revelar ? formatarCpf(p.cpf) : mascararDocumento(p.cpf)}</span> },
                 { rotulo: 'Nome da mãe', valor: p.nomeMae ?? <Badge tom="atencao">Não informado</Badge> },
                 { rotulo: 'Raça/cor', valor: p.racaCor === 'ignorado' ? <Badge tom="atencao">Ignorado</Badge> : RACA_ROTULO[p.racaCor] },
                 { rotulo: 'Escolaridade', valor: p.escolaridade === 'ignorado' ? <Badge tom="atencao">Ignorado</Badge> : ESCOLARIDADE_ROTULO[p.escolaridade] },

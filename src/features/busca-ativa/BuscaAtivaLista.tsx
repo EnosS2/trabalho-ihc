@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
 import { Field, RadioCards, Segmented, Select, Textarea } from '@/components/ui/Form'
+import { Meta } from '@/components/ui/Layout'
 import { useToast } from '@/components/ui/Toast'
 import type { TarefaResumo } from '@/data/api'
 import { useBuscaAtiva, useReferencias, useRegistrarTentativa } from '@/data/hooks'
@@ -14,6 +15,7 @@ import { RESULTADO_TENTATIVA_ROTULO } from '@/domain/rotulos'
 import type { ResultadoTentativa, TentativaContato } from '@/domain/types'
 import { formatarTelefone } from '@/domain/rules/documentos'
 import { formatarData } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 
 const MEIOS: { valor: TentativaContato['meio']; rotulo: string; icone: typeof Phone }[] = [
   { valor: 'visita', rotulo: 'Visita domiciliar', icone: MapPin },
@@ -147,14 +149,17 @@ export default function BuscaAtivaLista() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-lg font-bold">{t.pessoa.nome}</p>
-                  <p className="text-sm text-muted">
-                    {t.pessoa.idade} anos · {t.microarea?.descricao ?? 'Sem microárea'}
-                    {usuario.perfil !== 'acs' && t.acsNome ? ` · ACS ${t.acsNome}` : ''}
-                  </p>
+                  <Meta
+                    itens={[
+                      `${t.pessoa.idade} anos`,
+                      t.microarea?.descricao ?? 'Sem microárea',
+                      usuario.perfil !== 'acs' && t.acsNome ? `ACS ${t.acsNome}` : null,
+                    ]}
+                  />
                 </div>
                 {t.tarefa.status === 'aberta' ? (
                   <Badge tom={t.diasEmAberto > 7 ? 'perigo' : 'atencao'} icone={ICONE.aguardando}>
-                    {t.diasEmAberto} dia(s)
+                    {plural(t.diasEmAberto, 'dia')}
                   </Badge>
                 ) : (
                   <Badge tom="sucesso" icone={ICONE.ok}>
@@ -185,7 +190,7 @@ export default function BuscaAtivaLista() {
               <p className="text-sm text-muted">
                 {t.tarefa.tentativas.length === 0
                   ? 'Nenhuma tentativa registrada.'
-                  : `${t.tarefa.tentativas.length} tentativa(s). Última em ${formatarData(ultima!.data)}: ${RESULTADO_TENTATIVA_ROTULO[ultima!.resultado].toLowerCase()}.`}
+                  : `${plural(t.tarefa.tentativas.length, 'tentativa')}. Última em ${formatarData(ultima!.data)}: ${RESULTADO_TENTATIVA_ROTULO[ultima!.resultado].toLowerCase()}.`}
               </p>
               {podeRegistrar && t.tarefa.status === 'aberta' && (
                 <Button variante="sutil" icone={ICONE.buscaAtiva} onClick={() => setSelecionada(t)} className="mt-auto">

@@ -83,7 +83,9 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
     .slice(0, 2)
     .map((p) => p[0])
     .join('')
-  const contexto = ubs ? `${ubs.nome} · ${territorio?.nome ?? ''}${microarea ? ` · ${microarea.descricao}` : ''}` : 'Rede municipal — Porto Alegre'
+  const contexto = ubs
+    ? [ubs.nome, territorio?.nome, microarea?.descricao].filter(Boolean).join(', ')
+    : 'Rede municipal de Porto Alegre'
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
@@ -98,12 +100,6 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
         </button>
         <div className="lg:hidden">
           <Logo className="[&_p:last-child]:hidden" />
-        </div>
-        <div className="hidden min-w-0 lg:flex">
-          <p className="truncate text-sm text-muted">
-            <span className="sr-only">Contexto: </span>
-            {contexto}
-          </p>
         </div>
 
         <div className="ml-auto flex items-center">
@@ -131,10 +127,10 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
                 </div>
                 <div className="rounded-lg bg-surface-2 p-3 text-sm">
                   <p className="font-bold">
-                    Nível {NIVEL_ACESSO[usuario.perfil].nivel} — {PERFIL_ROTULO[usuario.perfil]}
+                    {PERFIL_ROTULO[usuario.perfil]}, nível {NIVEL_ACESSO[usuario.perfil].nivel}
                   </p>
                   <p className="text-muted">Escopo: {NIVEL_ACESSO[usuario.perfil].escopo}</p>
-                  <p className="mt-1 text-muted lg:hidden">{contexto}</p>
+                  <p className="mt-1 text-muted">{contexto}</p>
                 </div>
                 <div>
                   <h2 id="titulo-trocar-perfil" className="mb-1 text-sm font-bold">

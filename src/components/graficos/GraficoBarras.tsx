@@ -40,15 +40,15 @@ export function GraficoBarras({
 
   return (
     <figure aria-labelledby={idTitulo} className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <figcaption id={idTitulo} className="font-bold">
+      <div className="flex items-start justify-between gap-3">
+        <figcaption id={idTitulo} className="min-w-0 pt-1.5 font-bold">
           {titulo}
         </figcaption>
         <button
           type="button"
           onClick={() => setTabela((t) => !t)}
           aria-pressed={tabela}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-2 text-sm font-bold text-primary hover:bg-primary-soft"
+          className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md px-2 text-sm font-bold whitespace-nowrap text-primary hover:bg-primary-soft"
         >
           {tabela ? <ChartColumn className="size-4" aria-hidden /> : <Table2 className="size-4" aria-hidden />}
           {tabela ? 'Ver gráfico' : 'Ver tabela'}
@@ -103,7 +103,7 @@ export function GraficoBarras({
                       <p className="font-bold">{p.rotulo}</p>
                       <p className="text-muted">
                         <span className="font-bold text-fg">{p.valor === null ? 'sem dados' : formatar(p.valor)}</span>
-                        {p.detalhe ? ` · ${p.detalhe}` : ''}
+                        {p.detalhe ? `, ${p.detalhe}` : ''}
                       </p>
                     </div>
                   )

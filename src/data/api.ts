@@ -4,6 +4,7 @@
  * como o servidor fará: o front nunca confia apenas no menu escondido.
  */
 import { agoraISO, diasEntre, hojeISO, idade, mesDe, somarDias } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 import { pode, type Permissao } from '@/domain/permissoes'
 import { alertasEstoque, fechamentoMensal, fechamentoParaCsv, resumoPorTipo, selecionarLoteFEFO } from '@/domain/rules/estoque'
 import { calcularIndicadores, type Indicadores } from '@/domain/rules/indicadores'
@@ -336,7 +337,7 @@ export function registrarTestagem(input: Omit<NovaTestagemInput, 'ubsId' | 'exec
       acao: 'testagem.registrar',
       entidade: 'testagem',
       entidadeId: r.testagem.id,
-      descricao: `Registrou testagem de ${pessoa.nome} (${r.testagem.testes.length} teste(s), ${r.casos.length} caso(s) aberto(s))`,
+      descricao: `Registrou testagem de ${pessoa.nome} (${plural(r.testagem.testes.length, 'teste')}, ${plural(r.casos.length, 'caso aberto', 'casos abertos')})`,
     })
     return r
   })
@@ -436,7 +437,7 @@ export function executarAcaoCaso(casoId: string, acao: AcaoCaso) {
       acao: `caso.${acao.tipo}`,
       entidade: 'caso',
       entidadeId: casoId,
-      descricao: `${DESCRICAO_ACAO[acao.tipo]} — ${AGRAVO_ROTULO[caso.agravo]}`,
+      descricao: `${DESCRICAO_ACAO[acao.tipo]} (${AGRAVO_ROTULO[caso.agravo]})`,
     })
     return resumoCaso(b, novo)
   })
@@ -472,7 +473,7 @@ export function listarBuscaAtiva(filtro: { status?: 'aberta' | 'concluida'; micr
           tarefa: t,
           pessoa: { id: p.id, nome: p.nome, telefone: p.telefone, endereco: p.endereco, idade: idade(p.dataNascimento, hoje) },
           microarea: b.microareas.find((m) => m.id === t.microareaId),
-          motivoExibido: ehAcs ? 'Retorno pendente na UBS — orientar a procurar a equipe de enfermagem' : t.motivo,
+          motivoExibido: ehAcs ? 'Retorno pendente na UBS. Oriente a pessoa a procurar a equipe de enfermagem.' : t.motivo,
           agravo: ehAcs ? undefined : caso?.agravo,
           diasEmAberto: Math.max(0, diasEntre(t.criadaEm, t.concluidaEm ?? hoje)),
           acsNome: b.usuarios.find((x) => x.perfil === 'acs' && x.microareaId === t.microareaId)?.nome,
@@ -573,7 +574,7 @@ export function registrarBaixa(loteId: string, dados: { tipo: 'perda' | 'vencime
     if (!lote) throw new ErroDeNegocio('Lote não encontrado.')
     const delta = dados.tipo === 'ajuste' ? dados.quantidade : -Math.abs(dados.quantidade)
     if (delta === 0) throw new ErroDeNegocio('Informe uma quantidade diferente de zero.')
-    if (lote.quantidadeAtual + delta < 0) throw new ErroDeNegocio(`O lote tem apenas ${lote.quantidadeAtual} unidade(s).`)
+    if (lote.quantidadeAtual + delta < 0) throw new ErroDeNegocio(`O lote tem só ${plural(lote.quantidadeAtual, 'unidade')}.`)
     if (!dados.motivo.trim()) throw new ErroDeNegocio('Descreva o motivo.')
     lote.quantidadeAtual += delta
     b.movimentacoes.push({ id: novoId('mov'), loteId, ubsId: u.ubsId!, tipo: dados.tipo, quantidade: delta, data: hojeISO(), usuarioId: u.id, motivo: dados.motivo })
@@ -710,6 +711,7 @@ export interface PendenciaPainel extends Pendencia {
   pessoaNome: string
   agravo: Agravo
   gestante: boolean
+  status: StatusCaso
 }
 
 export function obterPainelUbs() {
@@ -726,6 +728,7 @@ export function obterPainelUbs() {
           pessoaNome: pessoas.get(c.pessoaId)?.nome ?? '—',
           agravo: c.agravo,
           gestante: c.gestante,
+          status: derivarStatus(c),
         })),
       )
       .sort((x, y) => x.prazo.localeCompare(y.prazo))

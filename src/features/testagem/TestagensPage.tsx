@@ -15,6 +15,7 @@ import { useTestagens } from '@/data/hooks'
 import { AGRAVO_ROTULO, AGRAVOS, MOTIVO_ROTULO } from '@/domain/rotulos'
 import type { Agravo } from '@/domain/types'
 import { formatarData, hojeISO, somarDias } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 
 export function ResultadosResumo({ t }: { t: TestagemResumo['testagem'] }) {
   return (
@@ -93,7 +94,7 @@ export default function TestagensPage() {
             />
           </form>
           <p className="mb-3 text-sm text-muted" aria-live="polite">
-            {data ? `${data.length} testagem(ns) encontrada(s)${isFetching ? ' — atualizando…' : ''}` : ''}
+            {data ? `${plural(data.length, 'testagem encontrada', 'testagens encontradas')}${isFetching ? ', atualizando…' : ''}` : ''}
           </p>
           {isLoading && <Carregando />}
           {error && <EstadoErro erro={error} tentarNovamente={refetch} />}

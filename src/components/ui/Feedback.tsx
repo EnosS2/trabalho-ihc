@@ -81,7 +81,7 @@ export function Aviso({
   const { classes, icone: Padrao } = avisoTons[tom]
   const Icone = icone ?? Padrao
   return (
-    <div className={cn('flex gap-3 rounded-xl border p-4', classes, className)}>
+    <div className={cn('flex gap-3 rounded-lg border px-4 py-3', classes, className)}>
       <Icone className="av-ic mt-0.5 size-5 shrink-0" aria-hidden />
       <div className="min-w-0 flex-1 text-sm">
         {titulo && <p className="font-bold text-[0.95rem]">{titulo}</p>}

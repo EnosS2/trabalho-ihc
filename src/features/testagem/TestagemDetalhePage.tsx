@@ -66,8 +66,8 @@ export default function TestagemDetalhePage() {
                           <tr key={x.id} className="border-t border-border">
                             <td className="py-1.5">{TIPO_TESTE_ROTULO[x.tipo]}</td>
                             <td className="py-1.5 font-bold">{RESULTADO_TR_ROTULO[x.resultado]}</td>
-                            <td className="py-1.5 font-mono text-xs">
-                              {loteDe(x.loteId)?.lote} · {formatarData(loteDe(x.loteId)?.validade)}
+                            <td className="py-1.5 text-sm tabular">
+                              {loteDe(x.loteId)?.lote}, validade {formatarData(loteDe(x.loteId)?.validade)}
                             </td>
                           </tr>
                         ))}

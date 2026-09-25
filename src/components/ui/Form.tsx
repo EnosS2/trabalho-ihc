@@ -12,11 +12,16 @@ import {
 import { cn } from '@/lib/cn'
 
 const controle =
-  'w-full min-h-11 rounded-lg border border-border-strong bg-surface px-3 py-2 text-fg placeholder:text-muted/80 aria-[invalid=true]:border-danger aria-[invalid=true]:border-2 disabled:bg-surface-3 disabled:text-muted'
+  'w-full min-h-11 rounded-md border border-border-strong bg-surface px-3 py-2 text-fg placeholder:text-muted/80 aria-[invalid=true]:border-danger aria-[invalid=true]:border-2 disabled:bg-surface-3 disabled:text-muted'
 
 /**
  * Campo acessível: rótulo visível sempre (nunca só placeholder), dica e erro ligados
  * ao controle via aria-describedby, erro com ícone + texto (não só cor vermelha).
+ *
+ * Alinhamento: dentro de <GrupoCampos>, o campo ocupa 4 linhas da grade (rótulo, dica, controle,
+ * erro) via subgrid. Lado a lado, os rótulos alinham entre si e as caixas também, mesmo quando só
+ * um dos campos tem dica. O espaçamento interno é por margem (não por gap), para que uma linha vazia
+ * não deixe buraco entre o rótulo e a caixa. Fora do grupo, o campo é uma coluna simples.
  */
 export function Field({
   label,
@@ -49,8 +54,8 @@ export function Field({
       })
     : children
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
-      <label htmlFor={idCampo} className="text-sm font-bold text-fg">
+    <div className={cn('campo flex flex-col', className)}>
+      <label htmlFor={idCampo} className="row-start-1 self-end text-sm font-bold text-fg">
         {label}
         {obrigatorio ? (
           <span className="text-danger" aria-hidden>
@@ -60,18 +65,37 @@ export function Field({
         ) : null}
       </label>
       {dica && (
-        <p id={dicaId} className="text-sm text-muted">
+        <p id={dicaId} className="row-start-2 mt-1 text-sm text-muted">
           {dica}
         </p>
       )}
-      {controleFilho}
+      <div className="row-start-3 mt-1">{controleFilho}</div>
       {erro && (
-        <p id={erroId} className="flex items-center gap-1 text-sm font-bold text-danger" role="alert">
+        <p id={erroId} className="row-start-4 mt-1 flex items-center gap-1 text-sm font-bold text-danger" role="alert">
           <CircleX className="size-4 shrink-0" aria-hidden />
           {erro}
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * Bloco de campos com título. A legenda vira um título de seção (fio fino acima, sem caixa em volta),
+ * no mesmo padrão das seções das outras telas; continua sendo <legend>, lida pelo leitor de tela.
+ */
+export function GrupoCampos({ legenda, children, className }: { legenda: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <fieldset
+      className={cn(
+        'grid min-w-0 gap-x-4 border-t border-border pt-5 sm:grid-cols-2',
+        '*:mb-4 [&>.campo]:row-span-4 [&>.campo]:grid [&>.campo]:grid-rows-subgrid [&>.campo]:content-start',
+        className,
+      )}
+    >
+      <legend className="float-left col-span-full w-full text-xl font-bold">{legenda}</legend>
+      {children}
+    </fieldset>
   )
 }
 
@@ -216,13 +240,13 @@ export function Segmented<T extends string>({
   return (
     <fieldset className="min-w-0">
       <legend className="sr-only">{rotulo}</legend>
-      <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface-2 p-1">
+      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-surface-2 p-1">
         {opcoes.map((o) => (
           <label
             key={o.valor}
             className={cn(
-              'flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus',
-              valor === o.valor ? 'bg-surface text-primary shadow-card' : 'text-muted hover:text-fg',
+              'flex min-h-10 cursor-pointer items-center gap-2 rounded-md px-3 text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus',
+              valor === o.valor ? 'bg-surface text-primary ring-1 ring-border' : 'text-muted hover:text-fg',
             )}
           >
             <input

@@ -2,8 +2,9 @@ import type { LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { ICONE } from '@/components/icones'
 import { AgravoBadge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
+import { FitaCompacta } from '@/components/ui/FitaDoCaso'
 import type { PendenciaPainel } from '@/data/api'
-import type { TipoPendencia } from '@/domain/rules/seguimento'
+import { etapasDoCaso, type TipoPendencia } from '@/domain/rules/seguimento'
 import { cn } from '@/lib/cn'
 
 export const ICONE_PENDENCIA: Record<TipoPendencia, LucideIcon> = {
@@ -16,7 +17,10 @@ export const ICONE_PENDENCIA: Record<TipoPendencia, LucideIcon> = {
   notificacao: ICONE.notificacoes,
 }
 
-/** Lista de pendências com prazo: ícone do tipo + pessoa + agravo + prazo (texto e cor). */
+/**
+ * Lista de pendências com prazo. Cada linha: o que fazer e com quem (à esquerda); quando e em que
+ * ponto do caminho a pessoa está (à direita: prazo + fita do caso).
+ */
 export function ListaPendencias({ itens, vazio }: { itens: PendenciaPainel[]; vazio?: string }) {
   if (itens.length === 0) {
     return <p className="px-1 py-4 text-sm text-muted">{vazio ?? 'Nenhuma pendência.'}</p>
@@ -25,21 +29,15 @@ export function ListaPendencias({ itens, vazio }: { itens: PendenciaPainel[]; va
     <ul className="flex flex-col divide-y divide-border">
       {itens.map((p) => {
         const Icone = ICONE_PENDENCIA[p.tipo]
+        const { etapas, atual } = etapasDoCaso(p.agravo, p.status)
         return (
           <li key={`${p.casoId}-${p.chave}`}>
             <Link
               to={`/seguimento/${p.casoId}`}
-              className="flex items-start gap-3 rounded-lg px-2 py-3 hover:bg-surface-2"
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 rounded-md px-2 py-3 hover:bg-surface-2 sm:grid-cols-[auto_minmax(0,1fr)_auto]"
             >
-              <span
-                className={cn(
-                  'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full',
-                  p.vencida ? 'bg-danger-soft text-danger' : 'bg-primary-soft text-primary',
-                )}
-              >
-                <Icone className="size-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1">
+              <Icone className={cn('mt-0.5 size-5', p.vencida ? 'text-danger' : 'text-muted')} aria-hidden />
+              <span className="min-w-0">
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-bold">{p.pessoaNome}</span>
                   <AgravoBadge agravo={p.agravo} />
@@ -47,8 +45,9 @@ export function ListaPendencias({ itens, vazio }: { itens: PendenciaPainel[]; va
                 </span>
                 <span className="block text-sm text-muted">{p.descricao}</span>
               </span>
-              <span className="shrink-0">
+              <span className="col-start-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 sm:col-start-3 sm:flex-col sm:items-end">
                 <PrazoBadge prazo={p.prazo} diasRestantes={p.diasRestantes} />
+                <FitaCompacta etapas={etapas} atual={atual} vencida={p.vencida} />
               </span>
             </Link>
           </li>

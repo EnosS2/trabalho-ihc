@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ICONE, SIGNIFICADO_ICONE, type NomeIcone } from '@/components/icones'
 import { AgravoBadge, Badge, GestanteBadge, PrazoBadge, StatusCasoBadge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { FitaCompacta, FitaDoCaso } from '@/components/ui/FitaDoCaso'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Aviso } from '@/components/ui/Feedback'
 import { PageHeader } from '@/components/ui/Layout'
@@ -10,6 +11,8 @@ import { AGRAVOS, PERFIL_ROTULO, STATUS_CASO_ORDEM } from '@/domain/rotulos'
 import type { Perfil } from '@/domain/types'
 import { usePreferencias } from '@/app/preferencias'
 import { hojeISO, somarDias } from '@/lib/datas'
+
+const FITA_EXEMPLO = ['Teste rápido', 'Confirmação', 'Tratamento', 'Seguimento sorológico', 'Desfecho']
 
 const SECOES = [
   { id: 'perfis', titulo: '1. Perfis e níveis de acesso' },
@@ -44,16 +47,16 @@ const PERMISSAO_ROTULO: Record<Permissao, string> = {
 const PERFIS: Perfil[] = ['acs', 'executor', 'responsavel_tecnico', 'gestor', 'admin']
 
 const TELAS: Record<Perfil, { telas: string; acoes: string[] }> = {
-  acs: { telas: 'Painel do ACS · Busca ativa (projetada primeiro para celular)', acoes: ['Ver quem precisa voltar à UBS na sua microárea', 'Ligar com um toque (link tel:)', 'Registrar visita, telefonema ou mensagem e o resultado'] },
-  executor: { telas: 'Painel do dia · Nova testagem · Testagens · Pessoas · Seguimento', acoes: ['Registrar testagem guiada pelo fluxograma (próximo teste, lote FEFO, conduta)', 'Cadastrar pessoa já com os campos da notificação', 'Registrar coleta, resultado, doses, VDRL, parcerias e desfecho'] },
-  responsavel_tecnico: { telas: 'Tudo do executor + Estoque · Notificações · Indicadores da UBS · Auditoria', acoes: ['Entrada, baixa e ajuste de lotes; fechamento SISLOGLAB em CSV', 'Conferir completude e registrar envio ao Sentinela/DVS', 'Acompanhar a cascata do cuidado da UBS'] },
-  gestor: { telas: 'Painel da rede · Indicadores por coordenadoria e UBS', acoes: ['Comparar territórios (ex.: coleta no prazo, tratamento iniciado)', 'Filtrar período, coordenadoria e UBS', 'Exportar CSV — sem dados identificados'] },
-  admin: { telas: 'Painel administrativo · Configurações · Auditoria', acoes: ['Criar usuários e atribuir perfil/lotação', 'Ajustar prazos e estoque mínimo', 'Consultar a trilha de auditoria'] },
+  acs: { telas: 'Painel do ACS e busca ativa (projetada primeiro para celular)', acoes: ['Ver quem precisa voltar à UBS na sua microárea', 'Ligar com um toque (link tel:)', 'Registrar visita, telefonema ou mensagem e o resultado'] },
+  executor: { telas: 'Painel do dia, Nova testagem, Testagens, Pessoas, Seguimento', acoes: ['Registrar testagem guiada pelo fluxograma (próximo teste, lote FEFO, conduta)', 'Cadastrar pessoa já com os campos da notificação', 'Registrar coleta, resultado, doses, VDRL, parcerias e desfecho'] },
+  responsavel_tecnico: { telas: 'Tudo do executor, mais Estoque, Notificações, Indicadores da UBS e Auditoria', acoes: ['Entrada, baixa e ajuste de lotes; fechamento SISLOGLAB em CSV', 'Conferir completude e registrar envio ao Sentinela/DVS', 'Acompanhar a cascata do cuidado da UBS'] },
+  gestor: { telas: 'Painel da rede e indicadores por coordenadoria e UBS', acoes: ['Comparar territórios (ex.: coleta no prazo, tratamento iniciado)', 'Filtrar período, coordenadoria e UBS', 'Exportar CSV — sem dados identificados'] },
+  admin: { telas: 'Painel administrativo, Configurações e Auditoria', acoes: ['Criar usuários e atribuir perfil/lotação', 'Ajustar prazos e estoque mínimo', 'Consultar a trilha de auditoria'] },
 }
 
 const TOKENS_COR: { grupo: string; itens: { nome: string; token: string; uso: string }[] }[] = [
   {
-    grupo: 'Primária (azul-petróleo) — confiança, ação principal',
+    grupo: 'Primária (azul-petróleo): confiança, ação principal',
     itens: [
       { nome: 'Primária', token: '--primary', uso: 'Botões, links, item ativo' },
       { nome: 'Primária forte', token: '--primary-strong', uso: 'Barra lateral / cabeçalho (como no BMC)' },
@@ -61,11 +64,11 @@ const TOKENS_COR: { grupo: string; itens: { nome: string; token: string; uso: st
     ],
   },
   {
-    grupo: 'Acento (âmbar) — complementar dividido; atenção e marca',
+    grupo: 'Acento (âmbar): complementar dividido, atenção e andamento',
     itens: [
       { nome: 'Acento', token: '--accent', uso: 'Texto de destaque (gestante)' },
-      { nome: 'Acento preenchimento', token: '--accent-fill', uso: 'Contadores, item ativo' },
-      { nome: 'Foco', token: '--focus', uso: 'Contorno de foco do teclado' },
+      { nome: 'Acento preenchimento', token: '--accent-fill', uso: 'Etapa em andamento da fita, medidor em atenção' },
+      { nome: 'Foco', token: '--focus', uso: 'Contorno de foco do teclado (azul claro sobre a barra lateral)' },
     ],
   },
   {
@@ -79,7 +82,7 @@ const TOKENS_COR: { grupo: string; itens: { nome: string; token: string; uso: st
     ],
   },
   {
-    grupo: 'Semânticas — sempre com ícone e texto',
+    grupo: 'Semânticas: sempre com ícone e texto',
     itens: [
       { nome: 'Sucesso', token: '--success', uso: 'No prazo, concluído, não reagente' },
       { nome: 'Atenção', token: '--warning', uso: 'Prazo próximo, campo ignorado' },
@@ -88,7 +91,7 @@ const TOKENS_COR: { grupo: string; itens: { nome: string; token: string; uso: st
     ],
   },
   {
-    grupo: 'Agravos — paleta categórica Okabe-Ito (segura para daltonismo)',
+    grupo: 'Agravos: paleta categórica Okabe-Ito (segura para daltonismo)',
     itens: [
       { nome: 'HIV', token: '--hiv-solid', uso: 'Selo HIV (texto em --hiv)' },
       { nome: 'Sífilis', token: '--sif-solid', uso: 'Selo SIF (texto em --sif)' },
@@ -198,7 +201,7 @@ export default function GuiaInterfacePage() {
               </table>
             </div>
             <Aviso tom="info" className="mt-4" titulo="Minimização de dados (LGPD)">
-              O ACS vê só nome, endereço e telefone de quem precisa voltar — nunca o diagnóstico. O gestor vê apenas números
+              O ACS vê só nome, endereço e telefone de quem precisa voltar, nunca o diagnóstico. O gestor vê apenas números
               agregados. O administrador não acessa dados clínicos.
             </Aviso>
           </Secao>
@@ -223,7 +226,7 @@ export default function GuiaInterfacePage() {
                 <h3 className="mb-2 font-bold">Layout adotado</h3>
                 <div aria-hidden className="grid h-52 grid-cols-[4.5rem_1fr] overflow-hidden rounded-xl border border-border text-[0.65rem] font-bold">
                   <div className="row-span-2 flex flex-col bg-sidebar p-2 text-sidebar-fg">Navegação global<div className="mt-2 flex flex-col gap-1">{[1, 2, 3, 4, 5].map((i) => <span key={i} className="h-2 rounded bg-white/25" />)}</div><div className="mt-auto pt-2">Tema · acessib.</div></div>
-                  <div className="border-b border-border bg-surface p-2 text-muted">Barra superior: contexto · usuário/perfil</div>
+                  <div className="border-b border-border bg-surface p-2 text-muted">Barra superior: contexto e usuário</div>
                   <div className="bg-bg p-2">
                     <p className="text-fg">Título da página + ação primária</p>
                     <div className="mt-2 grid grid-cols-4 gap-1">{[1, 2, 3, 4].map((i) => <span key={i} className="h-6 rounded bg-surface" />)}</div>
@@ -240,7 +243,7 @@ export default function GuiaInterfacePage() {
                 <dl className="flex flex-col gap-2 text-sm">
                   {[
                     ['Proximidade', 'Campos agrupados em blocos (Identificação, Vigilância, Endereço); menu agrupado por etapa do trabalho.'],
-                    ['Região comum', 'Cartões delimitam um assunto cada — como os blocos do Business Model Canvas.'],
+                    ['Região comum', 'Painéis delimitam um assunto cada, como os blocos do Business Model Canvas. Dentro deles, linhas separadas por fios finos em vez de cartões dentro de cartões.'],
                     ['Similaridade', 'Mesmo agravo = mesma sigla e cor em todas as telas; mesmo status = mesmo selo.'],
                     ['Continuidade', 'Assistente em etapas, trilha do caso (teste → confirmação → tratamento → desfecho) e linha do tempo.'],
                     ['Figura-fundo', 'Diálogos sobre fundo escurecido; barra lateral escura contra conteúdo claro.'],
@@ -266,7 +269,7 @@ export default function GuiaInterfacePage() {
             </ul>
           </Secao>
 
-          <Secao id="cores" titulo={SECOES[3].titulo} descricao="Valores lidos do tema ativo — use a lua/sol no canto inferior da barra lateral (ou o alto contraste no menu Acessibilidade, ao lado) e veja a paleta mudar.">
+          <Secao id="cores" titulo={SECOES[3].titulo} descricao="Valores lidos do tema ativo. Use a lua/sol no canto inferior da barra lateral (ou o alto contraste no menu Acessibilidade, ao lado) e veja a paleta mudar.">
             <Aviso tom="info" className="mb-5" titulo="Harmonia: complementar dividido">
               Azul-petróleo (institucional, calmo, associado à saúde; o mesmo tom do cabeçalho do BMC) é a base. O âmbar, próximo do
               complementar, marca atenção e identidade sem competir com o vermelho de perigo. Neutros frios mantêm a unidade.
@@ -285,7 +288,7 @@ export default function GuiaInterfacePage() {
                           <span className="size-12 shrink-0 rounded-lg border border-border" style={{ background: `var(${i.token})` }} aria-hidden />
                           <span className="min-w-0 text-sm">
                             <span className="block font-bold">{i.nome}</span>
-                            <span className="block font-mono text-xs text-muted">{i.token} · {hex}</span>
+                            <span className="block text-xs text-muted">{i.token}, {hex}</span>
                             <span className="block text-xs text-muted">{i.uso}</span>
                             {c !== null && <span className="block text-xs font-bold">{c.toFixed(1)}:1 sobre superfície</span>}
                           </span>
@@ -314,25 +317,28 @@ export default function GuiaInterfacePage() {
                 <p className="mt-3 rounded-lg bg-surface-2 p-3 text-2xl" aria-label="Exemplo de caracteres ambíguos: I maiúsculo, l minúsculo, 1, O maiúsculo, 0">Il1 O0 rn m · 1:16</p>
               </div>
               <div>
-                <p className="text-sm font-bold text-muted">Códigos (CNS, lote)</p>
-                <p className="font-mono text-3xl font-bold">JetBrains Mono</p>
-                <p className="mt-1 text-sm text-muted">Monoespaçada para conferir dígitos alinhados: CNS, CPF e números de lote.</p>
-                <p className="mt-3 rounded-lg bg-surface-2 p-3 font-mono text-xl">700 4812 3390 0127</p>
+                <p className="text-sm font-bold text-muted">Números e códigos</p>
+                <p className="text-3xl font-bold tabular">Algarismos tabulares</p>
+                <p className="mt-1 text-sm text-muted">
+                  Uma família só. CNS, CPF, lotes e contagens usam a própria Atkinson com algarismos de largura fixa, que alinham em
+                  coluna. Como a fonte já distingue 0 de O e 1 de l, não é preciso uma monoespaçada.
+                </p>
+                <p className="mt-3 rounded-lg bg-surface-2 p-3 text-xl tabular">700 4812 3390 0127</p>
               </div>
             </div>
-            <h3 className="mt-6 mb-2 font-bold">Escala (base 16px, razão ≈ 1,2)</h3>
+            <h3 className="mt-6 mb-2 font-bold">Escala (base 16px, razão 1,25, terça maior)</h3>
             <ul className="flex flex-col gap-2">
               {[
-                ['text-3xl', '30px · título de página', 'font-bold'],
-                ['text-2xl', '24px · título (mobile) / número de destaque', 'font-bold'],
-                ['text-lg', '18px · título de cartão', 'font-bold'],
-                ['text-base', '16px · texto corrido', ''],
-                ['text-sm', '14px · rótulos, descrições, tabelas', ''],
-                ['text-xs', '12px · metadados (uso mínimo)', ''],
-              ].map(([c, r, p]) => (
-                <li key={c} className="flex flex-wrap items-baseline gap-4 border-b border-border pb-2 last:border-0">
-                  <span className="w-20 font-mono text-xs text-muted">{c}</span>
-                  <span className={`${c} ${p}`}>{r}</span>
+                ['31px', 'Título de página', 'text-[1.953rem] font-bold'],
+                ['25px', 'Número de destaque, título de página no celular', 'text-[1.563rem] font-bold'],
+                ['20px', 'Título de seção ou painel', 'text-xl font-bold'],
+                ['16px', 'Texto corrido e títulos de item', 'text-base'],
+                ['14px', 'Rótulos, descrições, tabelas', 'text-sm'],
+                ['12px', 'Selos (uso mínimo)', 'text-xs'],
+              ].map(([t, r, c]) => (
+                <li key={t} className="flex flex-wrap items-baseline gap-4 border-b border-border pb-2 last:border-0">
+                  <span className="w-14 text-sm text-muted tabular">{t}</span>
+                  <span className={c}>{r}</span>
                 </li>
               ))}
             </ul>
@@ -365,6 +371,25 @@ export default function GuiaInterfacePage() {
               <div>
                 <h3 className="mb-2 font-bold">Etapas do caso</h3>
                 <div className="flex flex-wrap gap-2">{STATUS_CASO_ORDEM.map((s) => <StatusCasoBadge key={s} status={s} />)}</div>
+              </div>
+            </div>
+            <div className="mt-6">
+              <h3 className="mb-1 font-bold">Fita do caso</h3>
+              <p className="mb-3 max-w-3xl text-sm text-muted">
+                O signo próprio do sistema. A trilha do cuidado é desenhada como a janela do cassete de teste rápido, com uma faixa
+                por etapa, como as linhas C e T que a equipe lê todo dia. Faixa azul: etapa concluída. Âmbar: em andamento.
+                Vermelha: em andamento com prazo vencido. Apagada: ainda não chegou. A versão compacta acompanha cada pendência
+                e cada cartão do quadro; a completa abre o detalhe do caso.
+              </p>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                  <FitaCompacta etapas={FITA_EXEMPLO} atual={2} />
+                  <FitaCompacta etapas={FITA_EXEMPLO} atual={3} vencida />
+                  <FitaCompacta etapas={FITA_EXEMPLO} atual={FITA_EXEMPLO.length} />
+                </div>
+                <div className="max-w-2xl">
+                  <FitaDoCaso etapas={FITA_EXEMPLO} atual={2} />
+                </div>
               </div>
               <div>
                 <h3 className="mb-2 font-bold">Prazos: cor + ícone + texto</h3>

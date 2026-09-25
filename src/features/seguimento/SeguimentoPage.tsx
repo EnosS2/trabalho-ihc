@@ -2,7 +2,8 @@ import { Columns3, List, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { ICONE } from '@/components/icones'
-import { AgravoBadge, GestanteBadge, PrazoBadge, StatusCasoBadge } from '@/components/ui/Badge'
+import { AgravoBadge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
+import { FitaCompacta } from '@/components/ui/FitaDoCaso'
 import { Card, CardBody } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
@@ -11,22 +12,27 @@ import { PageHeader } from '@/components/ui/Layout'
 import type { CasoResumo } from '@/data/api'
 import { useCasos } from '@/data/hooks'
 import { AGRAVO_ROTULO, AGRAVOS, STATUS_CASO_CURTO, STATUS_CASO_ORDEM, STATUS_CASO_ROTULO } from '@/domain/rotulos'
+import { etapasDoCaso } from '@/domain/rules/seguimento'
 import type { Agravo, StatusCaso } from '@/domain/types'
 import { formatarData } from '@/lib/datas'
 import { cn } from '@/lib/cn'
+import { plural } from '@/lib/texto'
 
 function CartaoCaso({ r }: { r: CasoResumo }) {
   return (
     <Link
       to={`/seguimento/${r.caso.id}`}
       className={cn(
-        'flex flex-col gap-2 rounded-lg border bg-surface p-3 shadow-card transition-colors hover:border-primary',
+        'flex flex-col gap-2 rounded-md border bg-surface p-3 transition-colors hover:border-primary',
         r.proxima?.vencida ? 'border-danger/60 border-l-4' : 'border-border',
       )}
     >
-      <span className="flex flex-wrap items-center gap-1.5">
-        <AgravoBadge agravo={r.caso.agravo} />
-        {r.caso.gestante && <GestanteBadge />}
+      <span className="flex items-start justify-between gap-2">
+        <span className="flex flex-wrap items-center gap-1.5">
+          <AgravoBadge agravo={r.caso.agravo} />
+          {r.caso.gestante && <GestanteBadge />}
+        </span>
+        <FitaCompacta {...etapasDoCaso(r.caso.agravo, r.status)} vencida={r.proxima?.vencida} semRotulo />
       </span>
       <span className="font-bold leading-tight">{r.pessoa.nomeSocial ?? r.pessoa.nome}</span>
       {r.proxima ? (
@@ -98,7 +104,7 @@ export default function SeguimentoPage() {
       </Card>
 
       <p className="mb-3 text-sm text-muted" aria-live="polite">
-        {data ? `${casos.length} caso(s)` : ''}
+        {data ? plural(casos.length, 'caso') : ''}
       </p>
       {isLoading && <Carregando />}
       {error && <EstadoErro erro={error} tentarNovamente={refetch} />}
@@ -112,10 +118,13 @@ export default function SeguimentoPage() {
             {colunas.map((s) => {
               const doStatus = casos.filter((c) => c.status === s)
               return (
-                <li key={s} className="flex min-w-0 flex-col gap-2 rounded-xl bg-surface-3/60 p-3" aria-labelledby={`col-${s}`}>
-                  <h2 id={`col-${s}`} className="flex items-center justify-between gap-2 px-1 text-sm font-bold" title={STATUS_CASO_ROTULO[s]}>
-                    <StatusCasoBadge status={s} curto={STATUS_CASO_CURTO[s]} />
-                    <span className="tabular text-muted">{doStatus.length}</span>
+                <li key={s} className="flex min-w-0 flex-col gap-2 rounded-lg bg-surface-3/60 p-3" aria-labelledby={`col-${s}`}>
+                  <h2 id={`col-${s}`} className="flex items-baseline justify-between gap-2 px-1 font-bold" title={STATUS_CASO_ROTULO[s]}>
+                    {STATUS_CASO_CURTO[s]}
+                    <span className="text-sm tabular text-muted">
+                      {doStatus.length}
+                      <span className="sr-only"> {doStatus.length === 1 ? 'caso' : 'casos'}</span>
+                    </span>
                   </h2>
                   <ul className="flex flex-col gap-2">
                     {doStatus.map((r) => (
@@ -165,7 +174,7 @@ export default function SeguimentoPage() {
                     </span>
                   ),
                 },
-                { chave: 'status', cabecalho: 'Etapa', celula: (r) => <StatusCasoBadge status={r.status as StatusCaso} curto={STATUS_CASO_CURTO[r.status]} /> },
+                { chave: 'status', cabecalho: 'Etapa', celula: (r) => <FitaCompacta {...etapasDoCaso(r.caso.agravo, r.status as StatusCaso)} vencida={r.proxima?.vencida} /> },
                 { chave: 'prox', cabecalho: 'Próxima ação', celula: (r) => r.proxima?.descricao ?? '—' },
                 { chave: 'prazo', cabecalho: 'Prazo', celula: (r) => (r.proxima ? <PrazoBadge prazo={r.proxima.prazo} diasRestantes={r.proxima.diasRestantes} /> : '—') },
                 { chave: 'aberto', cabecalho: 'Aberto em', celula: (r) => formatarData(r.caso.abertoEm), className: 'tabular', ocultarMobile: true },

@@ -13,6 +13,7 @@ import { PageHeader } from '@/components/ui/Layout'
 import { usePessoas } from '@/data/hooks'
 import { mascararDocumento } from '@/domain/rules/documentos'
 import { formatarData } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 
 export default function PessoasPage() {
   const podeEditar = usePode('pessoa.editar')
@@ -48,7 +49,7 @@ export default function PessoasPage() {
             </Field>
           </form>
           <p className="sr-only" aria-live="polite">
-            {data ? `${data.length} resultado(s)` : ''}
+            {data ? plural(data.length, 'resultado') : ''}
           </p>
           {isLoading && <Carregando />}
           {error && <EstadoErro erro={error} tentarNovamente={refetch} />}
@@ -82,7 +83,7 @@ export default function PessoasPage() {
                   ),
                 },
                 { chave: 'idade', cabecalho: 'Idade', celula: (l) => `${l.idade} anos`, className: 'tabular' },
-                { chave: 'cns', cabecalho: 'CNS', celula: (l) => <span className="font-mono text-xs">{mascararDocumento(l.pessoa.cns)}</span> },
+                { chave: 'cns', cabecalho: 'CNS', celula: (l) => <span className="tabular">{mascararDocumento(l.pessoa.cns)}</span> },
                 {
                   chave: 'situacao',
                   cabecalho: 'Situação',

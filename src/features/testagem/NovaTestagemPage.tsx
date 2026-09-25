@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoVazio } from '@/components/ui/Feedback'
 import { Checkbox, Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
-import { PageHeader, Stepper } from '@/components/ui/Layout'
+import { Meta, PageHeader, Stepper } from '@/components/ui/Layout'
 import { useToast } from '@/components/ui/Toast'
 import type { Caso, Pessoa, ResultadoTR, Testagem, TipoTeste } from '@/domain/types'
 import { usePessoa, usePessoas, useLotesTestagem, useRegistrarTestagem, useSalvarPessoa } from '@/data/hooks'
@@ -25,6 +25,7 @@ import {
 } from '@/domain/rotulos'
 import type { Agravo, InterpretacaoAgravo, MotivoTestagem } from '@/domain/types'
 import { formatarData, semanasGestacao } from '@/lib/datas'
+import { plural } from '@/lib/texto'
 import { cn } from '@/lib/cn'
 import { PessoaFormulario } from '@/features/pessoas/PessoaFormulario'
 
@@ -71,7 +72,7 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
           </div>
         </Field>
         <div aria-live="polite" className="sr-only">
-          {data ? `${data.length} pessoa(s) encontrada(s)` : ''}
+          {data ? plural(data.length, 'pessoa encontrada', 'pessoas encontradas') : ''}
         </div>
         {isFetching && !data && <Carregando />}
         {data && data.length === 0 && (
@@ -113,14 +114,19 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
                           {pessoa.gestante && <GestanteBadge />}
                           {casosAtivos > 0 && (
                             <Badge tom="info" icone={ICONE.seguimento}>
-                              {casosAtivos} caso(s) em seguimento
+                              {plural(casosAtivos, 'caso')} em seguimento
                             </Badge>
                           )}
                         </span>
-                        <span className="block text-sm text-muted">
-                          {idade} anos · CNS {mascararDocumento(pessoa.cns)} · CPF {mascararDocumento(pessoa.cpf)}
-                          {ultimaTestagem ? ` · última testagem ${formatarData(ultimaTestagem)}` : ''}
-                        </span>
+                        <Meta
+                          className="mt-0.5"
+                          itens={[
+                            `${idade} anos`,
+                            <span className="tabular">CNS {mascararDocumento(pessoa.cns)}</span>,
+                            <span className="tabular">CPF {mascararDocumento(pessoa.cpf)}</span>,
+                            ultimaTestagem ? `Última testagem em ${formatarData(ultimaTestagem)}` : null,
+                          ]}
+                        />
                       </span>
                     </label>
                   </li>
@@ -220,7 +226,7 @@ function PainelAgravo({
                   <Badge tom={t.resultado === 'reagente' ? 'perigo' : t.resultado === 'nao_reagente' ? 'sucesso' : 'atencao'}>
                     {RESULTADO_TR_ROTULO[t.resultado]}
                   </Badge>
-                  <span className="font-mono text-xs text-muted">
+                  <span className="text-sm text-muted tabular">
                     lote {lotes?.flatMap((l) => l.disponiveis).find((l) => l.id === t.loteId)?.lote ?? '—'}
                   </span>
                 </li>
@@ -249,7 +255,7 @@ function PainelAgravo({
                   <Select value={loteEfetivo} onChange={(e) => setLoteId(e.target.value)}>
                     {disponiveis.map((l, i) => (
                       <option key={l.id} value={l.id}>
-                        {l.lote} · {l.fabricante} · validade {formatarData(l.validade)} ·{' '}
+                        Lote {l.lote}, {l.fabricante}, validade {formatarData(l.validade)},{' '}
                         {l.quantidadeAtual - (usoPorLote.get(l.id) ?? 0)} un.{i === 0 ? ' (sugerido)' : ''}
                       </option>
                     ))}
@@ -428,9 +434,9 @@ export default function NovaTestagemPage() {
             </span>
             <p className="text-xl font-bold">Testagem de {pessoa?.nome} salva.</p>
             <p className="text-muted">
-              {concluida.testagem.testes.length} dispositivo(s) baixado(s) do estoque.{' '}
+              {plural(concluida.testagem.testes.length, 'teste baixado', 'testes baixados')} do estoque.{' '}
               {concluida.casos.length > 0
-                ? `${concluida.casos.length} caso(s) aberto(s) para seguimento — os prazos já estão no painel.`
+                ? `${plural(concluida.casos.length, 'caso aberto', 'casos abertos')} para seguimento. Os prazos já estão no painel.`
                 : 'Nenhum caso precisou ser aberto.'}
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -580,7 +586,7 @@ export default function NovaTestagemPage() {
             <Card className="border-2 border-danger">
               <CardHeader
                 titulo="Gestante com sífilis: tratar hoje"
-                descricao="Nota Técnica CAIST/SMS — não aguardar o confirmatório."
+                descricao="Pela Nota Técnica CAIST/SMS, não aguardar o confirmatório."
                 icone={<ICONE.gestante className="size-5 text-danger" aria-hidden />}
               />
               <CardBody>
@@ -624,7 +630,7 @@ export default function NovaTestagemPage() {
               ))}
               {abreCasos.length > 0 && (
                 <Aviso tom="info" titulo="O que acontece ao finalizar">
-                  {abreCasos.length} caso(s) serão abertos com prazos de coleta, tratamento e notificação. Se a pessoa não
+                  {abreCasos.length === 1 ? 'Será aberto 1 caso' : `Serão abertos ${abreCasos.length} casos`} com prazos de coleta, tratamento e notificação. Se a pessoa não
                   voltar no prazo, o ACS da microárea recebe a busca ativa.
                 </Aviso>
               )}

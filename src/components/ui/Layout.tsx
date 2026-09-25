@@ -48,7 +48,7 @@ export function PageHeader({
       )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-fg sm:text-3xl">{titulo}</h1>
+          <h1 className="text-[1.563rem] font-bold text-fg sm:text-[1.953rem]">{titulo}</h1>
           {descricao && <p className="mt-1 max-w-3xl text-muted">{descricao}</p>}
         </div>
         {acoes && <div className="flex flex-wrap gap-2">{acoes}</div>}
@@ -67,37 +67,68 @@ const statTom: Record<Tom, string> = {
   acento: 'text-accent',
 }
 
-/** Indicador-chave (KPI). O tom colore o ícone e o valor; o texto explica o número. */
+/** Metadados de uma linha (idade, documentos, datas): separados por espaço, sem "·" entre eles. */
+export function Meta({ itens, className }: { itens: ReactNode[]; className?: string }) {
+  return (
+    <span className={cn('flex flex-wrap gap-x-4 gap-y-0.5 text-sm text-muted', className)}>
+      {itens.filter(Boolean).map((i, k) => (
+        <span key={k}>{i}</span>
+      ))}
+    </span>
+  )
+}
+
+/**
+ * Faixa de números-resumo: uma só superfície dividida por fios finos (proximidade), em vez de
+ * vários cartões iguais. Cada <Stat> é uma célula.
+ */
+export function Resumo({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <dl
+      className={cn(
+        'grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none',
+        // Número ímpar de células em 2 colunas: a última ocupa a linha toda (sem quadrado vazio).
+        '[&>:last-child:nth-child(odd)]:col-span-2 lg:[&>:last-child:nth-child(odd)]:col-auto',
+        className,
+      )}
+    >
+      {children}
+    </dl>
+  )
+}
+
+/**
+ * Célula de <Resumo>: número, o que ele conta e um detalhe. O tom colore só o número; o texto explica.
+ * As células de uma faixa ficam da mesma altura: dê `detalhe` a todas ou a nenhuma, senão sobra um
+ * vão em branco sob as que não têm. Número, rótulo e detalhe ocupam 3 linhas da grade do <Resumo>
+ * (subgrid): se um rótulo quebra em duas linhas, os detalhes de todas as células continuam alinhados.
+ */
 export function Stat({
   rotulo,
   valor,
   detalhe,
-  icone: Icone,
   tom = 'neutro',
   para,
 }: {
   rotulo: string
   valor: ReactNode
   detalhe?: ReactNode
-  icone?: LucideIcon
   tom?: Tom
   para?: string
 }) {
   const conteudo = (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-bold text-muted">{rotulo}</p>
-        {Icone && <Icone className={cn('size-5', statTom[tom])} aria-hidden />}
-      </div>
-      <p className={cn('mt-1 text-3xl font-bold', statTom[tom])}>{valor}</p>
-      {detalhe && <p className="mt-0.5 text-sm text-muted">{detalhe}</p>}
+      <dd className={cn('row-start-1 text-[1.953rem] leading-none font-bold tabular', statTom[tom])}>{valor}</dd>
+      <dt className="row-start-2 mt-1.5 text-sm font-bold text-fg">{rotulo}</dt>
+      {detalhe && <dd className="row-start-3 mt-1 text-sm text-muted">{detalhe}</dd>}
     </>
   )
-  const classes = 'block rounded-xl border border-border bg-surface p-4 shadow-card'
+  const classes = 'row-span-3 grid grid-rows-subgrid content-start gap-y-0 bg-surface px-4 py-3.5'
   return para ? (
-    <Link to={para} className={cn(classes, 'transition-colors hover:border-primary hover:bg-surface-2')}>
+    <div className={cn(classes, 'relative hover:bg-surface-2')}>
       {conteudo}
-    </Link>
+      <Link to={para} className="absolute inset-0" aria-label={`${rotulo}: abrir`} />
+    </div>
   ) : (
     <div className={classes}>{conteudo}</div>
   )

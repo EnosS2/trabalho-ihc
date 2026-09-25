@@ -5,7 +5,7 @@ import { useSessaoAtiva } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
 import { Button } from '@/components/ui/Button'
 import { Aviso } from '@/components/ui/Feedback'
-import { Checkbox, Field, Input, Select } from '@/components/ui/Form'
+import { Checkbox, Field, GrupoCampos, Input, Select } from '@/components/ui/Form'
 import type { PessoaInput } from '@/data/api'
 import { useReferencias } from '@/data/hooks'
 import { validarCns, validarCpf } from '@/domain/rules/documentos'
@@ -136,20 +136,17 @@ export function PessoaFormulario({
   const gestante = useWatch({ control, name: 'gestante' })
   const qtdErros = Object.keys(errors).length
 
-  const bloco = 'grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-2'
-  const legenda = 'px-1 text-base font-bold'
 
   return (
     <form onSubmit={handleSubmit((v) => aoSalvar(paraPessoaInput(v)))} noValidate className="flex flex-col gap-5">
       {isSubmitted && qtdErros > 0 && (
-        <Aviso tom="perigo" titulo={`Corrija ${qtdErros} campo(s) destacado(s) para continuar.`} />
+        <Aviso tom="perigo" titulo={qtdErros === 1 ? 'Corrija o campo destacado para continuar.' : `Corrija os ${qtdErros} campos destacados para continuar.`} />
       )}
       <p className="text-sm text-muted">
         Campos com <span className="text-danger">*</span> são obrigatórios.
       </p>
 
-      <fieldset className={bloco}>
-        <legend className={legenda}>Identificação</legend>
+      <GrupoCampos legenda="Identificação">
         <Field label="Nome completo" obrigatorio erro={errors.nome?.message} className="sm:col-span-2">
           <Input autoComplete="off" {...register('nome')} />
         </Field>
@@ -173,15 +170,14 @@ export function PessoaFormulario({
           <Input autoComplete="off" {...register('nomeMae')} />
         </Field>
         <Field label="Cartão Nacional de Saúde (CNS)" dica="15 dígitos." erro={errors.cns?.message}>
-          <Input inputMode="numeric" className="font-mono" maxLength={18} {...register('cns')} />
+          <Input inputMode="numeric" className="tabular" maxLength={18} {...register('cns')} />
         </Field>
         <Field label="CPF" dica="Se não houver CNS." erro={errors.cpf?.message}>
-          <Input inputMode="numeric" className="font-mono" maxLength={14} {...register('cpf')} />
+          <Input inputMode="numeric" className="tabular" maxLength={14} {...register('cpf')} />
         </Field>
-      </fieldset>
+      </GrupoCampos>
 
-      <fieldset className={bloco}>
-        <legend className={legenda}>Dados para a vigilância</legend>
+      <GrupoCampos legenda="Dados para a vigilância">
         <Field label="Raça/cor (autodeclarada)" obrigatorio erro={errors.racaCor?.message}>
           <Select {...register('racaCor')}>
             <option value="">Selecione…</option>
@@ -202,10 +198,9 @@ export function PessoaFormulario({
             ))}
           </Select>
         </Field>
-      </fieldset>
+      </GrupoCampos>
 
-      <fieldset className={bloco}>
-        <legend className={legenda}>Contato e endereço</legend>
+      <GrupoCampos legenda="Contato e endereço">
         <Field label="Telefone com DDD" dica="Essencial para a busca ativa." erro={errors.telefone?.message}>
           <Input type="tel" inputMode="tel" autoComplete="off" {...register('telefone')} />
         </Field>
@@ -231,15 +226,16 @@ export function PessoaFormulario({
         <Field label="Bairro" obrigatorio erro={errors.bairro?.message} className="sm:col-span-2">
           <Input autoComplete="off" {...register('bairro')} />
         </Field>
-      </fieldset>
+      </GrupoCampos>
 
       {sexo === 'F' && (
-        <fieldset className={bloco}>
-          <legend className={legenda}>
+        <GrupoCampos
+          legenda={
             <span className="inline-flex items-center gap-2">
               <ICONE.gestante className="size-5 text-accent" aria-hidden /> Gestação
             </span>
-          </legend>
+          }
+        >
           <Checkbox
             label="Gestante"
             descricao="Gestantes têm prioridade: sífilis reagente é tratada no mesmo dia."
@@ -252,7 +248,7 @@ export function PessoaFormulario({
               <Input type="date" max={hojeISO()} {...register('dum')} />
             </Field>
           )}
-        </fieldset>
+        </GrupoCampos>
       )}
 
       <div className="flex flex-wrap justify-end gap-2">

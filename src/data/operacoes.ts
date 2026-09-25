@@ -14,6 +14,7 @@ import {
 } from '@/domain/rules/seguimento'
 import { loteUtilizavel } from '@/domain/rules/estoque'
 import { AGRAVO_ROTULO, TIPO_TESTE_ROTULO } from '@/domain/rotulos'
+import { plural } from '@/lib/texto'
 import type {
   Agravo,
   Caso,
@@ -82,7 +83,7 @@ export function registrarTestagemOp(banco: Banco, input: NovaTestagemInput) {
       throw new ErroDeNegocio(`O lote ${lote.lote} está vencido ou sem saldo.`)
     }
     if (usoPorLote.get(lote.id)! > lote.quantidadeAtual) {
-      throw new ErroDeNegocio(`O lote ${lote.lote} tem apenas ${lote.quantidadeAtual} unidade(s).`)
+      throw new ErroDeNegocio(`O lote ${lote.lote} tem só ${plural(lote.quantidadeAtual, 'unidade')}.`)
     }
   }
   const testagemId = novoId('tsg')
