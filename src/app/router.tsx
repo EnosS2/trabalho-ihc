@@ -77,4 +77,7 @@ export const router = createBrowserRouter([
       },
     ],
   },
-])
+], {
+  // No GitHub Pages o app fica em /trabalho-ihc/; BASE_URL vem do `base` do vite.config.
+  basename: import.meta.env.BASE_URL.replace(/\/$/, '') || '/',
+})

@@ -219,7 +219,7 @@ relógio (aguardando), X (vencido/erro).
 ### Ideias futuras (backlog)
 - Integração com e-SUS APS (CDS/PEC) e exportação para Sentinela
 - PWA/offline para ACS
-- Deploy do front (GitHub Pages / Vercel)
+- ~~Deploy do front (GitHub Pages / Vercel)~~ — feito: GitHub Pages via Actions (`.github/workflows/deploy.yml`)
 
 ## 5. Registro de alterações
 
@@ -253,3 +253,4 @@ relógio (aguardando), X (vencido/erro).
 | 2026-09-25 | Logo (ícone + nome) virou link para o Painel na barra lateral, na gaveta mobile (fecha a gaveta) e no topo do celular; rótulo acessível "Testagem UBS, ir para o painel". `Logo` ganhou `semSubtitulo` no lugar do seletor `[&_p:last-child]:hidden`. |
 | 2026-09-25 | Central de ajuda: botão "Guia de interface (IHC)" virou "Guia de interface" (sem o nome da disciplina no rótulo). |
 | 2026-09-25 | Botão secundário com fundo transparente (só borda; fundo no hover). Na página cinza deixava de parecer um painel (ex.: "Guia de interface" na Central de ajuda); dentro de painéis brancos nada muda. |
+| 2026-09-25 | Deploy no GitHub Pages: `base: '/trabalho-ihc/'` no build (vite.config), `basename` do router a partir de `BASE_URL`, workflow `.github/workflows/deploy.yml` (testes + build + `404.html` como fallback de SPA). |
