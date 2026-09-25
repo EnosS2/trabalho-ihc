@@ -186,7 +186,7 @@ export function Medidor({
 export function Stepper({ passos, atual }: { passos: string[]; atual: number }) {
   return (
     <nav aria-label="Etapas">
-      <ol className="flex items-center gap-2 overflow-x-auto pb-1">
+      <ol className="flex items-center gap-2 relative overflow-x-auto pb-1">
         {passos.map((p, i) => {
           const feito = i < atual
           const ativo = i === atual

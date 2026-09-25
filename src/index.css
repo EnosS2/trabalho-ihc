@@ -262,6 +262,35 @@ html[data-fonte='3'] {
   }
 }
 
+/*
+ * Barras de rolagem: finas, em pílula, na cor das bordas do tema, sem setas. Discretas em repouso,
+ * mais fortes no hover. Chrome/Edge/Safari usam ::-webkit-scrollbar; o Firefox, as propriedades padrão.
+ */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+}
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--border-strong) 55%, transparent);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--border-strong);
+  border-width: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

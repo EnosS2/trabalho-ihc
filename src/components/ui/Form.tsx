@@ -55,7 +55,7 @@ export function Field({
     : children
   return (
     <div className={cn('campo flex flex-col', className)}>
-      <label htmlFor={idCampo} className="row-start-1 self-end text-sm font-bold text-fg">
+      <label htmlFor={idCampo} className="row-start-1 text-sm font-bold text-fg">
         {label}
         {obrigatorio ? (
           <span className="text-danger" aria-hidden>

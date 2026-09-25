@@ -30,7 +30,7 @@ export function Tabs<T extends string>({
     refs.current[n]?.focus()
   }
   return (
-    <div role="tablist" aria-label={rotulo} className="flex gap-1 overflow-x-auto border-b border-border">
+    <div role="tablist" aria-label={rotulo} className="flex gap-1 relative overflow-x-auto border-b border-border">
       {abas.map((a, i) => {
         const sel = a.id === ativa
         return (

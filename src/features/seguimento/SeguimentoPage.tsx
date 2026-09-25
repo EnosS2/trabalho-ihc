@@ -113,7 +113,7 @@ export default function SeguimentoPage() {
       )}
 
       {data && casos.length > 0 && visao === 'quadro' && (
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+        <div className="-mx-4 relative overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           <ol className="grid auto-cols-[minmax(15rem,1fr)] grid-flow-col gap-4" aria-label="Quadro de casos por etapa">
             {colunas.map((s) => {
               const doStatus = casos.filter((c) => c.status === s)

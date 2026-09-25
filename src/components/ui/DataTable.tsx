@@ -35,7 +35,7 @@ export function DataTable<T>({
   if (linhas.length === 0) return <>{vazio}</>
   return (
     <>
-      <div className="hidden overflow-x-auto md:block">
+      <div className="hidden relative overflow-x-auto md:block">
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">{legenda}</caption>
           <thead>

@@ -366,7 +366,7 @@ export default function EstoquePage() {
                     <Card>
                       <CardHeader titulo={`${fech.data.ubs.nome}, ${formatarMes(mesFech).toLowerCase()}`} descricao={`CNES ${fech.data.ubs.cnes}`} />
                       <CardBody>
-                        <div className="overflow-x-auto">
+                        <div className="relative overflow-x-auto">
                           <table className="w-full min-w-[44rem] text-sm">
                             <caption className="sr-only">Fechamento mensal do estoque</caption>
                             <thead>

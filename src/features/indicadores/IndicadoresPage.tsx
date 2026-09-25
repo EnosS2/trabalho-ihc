@@ -235,7 +235,7 @@ export default function IndicadoresPage() {
             <Card aria-labelledby="t-terr">
               <CardHeader id="t-terr" titulo="Por coordenadoria de saúde" icone={<ICONE.painel className="size-5" aria-hidden />} />
               <CardBody>
-                <div className="overflow-x-auto">
+                <div className="relative overflow-x-auto">
                   <table className="w-full min-w-[44rem] text-sm">
                     <caption className="sr-only">Indicadores por coordenadoria</caption>
                     <thead>
