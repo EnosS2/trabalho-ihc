@@ -466,6 +466,7 @@ export default function CasoDetalhePage() {
     <>
       <PageHeader
         titulo={pessoa.nomeSocial ?? pessoa.nome}
+        tituloAba={`Caso de ${AGRAVO_ROTULO[caso.agravo]}`}
         trilha={[{ rotulo: 'Seguimento', para: '/seguimento' }, { rotulo: `${AGRAVO_ROTULO[caso.agravo]} — ${pessoa.nome}` }]}
         descricao={
           <span className="flex flex-wrap items-center gap-2">

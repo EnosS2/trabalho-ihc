@@ -48,7 +48,8 @@ Cada perfil entra num **painel próprio** com as tarefas do dia, sem telas que n
 
 ### Layout adotado
 - **Casca da aplicação:** barra lateral escura (navegação global agrupada por etapa do trabalho: Atendimento,
-  Acompanhamento, Gestão, Sistema) + barra superior (contexto UBS/coordenadoria, menu de acessibilidade e usuário)
+  Acompanhamento, Gestão, Sistema) + barra superior (contexto UBS/coordenadoria e menu do usuário/troca de perfil); preferências de
+  visualização (tema e acessibilidade) no rodapé da barra lateral
   + área de conteúdo com largura máxima de 80rem.
 - **Página:** trilha de navegação → título (h1) e descrição → **uma** ação primária à direita → indicadores em linha →
   conteúdo principal à esquerda e apoio à direita (leitura em "F").
@@ -107,7 +108,7 @@ passar. Como alguns pares ficam perto do limite, **a cor nunca aparece sozinha**
 - Cores semânticas sempre acompanham ícone e texto.
 - Há três temas: claro (**padrão**), escuro e **alto contraste** (preto sobre branco, bordas pretas). A troca
   claro/escuro fica num botão de lua/sol no canto inferior da barra lateral (sempre à mão, sem abrir menu); o alto
-  contraste fica no menu Acessibilidade. A troca é animada: o ícone gira de lua para sol e o novo tema se revela
+  contraste fica no menu Acessibilidade, logo ao lado. A troca é animada: o ícone gira de lua para sol e o novo tema se revela
   num círculo a partir do botão, dando continuidade visual (sem "piscar"). Com "reduzir animações" a troca é imediata.
 - Os tokens ficam em `src/index.css`.
 

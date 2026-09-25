@@ -63,19 +63,17 @@ export function AlternarTema() {
   const icone =
     'absolute size-5 transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none'
   return (
-    <div className="mt-auto px-3 pt-2 pb-4">
-      <button
-        ref={botao}
-        type="button"
-        onClick={trocar}
-        disabled={prefs.altoContraste}
-        aria-label={rotulo}
-        title={prefs.altoContraste ? 'Indisponível com alto contraste ativo' : rotulo}
-        className="relative inline-flex size-11 items-center justify-center overflow-hidden rounded-lg text-sidebar-fg hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Moon aria-hidden className={cn(icone, escuro ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100')} />
-        <Sun aria-hidden className={cn(icone, escuro ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0')} />
-      </button>
-    </div>
+    <button
+      ref={botao}
+      type="button"
+      onClick={trocar}
+      disabled={prefs.altoContraste}
+      aria-label={rotulo}
+      title={prefs.altoContraste ? 'Indisponível com alto contraste ativo' : rotulo}
+      className="relative inline-flex size-11 items-center justify-center overflow-hidden rounded-lg text-sidebar-fg hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <Moon aria-hidden className={cn(icone, escuro ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100')} />
+      <Sun aria-hidden className={cn(icone, escuro ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0')} />
+    </button>
   )
 }

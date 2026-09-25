@@ -51,6 +51,7 @@ function PainelUbs() {
     <>
       <PageHeader
         titulo={`${saudacao()}, ${usuario.nome.split(' ')[0]}`}
+        tituloAba="Painel"
         descricao={`${ubs?.nome} — ${formatarData(hojeISO())}. Veja o que precisa de atenção hoje.`}
         acoes={
           <LinkButton to="/testagem/nova" icone={ICONE.novaTestagem} tamanho="lg">
@@ -192,6 +193,7 @@ function PainelAcs() {
     <>
       <PageHeader
         titulo={`${saudacao()}, ${usuario.nome.split(' ')[0]}`}
+        tituloAba="Painel"
         descricao={`${microarea?.descricao ?? ''} · ${ubs?.nome}. Estas pessoas precisam voltar à UBS.`}
       />
       <Aviso tom="info" className="mb-4" titulo="Sigilo">
@@ -214,6 +216,7 @@ function PainelGestor() {
     <>
       <PageHeader
         titulo={`${saudacao()}, ${usuario.nome.split(' ')[0]}`}
+        tituloAba="Painel"
         descricao="Rede municipal — últimos 90 dias. Dados agregados, sem identificação de pessoas."
         acoes={
           <LinkButton to="/indicadores" icone={ICONE.indicadores}>
@@ -273,6 +276,7 @@ function PainelAdmin() {
     <>
       <PageHeader
         titulo={`${saudacao()}, ${usuario.nome.split(' ')[0]}`}
+        tituloAba="Painel"
         descricao="Administração do sistema. Você não tem acesso a dados clínicos."
         acoes={
           <LinkButton to="/configuracoes" icone={ICONE.configuracoes}>

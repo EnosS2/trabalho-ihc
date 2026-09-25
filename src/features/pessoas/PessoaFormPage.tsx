@@ -21,6 +21,7 @@ export default function PessoaFormPage() {
     <>
       <PageHeader
         titulo={pessoa ? `Editar ${pessoa.nome}` : 'Cadastrar pessoa'}
+        tituloAba={pessoa ? 'Editar cadastro' : 'Cadastrar pessoa'}
         descricao="Um cadastro completo hoje evita notificação incompleta amanhã."
         trilha={[
           { rotulo: 'Pessoas', para: '/pessoas' },

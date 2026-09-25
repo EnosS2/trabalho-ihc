@@ -1,7 +1,6 @@
-import { Accessibility, Check, ChevronDown, CircleHelp, Menu, Minus, Plus, RotateCcw } from 'lucide-react'
+import { Check, ChevronDown, CircleHelp, Menu } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { usePreferencias, type Preferencias } from '@/app/preferencias'
 import { useSessaoAtiva } from '@/app/sessao'
 import { useToast } from '@/components/ui/Toast'
 import { useEntrar, useUsuariosDemo } from '@/data/hooks'
@@ -72,70 +71,6 @@ function Suspenso({
   )
 }
 
-function PainelAcessibilidade() {
-  const { prefs, atualizar, restaurar } = usePreferencias()
-  const pct = ['100%', '112%', '125%', '137%'][prefs.fonte]
-  return (
-    <div className="flex flex-col gap-4">
-      <h2 className="font-bold">Acessibilidade</h2>
-      <div>
-        <p id="rot-fonte" className="mb-1 text-sm font-bold">
-          Tamanho do texto: <span className="tabular">{pct}</span>
-        </p>
-        <div className="flex gap-2" role="group" aria-labelledby="rot-fonte">
-          <button
-            type="button"
-            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-lg border border-border-strong font-bold hover:bg-surface-3 disabled:opacity-50"
-            onClick={() => atualizar({ fonte: Math.max(0, prefs.fonte - 1) as Preferencias['fonte'] })}
-            disabled={prefs.fonte === 0}
-            aria-label="Diminuir texto"
-          >
-            <Minus className="size-4" aria-hidden /> A
-          </button>
-          <button
-            type="button"
-            className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-lg border border-border-strong text-lg font-bold hover:bg-surface-3 disabled:opacity-50"
-            onClick={() => atualizar({ fonte: Math.min(3, prefs.fonte + 1) as Preferencias['fonte'] })}
-            disabled={prefs.fonte === 3}
-            aria-label="Aumentar texto"
-          >
-            <Plus className="size-4" aria-hidden /> A
-          </button>
-        </div>
-      </div>
-      <label className="flex cursor-pointer items-center justify-between gap-3">
-        <span>
-          <span className="block font-bold">Alto contraste</span>
-          <span className="text-sm text-muted">Preto sobre branco, bordas fortes</span>
-        </span>
-        <input
-          type="checkbox"
-          role="switch"
-          className="size-5 accent-[var(--primary)]"
-          checked={prefs.altoContraste}
-          onChange={(e) => atualizar({ altoContraste: e.target.checked })}
-        />
-      </label>
-      <label className="flex cursor-pointer items-center justify-between gap-3">
-        <span>
-          <span className="block font-bold">Reduzir animações</span>
-          <span className="text-sm text-muted">Remove transições e movimentos</span>
-        </span>
-        <input
-          type="checkbox"
-          role="switch"
-          className="size-5 accent-[var(--primary)]"
-          checked={prefs.movimentoReduzido}
-          onChange={(e) => atualizar({ movimentoReduzido: e.target.checked })}
-        />
-      </label>
-      <button type="button" onClick={restaurar} className="flex items-center gap-2 self-start text-sm font-bold text-primary hover:underline">
-        <RotateCcw className="size-4" aria-hidden /> Restaurar padrão
-      </button>
-    </div>
-  )
-}
-
 export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
   const { usuario, ubs, territorio, microarea } = useSessaoAtiva()
   const entrar = useEntrar()
@@ -171,10 +106,7 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
           </p>
         </div>
 
-        <div className="ml-auto flex items-center gap-1">
-          <Suspenso rotulo="Opções de acessibilidade" gatilho={<><Accessibility className="size-5" aria-hidden /><span className="hidden text-sm font-bold sm:inline">Acessibilidade</span></>}>
-            {() => <PainelAcessibilidade />}
-          </Suspenso>
+        <div className="ml-auto flex items-center">
           <Suspenso
             rotulo={`Menu do usuário ${usuario.nome}`}
             gatilho={

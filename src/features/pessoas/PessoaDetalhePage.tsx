@@ -30,6 +30,7 @@ export default function PessoaDetalhePage() {
     <>
       <PageHeader
         titulo={p.nomeSocial ?? p.nome}
+        tituloAba="Cadastro da pessoa"
         descricao={
           <span className="flex flex-wrap items-center gap-2">
             {idade} anos · {SEXO_ROTULO[p.sexo]}

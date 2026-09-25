@@ -4,21 +4,28 @@ import { Link } from 'react-router'
 import { cn } from '@/lib/cn'
 import type { Tom } from './Badge'
 
-/** Cabeçalho de página: título (h1), descrição e UMA ação primária à direita (pregnância). */
+/**
+ * Cabeçalho de página: título (h1), descrição e UMA ação primária à direita (pregnância).
+ * Também define o título da aba: "<nome da tela> · Testagem UBS". Quando o h1 é pessoal (saudação,
+ * nome de pessoa), passe `tituloAba` com o nome genérico da tela — a aba aparece no histórico,
+ * na barra de tarefas e em compartilhamento de tela, então nunca leva nome de paciente.
+ */
 export function PageHeader({
   titulo,
+  tituloAba,
   descricao,
   acoes,
   trilha,
 }: {
   titulo: string
+  tituloAba?: string
   descricao?: ReactNode
   acoes?: ReactNode
   trilha?: { rotulo: string; para?: string }[]
 }) {
   useEffect(() => {
-    document.title = `${titulo} · Testagem UBS`
-  }, [titulo])
+    document.title = `${tituloAba ?? titulo} · Testagem UBS`
+  }, [tituloAba, titulo])
   return (
     <header className="mb-6 flex flex-col gap-3">
       {trilha && (

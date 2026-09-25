@@ -6,6 +6,7 @@ import { NAVEGACAO, type ItemNav } from '@/app/navegacao'
 import { useBuscaAtiva, useEstoque, usePainelUbs } from '@/data/hooks'
 import { pode } from '@/domain/permissoes'
 import { cn } from '@/lib/cn'
+import { Acessibilidade } from './Acessibilidade'
 import { AlternarTema } from './AlternarTema'
 import { Logo } from './Logo'
 
@@ -111,7 +112,7 @@ export function Sidebar({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
           <Logo claro />
         </div>
         <Navegacao />
-        <AlternarTema />
+        <Rodape />
       </aside>
 
       {/* Mobile/tablet: gaveta modal */}
@@ -137,10 +138,20 @@ export function Sidebar({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
               </button>
             </div>
             <Navegacao aoNavegar={aoFechar} />
-            <AlternarTema />
+            <Rodape />
           </div>
         </div>
       )}
     </>
+  )
+}
+
+/** Preferências de visualização, fixas no canto inferior esquerdo. */
+function Rodape() {
+  return (
+    <div className="mt-auto flex items-center gap-1 px-3 pt-2 pb-4">
+      <AlternarTema />
+      <Acessibilidade />
+    </div>
   )
 }
