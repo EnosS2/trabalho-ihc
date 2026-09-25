@@ -3,7 +3,6 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { usePreferencias, type Preferencias } from '@/app/preferencias'
 import { useSessaoAtiva } from '@/app/sessao'
-import { ICONE } from '@/components/icones'
 import { useSair } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO } from '@/domain/rotulos'
@@ -162,8 +161,7 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
         <div className="lg:hidden">
           <Logo className="[&_p:last-child]:hidden" />
         </div>
-        <div className="hidden min-w-0 items-center gap-2 lg:flex">
-          <ICONE.painel className="size-4 shrink-0 text-muted" aria-hidden />
+        <div className="hidden min-w-0 lg:flex">
           <p className="truncate text-sm text-muted">
             <span className="sr-only">Contexto: </span>
             {contexto}

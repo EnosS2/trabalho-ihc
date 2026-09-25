@@ -64,7 +64,7 @@ const TOKENS_COR: { grupo: string; itens: { nome: string; token: string; uso: st
     grupo: 'Acento (âmbar) — complementar dividido; atenção e marca',
     itens: [
       { nome: 'Acento', token: '--accent', uso: 'Texto de destaque (gestante)' },
-      { nome: 'Acento preenchimento', token: '--accent-fill', uso: 'Logotipo, contadores, item ativo' },
+      { nome: 'Acento preenchimento', token: '--accent-fill', uso: 'Contadores, item ativo' },
       { nome: 'Foco', token: '--focus', uso: 'Contorno de foco do teclado' },
     ],
   },
