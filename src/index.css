@@ -280,6 +280,29 @@ html[data-movimento='reduzido'] *::after {
   transition-duration: 0.01ms !important;
 }
 
+/* Troca de tema: o novo tema se revela num círculo a partir do botão (animação feita em JS). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* Alternativa sem View Transitions API: as cores mudam em fade. */
+html.tema-em-transicao,
+html.tema-em-transicao *,
+html.tema-em-transicao *::before,
+html.tema-em-transicao *::after {
+  transition:
+    background-color 450ms ease,
+    border-color 450ms ease,
+    color 450ms ease,
+    fill 450ms ease,
+    stroke 450ms ease !important;
+}
+
 dialog::backdrop {
   background: rgb(8 18 26 / 0.55);
 }

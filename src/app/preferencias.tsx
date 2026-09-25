@@ -1,20 +1,24 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 export interface Preferencias {
-  tema: 'sistema' | 'claro' | 'escuro'
+  /** Claro é o padrão; a troca fica no botão sol/lua da barra lateral. */
+  tema: 'claro' | 'escuro'
   altoContraste: boolean
   /** 0 = 100%, 1 = 112,5%, 2 = 125%, 3 = 137,5% */
   fonte: 0 | 1 | 2 | 3
   movimentoReduzido: boolean
 }
 
-const PADRAO: Preferencias = { tema: 'sistema', altoContraste: false, fonte: 0, movimentoReduzido: false }
+const PADRAO: Preferencias = { tema: 'claro', altoContraste: false, fonte: 0, movimentoReduzido: false }
 const CHAVE = 'testagem-ubs:preferencias'
 
 function ler(): Preferencias {
   try {
     const bruto = localStorage.getItem(CHAVE)
-    return bruto ? { ...PADRAO, ...(JSON.parse(bruto) as Partial<Preferencias>) } : PADRAO
+    if (!bruto) return PADRAO
+    const salvo = { ...PADRAO, ...(JSON.parse(bruto) as Partial<Preferencias>) }
+    // Versões anteriores tinham o tema "sistema": passa a valer o padrão (claro).
+    return { ...salvo, tema: salvo.tema === 'escuro' ? 'escuro' : 'claro' }
   } catch {
     return PADRAO
   }
@@ -32,12 +36,7 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const html = document.documentElement
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const aplicarTema = () => {
-      const escuro = prefs.tema === 'escuro' || (prefs.tema === 'sistema' && media.matches)
-      html.dataset.tema = escuro && !prefs.altoContraste ? 'escuro' : 'claro'
-    }
-    aplicarTema()
+    html.dataset.tema = prefs.tema === 'escuro' && !prefs.altoContraste ? 'escuro' : 'claro'
     html.dataset.contraste = prefs.altoContraste ? 'alto' : 'normal'
     html.dataset.fonte = String(prefs.fonte)
     html.dataset.movimento = prefs.movimentoReduzido ? 'reduzido' : 'normal'
@@ -46,15 +45,14 @@ export function PreferenciasProvider({ children }: { children: ReactNode }) {
     } catch {
       /* preferência vale só nesta sessão */
     }
-    media.addEventListener('change', aplicarTema)
-    return () => media.removeEventListener('change', aplicarTema)
   }, [prefs])
 
   const valor = useMemo(
     () => ({
       prefs,
       atualizar: (p: Partial<Preferencias>) => setPrefs((atual) => ({ ...atual, ...p })),
-      restaurar: () => setPrefs(PADRAO),
+      // Restaura só os ajustes de acessibilidade; o tema claro/escuro é escolha à parte.
+      restaurar: () => setPrefs((atual) => ({ ...PADRAO, tema: atual.tema })),
     }),
     [prefs],
   )

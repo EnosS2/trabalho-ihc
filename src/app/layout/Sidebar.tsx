@@ -6,6 +6,7 @@ import { NAVEGACAO, type ItemNav } from '@/app/navegacao'
 import { useBuscaAtiva, useEstoque, usePainelUbs } from '@/data/hooks'
 import { pode } from '@/domain/permissoes'
 import { cn } from '@/lib/cn'
+import { AlternarTema } from './AlternarTema'
 import { Logo } from './Logo'
 
 function useContadores() {
@@ -110,6 +111,7 @@ export function Sidebar({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
           <Logo claro />
         </div>
         <Navegacao />
+        <AlternarTema />
       </aside>
 
       {/* Mobile/tablet: gaveta modal */}
@@ -135,6 +137,7 @@ export function Sidebar({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
               </button>
             </div>
             <Navegacao aoNavegar={aoFechar} />
+            <AlternarTema />
           </div>
         </div>
       )}

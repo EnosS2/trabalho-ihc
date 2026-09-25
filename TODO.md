@@ -235,3 +235,6 @@ relógio (aguardando), X (vencido/erro).
 | 2026-09-24 | Correções: anotação usa autor/data da sessão; diálogo devolve o foco ao desmontar; valor grande do KPI sem tabular-nums; barra lateral ocupa a altura toda; assistente em 1 coluna até 2xl; rótulo da linha de referência não corta. |
 | 2026-09-24 | Seed com estoque realista (lotes de 25 un., TR2 de 10) e mínimos ≈ 30 dias de consumo (TR1/sífilis 20, hepatites 15, TR2 5); seed reserva unidades por testagem; VERSAO_BANCO = 2 (regenera dados antigos). 37 testes passando. |
 | 2026-09-24 | Documentação: README e docs/design-ihc.md. |
+| 2026-09-24 | Login: removido o parágrafo de subtítulo abaixo do título (pedido do usuário). |
+| 2026-09-24 | Tema claro passa a ser o padrão (removida a opção "sistema"; preferência antiga "sistema" vira claro). Troca claro/escuro saiu do menu Acessibilidade e virou botão lua/sol no canto inferior da barra lateral (desktop e gaveta mobile); desabilitado com alto contraste. "Restaurar padrão" da acessibilidade não mexe mais no tema. |
+| 2026-09-24 | Troca de tema animada: ícone lua↔sol gira e cresce com efeito de mola; o novo tema se revela num círculo a partir do botão (View Transitions API, 550ms), com fallback de fade de cores (`tema-em-transicao`) e troca instantânea com "reduzir animações". Componente em `src/app/layout/AlternarTema.tsx`. |

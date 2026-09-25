@@ -40,10 +40,6 @@ export default function LoginPage() {
           <h1 className="mt-8 max-w-2xl text-3xl font-bold text-white sm:text-4xl">
             Da testagem ao tratamento, sem perder ninguém no caminho.
           </h1>
-          <p className="mt-3 max-w-2xl text-lg text-sidebar-fg">
-            Registro guiado pelo fluxograma, seguimento dos casos reagentes, controle de lotes e notificações completas
-            para a Vigilância — dentro da UBS.
-          </p>
         </div>
       </div>
 

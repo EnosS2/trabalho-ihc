@@ -266,7 +266,7 @@ export default function GuiaInterfacePage() {
             </ul>
           </Secao>
 
-          <Secao id="cores" titulo={SECOES[3].titulo} descricao="Valores lidos do tema ativo — troque para escuro ou alto contraste no menu Acessibilidade e veja a paleta mudar.">
+          <Secao id="cores" titulo={SECOES[3].titulo} descricao="Valores lidos do tema ativo — use a lua/sol no canto inferior da barra lateral (ou o alto contraste no menu Acessibilidade) e veja a paleta mudar.">
             <Aviso tom="info" className="mb-5" titulo="Harmonia: complementar dividido">
               Azul-petróleo (institucional, calmo, associado à saúde; o mesmo tom do cabeçalho do BMC) é a base. O âmbar, próximo do
               complementar, marca atenção e identidade sem competir com o vermelho de perigo. Neutros frios mantêm a unidade.
@@ -400,7 +400,7 @@ export default function GuiaInterfacePage() {
               </ul>
               <div className="flex flex-col gap-3">
                 <h3 className="font-bold">Teste agora</h3>
-                <p className="text-sm text-muted">Pressione Tab para ver o foco. Use o menu “Acessibilidade” no topo para trocar tema, contraste e tamanho.</p>
+                <p className="text-sm text-muted">Pressione Tab para ver o foco. Use o menu “Acessibilidade” no topo para contraste, tamanho do texto e animações; o tema claro/escuro fica no botão de lua/sol, no canto inferior da barra lateral.</p>
                 <div className="flex flex-wrap gap-2">
                   <Button>Ação primária</Button>
                   <Button variante="secundario">Secundária</Button>

@@ -105,7 +105,10 @@ passar. Como alguns pares ficam perto do limite, **a cor nunca aparece sozinha**
 **Regras**
 - Contraste de 4,5:1 para textos e 3:1 para bordas de controle (WCAG 2.2 AA).
 - Cores semânticas sempre acompanham ícone e texto.
-- Há três temas: claro, escuro e **alto contraste** (preto sobre branco, bordas pretas).
+- Há três temas: claro (**padrão**), escuro e **alto contraste** (preto sobre branco, bordas pretas). A troca
+  claro/escuro fica num botão de lua/sol no canto inferior da barra lateral (sempre à mão, sem abrir menu); o alto
+  contraste fica no menu Acessibilidade. A troca é animada: o ícone gira de lua para sol e o novo tema se revela
+  num círculo a partir do botão, dando continuidade visual (sem "piscar"). Com "reduzir animações" a troca é imediata.
 - Os tokens ficam em `src/index.css`.
 
 ## 5. Tipografia

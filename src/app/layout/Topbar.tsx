@@ -1,4 +1,4 @@
-import { Accessibility, ChevronDown, LogOut, Menu, Minus, Moon, Plus, RotateCcw, Sun, SunMoon } from 'lucide-react'
+import { Accessibility, ChevronDown, LogOut, Menu, Minus, Plus, RotateCcw } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { usePreferencias, type Preferencias } from '@/app/preferencias'
@@ -74,11 +74,6 @@ function Suspenso({
 
 function PainelAcessibilidade() {
   const { prefs, atualizar, restaurar } = usePreferencias()
-  const temas: { v: Preferencias['tema']; rotulo: string; icone: typeof Sun }[] = [
-    { v: 'claro', rotulo: 'Claro', icone: Sun },
-    { v: 'escuro', rotulo: 'Escuro', icone: Moon },
-    { v: 'sistema', rotulo: 'Sistema', icone: SunMoon },
-  ]
   const pct = ['100%', '112%', '125%', '137%'][prefs.fonte]
   return (
     <div className="flex flex-col gap-4">
@@ -108,30 +103,6 @@ function PainelAcessibilidade() {
           </button>
         </div>
       </div>
-      <fieldset>
-        <legend className="mb-1 text-sm font-bold">Tema</legend>
-        <div className="grid grid-cols-3 gap-2">
-          {temas.map((t) => (
-            <label
-              key={t.v}
-              className={cn(
-                'flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-lg border text-sm font-bold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-focus',
-                prefs.tema === t.v ? 'border-primary bg-primary-soft text-primary-soft-fg' : 'border-border-strong',
-              )}
-            >
-              <input
-                type="radio"
-                name="tema"
-                className="sr-only"
-                checked={prefs.tema === t.v}
-                onChange={() => atualizar({ tema: t.v })}
-              />
-              <t.icone className="size-4" aria-hidden />
-              {t.rotulo}
-            </label>
-          ))}
-        </div>
-      </fieldset>
       <label className="flex cursor-pointer items-center justify-between gap-3">
         <span>
           <span className="block font-bold">Alto contraste</span>
