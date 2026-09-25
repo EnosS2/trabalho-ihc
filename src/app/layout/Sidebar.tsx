@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
-import { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router'
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
+import { NavLink, useLocation } from 'react-router'
 import { useSessaoAtiva } from '@/app/sessao'
 import { NAVEGACAO, type ItemNav } from '@/app/navegacao'
 import { useBuscaAtiva, useEstoque, usePainelUbs } from '@/data/hooks'
@@ -33,19 +33,68 @@ const ROTULO_CONTADOR: Record<NonNullable<ItemNav['contador']>, string> = {
 /**
  * Item ativo = aba da cor da página, encaixada no conteúdo (cantos côncavos em cima e embaixo):
  * diz "você está aqui" pela continuidade com a página, não por uma barra decorativa.
- * Na gaveta mobile não há página ao lado, então a aba vira uma pílula da mesma cor.
+ * Na barra fixa, a aba é UM elemento só que desliza até o item novo e acompanha a altura dele
+ * (o texto troca de cor junto); "reduzir animações" torna a troca instantânea (regra global do CSS).
+ * Na gaveta mobile não há página ao lado, então o item ativo vira uma pílula da mesma cor, sem deslize.
  */
 const abaEncaixada = cn(
-  'rounded-r-none pr-6',
-  "before:pointer-events-none before:absolute before:-top-3 before:right-0 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--bg)_12.5px)] before:content-['']",
-  "after:pointer-events-none after:absolute after:right-0 after:-bottom-3 after:size-3 after:bg-[radial-gradient(circle_at_0_100%,transparent_12px,var(--bg)_12.5px)] after:content-['']",
+  'rounded-l-lg bg-bg',
+  "before:absolute before:-top-3 before:right-0 before:size-3 before:bg-[radial-gradient(circle_at_0_0,transparent_12px,var(--bg)_12.5px)] before:content-['']",
+  "after:absolute after:right-0 after:-bottom-3 after:size-3 after:bg-[radial-gradient(circle_at_0_100%,transparent_12px,var(--bg)_12.5px)] after:content-['']",
 )
+
+/** Posição da aba: mede o link ativo (aria-current) em relação ao <nav>; remede ao trocar de rota ou redimensionar. */
+function useAbaDeslizante(nav: RefObject<HTMLElement | null>, ativo: boolean) {
+  const { pathname } = useLocation()
+  const [pos, setPos] = useState<{ top: number; height: number } | null>(null)
+  const [animar, setAnimar] = useState(false)
+
+  useLayoutEffect(() => {
+    if (!ativo) return
+    const el = nav.current
+    if (!el) return
+    const medir = () => {
+      const link = el.querySelector<HTMLElement>('a[aria-current="page"]')
+      if (!link) return setPos(null)
+      const r = link.getBoundingClientRect()
+      const base = el.getBoundingClientRect()
+      setPos({ top: r.top - base.top, height: r.height })
+    }
+    medir()
+    const obs = new ResizeObserver(medir)
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [nav, ativo, pathname])
+
+  // Só anima depois da primeira medição: ao abrir o app a aba já nasce no lugar, sem deslizar do topo.
+  useEffect(() => {
+    if (pos && !animar) {
+      const id = requestAnimationFrame(() => setAnimar(true))
+      return () => cancelAnimationFrame(id)
+    }
+  }, [pos, animar])
+
+  return { pos, animar }
+}
 
 function Navegacao({ aoNavegar, emGaveta }: { aoNavegar?: () => void; emGaveta?: boolean }) {
   const { usuario } = useSessaoAtiva()
   const contadores = useContadores()
+  const nav = useRef<HTMLElement>(null)
+  const { pos, animar } = useAbaDeslizante(nav, !emGaveta)
   return (
-    <nav aria-label="Navegação principal" className={cn('flex flex-col gap-5 py-4 pl-3', emGaveta && 'pr-3')}>
+    <nav ref={nav} aria-label="Navegação principal" className={cn('relative flex flex-col gap-5 py-4 pl-3', emGaveta && 'pr-3')}>
+      {!emGaveta && pos && (
+        <span
+          aria-hidden
+          className={cn(
+            'pointer-events-none absolute top-0 right-0 left-3',
+            abaEncaixada,
+            animar && 'transition-[transform,height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]',
+          )}
+          style={{ transform: `translateY(${pos.top}px)`, height: pos.height }}
+        />
+      )}
       {NAVEGACAO.map((grupo) => {
         const itens = grupo.itens.filter((i) => !i.permissao || pode(usuario, i.permissao))
         if (itens.length === 0) return null
@@ -63,11 +112,11 @@ function Navegacao({ aoNavegar, emGaveta }: { aoNavegar?: () => void; emGaveta?:
                       onClick={aoNavegar}
                       className={({ isActive }) =>
                         cn(
-                          'relative flex min-h-11 items-center gap-3 rounded-lg px-3 font-bold',
-                          isActive && !emGaveta ? abaEncaixada : !emGaveta && 'mr-3',
+                          'relative flex min-h-11 items-center gap-3 rounded-lg px-3 font-bold transition-colors duration-300',
+                          !emGaveta && 'mr-3',
                           isActive
-                            ? 'bg-bg text-fg [&>svg]:text-primary'
-                            : 'text-sidebar-fg transition-colors hover:bg-white/10 hover:text-white',
+                            ? cn('text-fg [&>svg]:text-primary', emGaveta && 'bg-bg')
+                            : 'text-sidebar-fg hover:bg-white/10 hover:text-white',
                         )
                       }
                     >

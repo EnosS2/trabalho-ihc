@@ -79,8 +79,9 @@ Cada perfil entra num **painel próprio** com as tarefas do dia, sem telas que n
 ### Recursos responsivos
 - Abordagem mobile-first; pontos de quebra em 640, 768, 1024 e 1280px.
 - **Item ativo do menu:** uma aba da cor da página, encaixada no conteúdo (cantos côncavos), em vez de fundo
-  destacado com barra lateral. Diz "você está aqui" pela continuidade com a página. Na gaveta mobile vira uma
-  pílula da mesma cor. No modo escuro a barra lateral é um pouco mais clara que a página, para a aba aparecer.
+  destacado com barra lateral. Diz "você está aqui" pela continuidade com a página. Ao navegar, a aba desliza
+  até o item novo e acompanha a altura dele (300ms); com "reduzir animações" a troca é instantânea. Na gaveta
+  mobile vira uma pílula da mesma cor. No modo escuro a barra lateral é um pouco mais clara que a página, para a aba aparecer.
 - **Âmbar não marca seleção nem contagem.** Contadores do menu são neutros; só o de pendências vencidas é vermelho
   (urgência). O âmbar fica para atenção: gestante, medidor abaixo do mínimo, etapa em andamento na fita.
 - Em telas ≥ 1024px a barra lateral fica fixa; abaixo disso vira gaveta modal (foco preso, Esc fecha).
