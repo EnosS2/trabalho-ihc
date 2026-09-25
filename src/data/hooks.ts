@@ -16,22 +16,18 @@ function useEscrita<TVars, TResult>(fn: (vars: TVars) => Promise<TResult>) {
 export const useSessao = () => useQuery({ queryKey: ['sessao'], queryFn: api.obterSessao, staleTime: Infinity })
 export const useUsuariosDemo = () => useQuery({ queryKey: ['usuarios-demo'], queryFn: api.listarUsuariosDemo })
 export function useEntrar() {
+  return useTrocaDeSessao(api.entrar)
+}
+export function useEntrarComPerfilPadrao() {
+  return useTrocaDeSessao(api.entrarComPerfilPadrao)
+}
+function useTrocaDeSessao<TVars>(fn: (vars: TVars) => Promise<unknown>) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: api.entrar,
+    mutationFn: fn,
     onSuccess: async () => {
       qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'sessao' })
       await qc.invalidateQueries({ queryKey: ['sessao'] })
-    },
-  })
-}
-export function useSair() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: api.sair,
-    onSuccess: () => {
-      qc.setQueryData(['sessao'], null)
-      qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'sessao' })
     },
   })
 }

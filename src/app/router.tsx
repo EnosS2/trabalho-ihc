@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
-import { createBrowserRouter, Outlet } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router'
 import { Carregando } from '@/components/ui/Feedback'
 import type { Permissao } from '@/domain/permissoes'
 import { AppShell } from './layout/AppShell'
@@ -8,7 +8,6 @@ import { ExigePermissao, Protegida } from './sessao'
 // Divisão de código por página: gráficos (Recharts) só carregam onde são usados.
 const pagina = (carregar: () => Promise<{ default: ComponentType }>) => lazy(carregar)
 
-const Login = pagina(() => import('@/features/auth/LoginPage'))
 const Painel = pagina(() => import('@/features/painel/PainelPage'))
 const NovaTestagem = pagina(() => import('@/features/testagem/NovaTestagemPage'))
 const Testagens = pagina(() => import('@/features/testagem/TestagensPage'))
@@ -25,6 +24,7 @@ const Indicadores = pagina(() => import('@/features/indicadores/IndicadoresPage'
 const Auditoria = pagina(() => import('@/features/auditoria/AuditoriaPage'))
 const Configuracoes = pagina(() => import('@/features/config/ConfiguracoesPage'))
 const Ajuda = pagina(() => import('@/features/ajuda/AjudaPage'))
+const Perfis = pagina(() => import('@/features/ajuda/PerfisPage'))
 const GuiaInterface = pagina(() => import('@/features/ajuda/GuiaInterfacePage'))
 const NaoEncontrada = pagina(() => import('@/features/NaoEncontradaPage'))
 
@@ -37,14 +37,8 @@ const Carregar = ({ children }: { children: ReactNode }) => (
 )
 
 export const router = createBrowserRouter([
-  {
-    path: '/entrar',
-    element: (
-      <Carregar>
-        <Login />
-      </Carregar>
-    ),
-  },
+  // Não há mais tela de login: links antigos para /entrar levam ao painel.
+  { path: '/entrar', element: <Navigate to="/" replace /> },
   {
     element: (
       <Protegida>
@@ -77,6 +71,7 @@ export const router = createBrowserRouter([
           { path: 'configuracoes', element: com('config.gerir', <Configuracoes />) },
           { path: 'ajuda', element: <Ajuda /> },
           { path: 'ajuda/guia-de-interface', element: <GuiaInterface /> },
+          { path: 'perfis', element: <Perfis /> },
           { path: '*', element: <NaoEncontrada /> },
         ],
       },

@@ -114,9 +114,12 @@ export interface Sessao {
   microarea?: Microarea
 }
 
+/** Perfis de demonstração, na ordem do seletor; o primeiro ativo é o perfil de entrada. */
+const USUARIOS_DEMO = ['usr-ana', 'usr-beatriz', 'usr-joana', 'usr-marcos', 'usr-paula', 'usr-carlos']
+
 export function listarUsuariosDemo() {
   return responder((b) =>
-    ['usr-ana', 'usr-beatriz', 'usr-joana', 'usr-marcos', 'usr-paula', 'usr-carlos']
+    USUARIOS_DEMO
       .map((id) => b.usuarios.find((u) => u.id === id)!)
       .map((u) => ({ ...u, ubsNome: b.ubs.find((x) => x.id === u.ubsId)?.nome })),
   )
@@ -130,6 +133,13 @@ export function entrar(usuarioId: string) {
     auditar(b, { usuarioId: u.id, ubsId: u.ubsId, acao: 'sessao.entrar', entidade: 'sessao', descricao: 'Entrou no sistema' })
     return u
   })
+}
+
+/** Só no protótipo (não há tela de login): entra com o primeiro perfil de demonstração ativo. */
+export async function entrarComPerfilPadrao() {
+  const id = await responder((b) => USUARIOS_DEMO.find((x) => b.usuarios.some((u) => u.id === x && u.ativo)))
+  if (!id) throw new ErroDeNegocio('Nenhum perfil de demonstração ativo.')
+  return entrar(id)
 }
 
 export function sair() {

@@ -1,9 +1,8 @@
-import type { ReactNode } from 'react'
-import { Navigate, useLocation } from 'react-router'
-import { Carregando } from '@/components/ui/Feedback'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { Aviso, Carregando } from '@/components/ui/Feedback'
 import { LinkButton } from '@/components/ui/Button'
 import type { Sessao } from '@/data/api'
-import { useSessao } from '@/data/hooks'
+import { useEntrarComPerfilPadrao, useSessao } from '@/data/hooks'
 import { pode, type Permissao } from '@/domain/permissoes'
 import { ICONE } from '@/components/icones'
 
@@ -19,11 +18,28 @@ export function usePode(permissao: Permissao): boolean {
   return pode(data?.usuario, permissao)
 }
 
+/** Protótipo sem tela de login: sem sessão, entra com o perfil padrão; a troca de perfil fica no menu do usuário. */
 export function Protegida({ children }: { children: ReactNode }) {
   const { data, isLoading } = useSessao()
-  const local = useLocation()
-  if (isLoading) return <Carregando texto="Verificando sessão…" className="min-h-dvh" />
-  if (!data) return <Navigate to="/entrar" replace state={{ de: local.pathname }} />
+  const entrar = useEntrarComPerfilPadrao()
+  const tentou = useRef(false)
+  const semSessao = !isLoading && !data
+  useEffect(() => {
+    if (semSessao && !tentou.current) {
+      tentou.current = true
+      entrar.mutate(undefined)
+    }
+  }, [semSessao, entrar])
+  if (entrar.isError) {
+    return (
+      <div className="mx-auto max-w-lg p-6">
+        <Aviso tom="perigo" titulo="Não foi possível entrar">
+          {entrar.error.message}
+        </Aviso>
+      </div>
+    )
+  }
+  if (!data) return <Carregando texto="Entrando…" className="min-h-dvh" />
   return <>{children}</>
 }
 

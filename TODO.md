@@ -177,7 +177,7 @@ relógio (aguardando), X (vencido/erro).
 - [x] Hooks TanStack Query
 
 ### Fase 2 — Telas
-- [x] Login (seleção de perfil demo) + contexto de sessão + rotas protegidas
+- [x] Sessão demo (entra direto como executor; troca de perfil no menu do usuário; explicação em `/perfis`) + rotas protegidas
 - [x] Painel (pendências do dia, prazos vencendo, alertas de estoque, atalhos) por perfil
 - [x] Nova testagem — assistente em etapas: pessoa → contexto → testes guiados pelo fluxograma → conduta/resumo
 - [x] Testagens — lista com filtros
@@ -239,3 +239,4 @@ relógio (aguardando), X (vencido/erro).
 | 2026-09-24 | Tema claro passa a ser o padrão (removida a opção "sistema"; preferência antiga "sistema" vira claro). Troca claro/escuro saiu do menu Acessibilidade e virou botão lua/sol no canto inferior da barra lateral (desktop e gaveta mobile); desabilitado com alto contraste. "Restaurar padrão" da acessibilidade não mexe mais no tema. |
 | 2026-09-24 | Troca de tema animada: ícone lua↔sol gira e cresce com efeito de mola; o novo tema se revela num círculo a partir do botão (View Transitions API, 550ms), com fallback de fade de cores (`tema-em-transicao`) e troca instantânea com "reduzir animações". Componente em `src/app/layout/AlternarTema.tsx`. |
 | 2026-09-24 | Barra superior: removido o ícone de casa antes do contexto da UBS (casa sugeria link para o início). Novo ícone da marca e da aba: cassete de teste rápido com faixas C/T em azul (`public/favicon.svg` e `Logo.tsx`), no lugar da gota com "+" em âmbar. |
+| 2026-09-24 | Removida a tela de login/seleção de perfil: sem sessão, o sistema entra com o primeiro perfil demo ativo (Executor(a) Ana Paula; `entrarComPerfilPadrao` na API mock). Menu do usuário troca de perfil (lista dos 6 perfis, marca o atual) e perdeu o "Sair". Rota oculta `/perfis` (fora do menu lateral, link "O que muda em cada perfil?" no menu do usuário) explica níveis/tarefas e permite trocar. `/entrar` redireciona para o painel. |

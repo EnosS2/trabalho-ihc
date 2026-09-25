@@ -1,9 +1,10 @@
-import { Accessibility, ChevronDown, LogOut, Menu, Minus, Plus, RotateCcw } from 'lucide-react'
+import { Accessibility, Check, ChevronDown, CircleHelp, Menu, Minus, Plus, RotateCcw } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { usePreferencias, type Preferencias } from '@/app/preferencias'
 import { useSessaoAtiva } from '@/app/sessao'
-import { useSair } from '@/data/hooks'
+import { useToast } from '@/components/ui/Toast'
+import { useEntrar, useUsuariosDemo } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO } from '@/domain/rotulos'
 import { cn } from '@/lib/cn'
@@ -137,7 +138,9 @@ function PainelAcessibilidade() {
 
 export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
   const { usuario, ubs, territorio, microarea } = useSessaoAtiva()
-  const sair = useSair()
+  const entrar = useEntrar()
+  const demo = useUsuariosDemo()
+  const toast = useToast()
   const navegar = useNavigate()
   const iniciais = usuario.nome
     .split(' ')
@@ -201,17 +204,48 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
                   <p className="text-muted">Escopo: {NIVEL_ACESSO[usuario.perfil].escopo}</p>
                   <p className="mt-1 text-muted lg:hidden">{contexto}</p>
                 </div>
-                <button
-                  type="button"
-                  className="flex min-h-11 items-center gap-2 rounded-lg px-2 font-bold text-danger hover:bg-danger-soft"
-                  onClick={async () => {
-                    fechar()
-                    await sair.mutateAsync()
-                    navegar('/entrar')
-                  }}
+                <div>
+                  <h2 id="titulo-trocar-perfil" className="mb-1 text-sm font-bold">
+                    Trocar perfil
+                  </h2>
+                  <ul aria-labelledby="titulo-trocar-perfil" className="flex flex-col">
+                    {demo.data?.map((u) => {
+                      const atual = u.id === usuario.id
+                      return (
+                        <li key={u.id}>
+                          <button
+                            type="button"
+                            aria-current={atual || undefined}
+                            disabled={atual || entrar.isPending}
+                            className="flex min-h-11 w-full items-center gap-2 rounded-lg px-2 text-left hover:bg-surface-3 disabled:hover:bg-transparent"
+                            onClick={async () => {
+                              fechar()
+                              try {
+                                await entrar.mutateAsync(u.id)
+                                navegar('/')
+                              } catch (e) {
+                                toast.erro(e)
+                              }
+                            }}
+                          >
+                            <span className="min-w-0 flex-1 leading-tight">
+                              <span className="block text-sm font-bold">{PERFIL_ROTULO[u.perfil]}</span>
+                              <span className="block truncate text-xs text-muted">{u.nome}</span>
+                            </span>
+                            {atual && <Check className="size-4 shrink-0 text-primary" aria-label="Perfil em uso" />}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+                <Link
+                  to="/perfis"
+                  onClick={fechar}
+                  className="flex min-h-11 items-center gap-2 rounded-lg border-t border-border px-2 pt-1 text-sm font-bold text-primary hover:underline"
                 >
-                  <LogOut className="size-5" aria-hidden /> Sair / trocar perfil
-                </button>
+                  <CircleHelp className="size-4" aria-hidden /> O que muda em cada perfil?
+                </Link>
               </div>
             )}
           </Suspenso>

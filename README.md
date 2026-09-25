@@ -26,7 +26,7 @@ npm run build      # typecheck + build de produção
 npm run lint
 ```
 
-Na tela inicial, escolha um perfil. Cada um tem nível de acesso e interface próprios.
+O sistema abre como Executor(a). Para trocar de perfil, use o menu do usuário no canto superior direito; a página `/perfis` explica o que cada um pode fazer. Cada perfil tem nível de acesso e interface próprios.
 
 | Perfil | Pessoa demo | O que experimentar |
 |---|---|---|
