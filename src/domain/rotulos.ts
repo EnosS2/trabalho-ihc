@@ -99,7 +99,8 @@ export const MOTIVO_ROTULO: Record<MotivoTestagem, string> = {
   campanha: 'Campanha / ação extramuros',
 }
 
-export const SEXO_ROTULO: Record<Sexo, string> = { F: 'Feminino', M: 'Masculino', I: 'Ignorado' }
+/** Sexo como a ficha de notificação pede (SINAN: M, F, I). O código I ("Ignorado" na ficha) aparece como "Não informado". */
+export const SEXO_ROTULO: Record<Sexo, string> = { F: 'Feminino', M: 'Masculino', I: 'Não informado' }
 
 export const RACA_ROTULO: Record<RacaCor, string> = {
   branca: 'Branca',

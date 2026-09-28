@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
-import { Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
+import { Field, Input, InputData, RadioCards, Select, Textarea } from '@/components/ui/Form'
 import { Medidor, PageHeader } from '@/components/ui/Layout'
 import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useToast } from '@/components/ui/Toast'
@@ -39,7 +39,7 @@ function DialogoEntrada({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
     if (!f.tipo) e.tipo = 'Selecione o tipo de teste.'
     if (!f.fabricante.trim()) e.fabricante = 'Informe o fabricante.'
     if (!f.lote.trim()) e.lote = 'Informe o número do lote.'
-    if (!f.validade) e.validade = 'Informe a validade.'
+    if (!f.validade) e.validade = 'Informe a validade completa (dd/mm/aaaa).'
     else if (f.validade <= hojeISO()) e.validade = 'Lote vencido não pode entrar no estoque.'
     if (!(Number(f.quantidade) > 0)) e.quantidade = 'Informe a quantidade recebida.'
     setErros(e)
@@ -81,7 +81,7 @@ function DialogoEntrada({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
           <Input className="tabular uppercase" value={f.lote} onChange={(e) => setF({ ...f, lote: e.target.value })} />
         </Field>
         <Field label="Validade" obrigatorio erro={erros.validade}>
-          <Input type="date" min={somarDias(hojeISO(), 1)} value={f.validade} onChange={(e) => setF({ ...f, validade: e.target.value })} />
+          <InputData value={f.validade} onChange={(v) => setF({ ...f, validade: v })} />
         </Field>
         <Field label="Quantidade (testes)" obrigatorio erro={erros.quantidade}>
           <Input type="number" inputMode="numeric" min={1} value={f.quantidade} onChange={(e) => setF({ ...f, quantidade: e.target.value })} />

@@ -7,7 +7,7 @@ import { LinkButton } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
-import { Checkbox, Field, Input, Select } from '@/components/ui/Form'
+import { Checkbox, Field, Input, InputData, Select } from '@/components/ui/Form'
 import { PageHeader } from '@/components/ui/Layout'
 import type { TestagemResumo } from '@/data/api'
 import { useTestagens } from '@/data/hooks'
@@ -77,10 +77,11 @@ export default function TestagensPage() {
               </div>
             </Field>
             <Field label="De">
-              <Input type="date" value={inicio} max={fim} onChange={(e) => setInicio(e.target.value)} />
+              {/* Filtro só muda com data completa: apagar ou digitar pela metade mantém o período anterior. */}
+              <InputData value={inicio} max={fim} onChange={(v) => v && setInicio(v)} />
             </Field>
             <Field label="Até">
-              <Input type="date" value={fim} min={inicio} max={hojeISO()} onChange={(e) => setFim(e.target.value)} />
+              <InputData value={fim} min={inicio} max={hojeISO()} onChange={(v) => v && setFim(v)} />
             </Field>
             <Field label="Agravo">
               <Select value={agravo} onChange={(e) => setAgravo(e.target.value as Agravo | '')}>

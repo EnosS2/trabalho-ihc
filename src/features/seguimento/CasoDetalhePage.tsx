@@ -9,7 +9,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro } from '@/components/ui/Feedback'
 import { FitaDoCaso } from '@/components/ui/FitaDoCaso'
-import { Checkbox, Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
+import { Checkbox, Field, Input, InputData, RadioCards, Select, Textarea } from '@/components/ui/Form'
 import { DescricaoLista, LinhaDoTempo, Medidor, PageHeader, type ItemLinhaDoTempo } from '@/components/ui/Layout'
 import { useToast } from '@/components/ui/Toast'
 import type { CasoDetalhe } from '@/data/api'
@@ -46,7 +46,7 @@ const TITULOS_VDRL = ['Não reagente', '1:1', '1:2', '1:4', '1:8', '1:16', '1:32
 const idLocal = () => Math.random().toString(36).slice(2, 10)
 
 /** Campo que recebe a mensagem de validação, para o erro aparecer junto dele (e não no topo do diálogo). */
-type CampoErro = 'resultado' | 'titulo' | 'texto' | 'desfecho'
+type CampoErro = 'data' | 'resultado' | 'titulo' | 'texto' | 'desfecho'
 type ErroCampo = { campo: CampoErro; mensagem: string }
 
 function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: CasoDetalhe; aoFechar: () => void }) {
@@ -135,6 +135,10 @@ function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: 
   const cfg = configuracao[tipo]
 
   const salvar = async () => {
+    if (tipo !== 'parceria' && tipo !== 'anotar' && !data) {
+      setErro({ campo: 'data', mensagem: `Informe uma data válida, de ${formatarData(caso.abertoEm)} até hoje (dd/mm/aaaa).` })
+      return
+    }
     const acao = cfg.montar()
     if ('campo' in acao) {
       setErro(acao)
@@ -164,8 +168,16 @@ function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: 
   }
 
   const campoData = (
-    <Field label="Data" obrigatorio dica="Não pode ser futura.">
-      <Input type="date" value={data} max={hoje} min={caso.abertoEm} onChange={(e) => setData(e.target.value)} />
+    <Field label="Data" obrigatorio dica="Não pode ser futura." erro={erroDe('data')}>
+      <InputData
+        value={data}
+        max={hoje}
+        min={caso.abertoEm}
+        onChange={(v) => {
+          setData(v)
+          if (erro?.campo === 'data') limparErro()
+        }}
+      />
     </Field>
   )
 

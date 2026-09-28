@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { useSessaoAtiva } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
 import { Button } from '@/components/ui/Button'
 import { Aviso } from '@/components/ui/Feedback'
-import { Checkbox, Field, GrupoCampos, Input, Select } from '@/components/ui/Form'
+import { Checkbox, Field, GrupoCampos, Input, InputData, Select } from '@/components/ui/Form'
 import type { PessoaInput } from '@/data/api'
 import { useReferencias } from '@/data/hooks'
 import { validarCns, validarCpf } from '@/domain/rules/documentos'
@@ -26,7 +26,7 @@ const esquema = z
     nomeSocial: z.string().trim().optional(),
     dataNascimento: z
       .string()
-      .min(1, 'Informe a data de nascimento.')
+      .min(1, 'Informe a data de nascimento completa (dd/mm/aaaa).')
       .refine((v) => v <= hojeISO(), 'A data não pode estar no futuro.'),
     sexo: z.enum(['F', 'M', 'I'], { errorMap: () => ({ message: 'Selecione o sexo.' }) }),
     cns: z
@@ -158,9 +158,16 @@ export function PessoaFormulario({
         <Field label="Nome social" dica="Como a pessoa prefere ser chamada." erro={errors.nomeSocial?.message}>
           <Input autoComplete="off" {...register('nomeSocial')} />
         </Field>
-        <Field label="Data de nascimento" obrigatorio erro={errors.dataNascimento?.message}>
-          <Input type="date" max={hojeISO()} {...register('dataNascimento')} />
-        </Field>
+        {/* O Controller fica por fora: o <Field> liga rótulo, dica e erro ao filho direto (o campo). */}
+        <Controller
+          control={control}
+          name="dataNascimento"
+          render={({ field }) => (
+            <Field label="Data de nascimento" obrigatorio erro={errors.dataNascimento?.message}>
+              <InputData ref={field.ref} name={field.name} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />
+            </Field>
+          )}
+        />
         <Field label="Sexo" obrigatorio erro={errors.sexo?.message}>
           <Select {...register('sexo')}>
             <option value="">Selecione…</option>
@@ -171,7 +178,7 @@ export function PessoaFormulario({
             ))}
           </Select>
         </Field>
-        <Field label="Nome da mãe" dica="Exigido na notificação." erro={errors.nomeMae?.message}>
+        <Field label="Nome da mãe" erro={errors.nomeMae?.message}>
           <Input autoComplete="off" {...register('nomeMae')} />
         </Field>
         <Field label="Cartão Nacional de Saúde (CNS)" dica="15 dígitos." erro={errors.cns?.message}>
@@ -206,7 +213,7 @@ export function PessoaFormulario({
       </GrupoCampos>
 
       <GrupoCampos legenda="Contato e endereço">
-        <Field label="Telefone com DDD" dica="Essencial para a busca ativa." erro={errors.telefone?.message}>
+        <Field label="Telefone com DDD" erro={errors.telefone?.message}>
           <Input type="tel" inputMode="tel" autoComplete="off" {...register('telefone')} />
         </Field>
         <Field label="Microárea" dica="Define qual ACS fará a busca ativa.">
@@ -243,15 +250,20 @@ export function PessoaFormulario({
         >
           <Checkbox
             label="Gestante"
-            descricao="Gestantes têm prioridade: sífilis reagente é tratada no mesmo dia."
             className="sm:col-span-2"
             {...register('gestante')}
           />
           {errors.gestante && <p className="text-sm font-bold text-danger">{errors.gestante.message}</p>}
           {gestante && (
-            <Field label="Data da última menstruação (DUM)" dica="Exigida na notificação de sífilis em gestante." erro={errors.dum?.message}>
-              <Input type="date" max={hojeISO()} {...register('dum')} />
-            </Field>
+            <Controller
+              control={control}
+              name="dum"
+              render={({ field }) => (
+                <Field label="Data da última menstruação (DUM)" erro={errors.dum?.message}>
+                  <InputData ref={field.ref} name={field.name} value={field.value ?? ''} onChange={field.onChange} onBlur={field.onBlur} />
+                </Field>
+              )}
+            />
           )}
         </GrupoCampos>
       )}
