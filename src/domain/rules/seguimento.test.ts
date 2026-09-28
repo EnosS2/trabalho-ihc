@@ -7,7 +7,9 @@ import {
   criarCaso,
   derivarStatus,
   etapasDoCaso,
+  motivoParaNaoDesfazer,
   pendenciasDoCaso,
+  registroDaAcao,
   pendenciasParaBuscaAtiva,
 } from './seguimento'
 
@@ -153,5 +155,84 @@ describe('etapasDoCaso', () => {
   it('caso encerrado tem todas as etapas concluídas', () => {
     expect(etapasDoCaso('hepatite_c', 'encerrado').atual).toBe(4)
     expect(etapasDoCaso('sifilis', 'encerrado').atual).toBe(5)
+  })
+})
+
+describe('desfazer registros do caso', () => {
+  const desfazer = (c: ReturnType<typeof casoSifilis>, registro: Parameters<typeof motivoParaNaoDesfazer>[1]) =>
+    aplicarAcao(c, { tipo: 'desfazer', registro }, P)
+
+  it('desfaz do fim para o começo: resultado antes da coleta', () => {
+    let c = casoSifilis(false)
+    c = aplicarAcao(c, { tipo: 'registrar_coleta', data: '2026-01-12' }, P)
+    c = aplicarAcao(c, { tipo: 'registrar_resultado', data: '2026-01-20', resultado: 'confirmado', titulo: '1:32' }, P)
+    expect(motivoParaNaoDesfazer(c, { tipo: 'coleta' })).toMatch(/resultado/)
+    c = desfazer(c, { tipo: 'resultado' })
+    expect(derivarStatus(c)).toBe('aguardando_resultado')
+    expect(c.seguimento).toHaveLength(0)
+    c = desfazer(c, { tipo: 'coleta' })
+    expect(derivarStatus(c)).toBe('aguardando_coleta')
+  })
+
+  it('desfazer resultado descartado reabre o caso encerrado automaticamente', () => {
+    let c = casoSifilis(false)
+    c = aplicarAcao(c, { tipo: 'registrar_coleta', data: '2026-01-11' }, P)
+    c = aplicarAcao(c, { tipo: 'registrar_resultado', data: '2026-01-15', resultado: 'descartado' }, P)
+    expect(motivoParaNaoDesfazer(c, { tipo: 'desfecho' })).toMatch(/descartado/)
+    c = desfazer(c, { tipo: 'resultado' })
+    expect(c.desfecho).toBeUndefined()
+    expect(derivarStatus(c)).toBe('aguardando_resultado')
+  })
+
+  it('1ª dose fora da gestação desfaz o tratamento inteiro; doses seguem a ordem inversa', () => {
+    let c = casoSifilis(false)
+    c = aplicarAcao(c, { tipo: 'registrar_coleta', data: '2026-01-12' }, P)
+    c = aplicarAcao(c, { tipo: 'registrar_resultado', data: '2026-01-20', resultado: 'confirmado', titulo: '1:8' }, P)
+    c = aplicarAcao(c, { tipo: 'iniciar_tratamento', data: '2026-01-21' }, P)
+    c = aplicarAcao(c, { tipo: 'aplicar_dose', numero: 2, data: '2026-01-29' }, P)
+    expect(motivoParaNaoDesfazer(c, { tipo: 'dose', numero: 1 })).toMatch(/seguinte/)
+    expect(motivoParaNaoDesfazer(c, { tipo: 'resultado' })).toMatch(/tratamento/)
+    c = desfazer(c, { tipo: 'dose', numero: 2 })
+    expect(c.tratamento!.doses[1]).toMatchObject({ aplicadaEm: undefined, previstaEm: '2026-01-28' })
+    expect(c.tratamento!.doses[2].previstaEm).toBe('2026-02-04')
+    c = desfazer(c, { tipo: 'dose', numero: 1 })
+    expect(c.tratamento).toBeUndefined()
+    expect(derivarStatus(c)).toBe('aguardando_tratamento')
+  })
+
+  it('gestante com sífilis: desfazer a 1ª dose mantém o esquema programado', () => {
+    let c = casoSifilis(true, true)
+    c = desfazer(c, { tipo: 'dose', numero: 1 })
+    expect(c.tratamento!.iniciadoEm).toBeUndefined()
+    expect(c.tratamento!.doses).toHaveLength(3)
+    expect(derivarStatus(c)).toBe('aguardando_tratamento')
+  })
+
+  it('caso encerrado precisa ser reaberto antes de corrigir', () => {
+    let c = casoSifilis(false)
+    c = aplicarAcao(c, { tipo: 'registrar_coleta', data: '2026-01-12' }, P)
+    c = aplicarAcao(c, { tipo: 'encerrar', desfecho: { tipo: 'obito', data: '2026-01-13' } }, P)
+    expect(() => desfazer(c, { tipo: 'coleta' })).toThrow(/Reabra/)
+    c = desfazer(c, { tipo: 'desfecho' })
+    expect(derivarStatus(c)).toBe('aguardando_resultado')
+  })
+
+  it('HIV com dois TR: o diagnóstico não é desfazível', () => {
+    const interpretacao = interpretarAgravo(
+      'hiv',
+      [
+        { tipo: 'hiv_tr1', resultado: 'reagente', ordem: 1 },
+        { tipo: 'hiv_tr2', resultado: 'reagente', ordem: 2 },
+      ],
+      { gestante: false, exposicaoRecente: false },
+    )
+    const c = criarCaso({ ...base, gestante: false, interpretacao }, P)
+    expect(motivoParaNaoDesfazer(c, { tipo: 'resultado' })).toMatch(/dois testes/)
+  })
+
+  it('associa cada ação ao registro que ela criou', () => {
+    const c = casoSifilis(false)
+    expect(registroDaAcao(c, { tipo: 'iniciar_tratamento', data: '2026-01-21' })).toEqual({ tipo: 'dose', numero: 1 })
+    expect(registroDaAcao(c, { tipo: 'anotar', id: 'a', data: '2026-01-21', autorId: 'x', texto: 'oi' })).toBeNull()
   })
 })

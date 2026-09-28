@@ -9,7 +9,8 @@ import { pode, type Permissao } from '@/domain/permissoes'
 import { alertasEstoque, fechamentoMensal, fechamentoParaCsv, resumoPorTipo, selecionarLoteFEFO } from '@/domain/rules/estoque'
 import { calcularIndicadores, type Indicadores } from '@/domain/rules/indicadores'
 import { calcularCompletude } from '@/domain/rules/notificacao'
-import { avaliarRespostaSorologica, derivarStatus, pendenciasDoCaso, type AcaoCaso, type Pendencia } from '@/domain/rules/seguimento'
+import { avaliarRespostaSorologica, derivarStatus, descreverRegistro, pendenciasDoCaso, type AcaoCaso, type Pendencia } from '@/domain/rules/seguimento'
+import { nomeDeExibicao, nomesPesquisaveis } from '@/domain/rules/pessoa'
 import { validarCns, validarCpf } from '@/domain/rules/documentos'
 import { formatarMes } from '@/lib/datas'
 import { AGRAVO_ROTULO, TIPOS_TESTE } from '@/domain/rotulos'
@@ -209,7 +210,7 @@ export function buscarPessoas(filtro: { termo?: string; limite?: number }) {
       .filter((p) => {
         if (!termo) return true
         if (digitos.length >= 4 && (p.cns?.includes(digitos) || p.cpf?.includes(digitos))) return true
-        return normalizar(`${p.nome} ${p.nomeSocial ?? ''}`).includes(termo)
+        return normalizar(nomesPesquisaveis(p)).includes(termo)
       })
       .sort((a, c) => (ultima.get(c.id) ?? '').localeCompare(ultima.get(a.id) ?? ''))
       .slice(0, filtro.limite ?? 50)
@@ -286,11 +287,14 @@ export function listarTestagens(filtro: { inicio?: ISODate; fim?: ISODate; agrav
       .filter((t) => !filtro.fim || t.data <= filtro.fim)
       .filter((t) => !filtro.agravo || t.agravos.includes(filtro.agravo))
       .filter((t) => !filtro.somenteReagentes || t.interpretacoes.some((i) => i.conclusao === 'reagente' || i.conclusao === 'discordante'))
-      .filter((t) => !termo || normalizar(pessoas.get(t.pessoaId)?.nome ?? '').includes(termo))
+      .filter((t) => {
+        const p = pessoas.get(t.pessoaId)
+        return !termo || (p !== undefined && normalizar(nomesPesquisaveis(p)).includes(termo))
+      })
       .sort((x, y) => y.data.localeCompare(x.data) || y.id.localeCompare(x.id))
       .map<TestagemResumo>((t) => ({
         testagem: t,
-        pessoaNome: pessoas.get(t.pessoaId)?.nome ?? '—',
+        pessoaNome: nomeDeExibicao(pessoas.get(t.pessoaId) ?? { nome: '—' }),
         executorNome: usuarios.get(t.executorId) ?? '—',
       }))
   })
@@ -378,7 +382,7 @@ export function listarCasos(filtro: { status?: StatusCaso | 'ativos'; agravo?: A
       .filter((c) => !filtro.agravo || c.agravo === filtro.agravo)
       .map((c) => resumoCaso(b, c, pessoas.get(c.pessoaId)))
       .filter((r) => !filtro.status || (filtro.status === 'ativos' ? r.status !== 'encerrado' : r.status === filtro.status))
-      .filter((r) => !termo || normalizar(r.pessoa.nome).includes(termo))
+      .filter((r) => !termo || normalizar(nomesPesquisaveis(r.pessoa)).includes(termo))
       .sort((x, y) => (x.proxima?.prazo ?? '9999').localeCompare(y.proxima?.prazo ?? '9999') || y.caso.abertoEm.localeCompare(x.caso.abertoEm))
   })
 }
@@ -420,6 +424,7 @@ const DESCRICAO_ACAO: Record<AcaoCaso['tipo'], string> = {
   atualizar_parceria: 'Atualizou situação da parceria',
   encerrar: 'Encerrou o caso',
   anotar: 'Adicionou anotação',
+  desfazer: 'Desfez registro',
 }
 
 export function executarAcaoCaso(casoId: string, acao: AcaoCaso) {
@@ -437,7 +442,7 @@ export function executarAcaoCaso(casoId: string, acao: AcaoCaso) {
       acao: `caso.${acao.tipo}`,
       entidade: 'caso',
       entidadeId: casoId,
-      descricao: `${DESCRICAO_ACAO[acao.tipo]} (${AGRAVO_ROTULO[caso.agravo]})`,
+      descricao: `${acao.tipo === 'desfazer' ? `Desfez ${descreverRegistro(acao.registro)}` : DESCRICAO_ACAO[acao.tipo]} (${AGRAVO_ROTULO[caso.agravo]})`,
     })
     return resumoCaso(b, novo)
   })
@@ -447,7 +452,7 @@ export function executarAcaoCaso(casoId: string, acao: AcaoCaso) {
 
 export interface TarefaResumo {
   tarefa: TarefaBuscaAtiva
-  pessoa: Pick<Pessoa, 'id' | 'nome' | 'telefone' | 'endereco'> & { idade: number }
+  pessoa: Pick<Pessoa, 'id' | 'nome' | 'nomeSocial' | 'telefone' | 'endereco'> & { idade: number }
   microarea?: Microarea
   /** Para o ACS, o motivo é genérico: o diagnóstico não é exposto (sigilo/LGPD). */
   motivoExibido: string
@@ -471,7 +476,7 @@ export function listarBuscaAtiva(filtro: { status?: 'aberta' | 'concluida'; micr
         const caso = b.casos.find((c) => c.id === t.casoId)
         return {
           tarefa: t,
-          pessoa: { id: p.id, nome: p.nome, telefone: p.telefone, endereco: p.endereco, idade: idade(p.dataNascimento, hoje) },
+          pessoa: { id: p.id, nome: p.nome, nomeSocial: p.nomeSocial, telefone: p.telefone, endereco: p.endereco, idade: idade(p.dataNascimento, hoje) },
           microarea: b.microareas.find((m) => m.id === t.microareaId),
           motivoExibido: ehAcs ? 'Retorno pendente na UBS. Oriente a pessoa a procurar a equipe de enfermagem.' : t.motivo,
           agravo: ehAcs ? undefined : caso?.agravo,
@@ -725,7 +730,7 @@ export function obterPainelUbs() {
         pendenciasDoCaso(c, b.parametros, hoje, b.notificacoes.find((n) => n.casoId === c.id)).map((p) => ({
           ...p,
           pessoaId: c.pessoaId,
-          pessoaNome: pessoas.get(c.pessoaId)?.nome ?? '—',
+          pessoaNome: nomeDeExibicao(pessoas.get(c.pessoaId) ?? { nome: '—' }),
           agravo: c.agravo,
           gestante: c.gestante,
           status: derivarStatus(c),

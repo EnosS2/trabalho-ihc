@@ -156,6 +156,16 @@ export function executarAcaoCasoOp(banco: Banco, casoId: string, acao: AcaoCaso)
   if (idx < 0) throw new ErroDeNegocio('Caso não encontrado.')
   try {
     const novo = aplicarAcao(banco.casos[idx], acao, banco.parametros)
+    if (acao.tipo === 'desfazer') {
+      // O caso deixou de ser notificável (ex.: resultado confirmado desfeito): a notificação pendente sai da fila.
+      const n = banco.notificacoes.find((x) => x.casoId === casoId)
+      if (n && !classificarNotificacao(novo)) {
+        if (n.status === 'enviada') {
+          throw new ErroDeNegocio('A notificação deste caso já foi enviada com este dado. Registre a correção numa anotação e avise a vigilância.')
+        }
+        banco.notificacoes = banco.notificacoes.filter((x) => x !== n)
+      }
+    }
     banco.casos[idx] = novo
     sincronizarNotificacao(banco, novo)
     return novo

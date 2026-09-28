@@ -14,11 +14,16 @@ import { usePessoas } from '@/data/hooks'
 import { mascararDocumento } from '@/domain/rules/documentos'
 import { formatarData } from '@/lib/datas'
 import { plural } from '@/lib/texto'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
+
+/** A busca devolve no máximo 50 pessoas (limite da API). */
+const LIMITE_LISTA = 50
 
 export default function PessoasPage() {
   const podeEditar = usePode('pessoa.editar')
-  const [termo, setTermo] = useState('')
-  const [busca, setBusca] = useState('')
+  const [termo, setTermo] = useEstadoNaUrl('q', '')
+  const [busca, setBusca] = useState(termo)
   useEffect(() => {
     const t = setTimeout(() => setBusca(termo), 250)
     return () => clearTimeout(t)
@@ -51,6 +56,13 @@ export default function PessoasPage() {
           <p className="sr-only" aria-live="polite">
             {data ? plural(data.length, 'resultado') : ''}
           </p>
+          {data && data.length >= LIMITE_LISTA && (
+            <p className="mb-3 text-sm text-muted">
+              {busca.trim()
+                ? `Mostrando as ${LIMITE_LISTA} primeiras. Digite o sobrenome ou o documento para refinar.`
+                : `Mostrando as ${LIMITE_LISTA} pessoas testadas mais recentemente. Busque pelo nome ou documento para encontrar outras.`}
+            </p>
+          )}
           {isLoading && <Carregando />}
           {error && <EstadoErro erro={error} tentarNovamente={refetch} />}
           {data && (
@@ -60,7 +72,7 @@ export default function PessoasPage() {
               chave={(l) => l.pessoa.id}
               principal={(l) => (
                 <Link to={`/pessoas/${l.pessoa.id}`} className="font-bold text-primary hover:underline">
-                  {l.pessoa.nomeSocial ?? l.pessoa.nome}
+                  {nomeDeExibicao(l.pessoa)}
                 </Link>
               )}
               vazio={
@@ -78,7 +90,7 @@ export default function PessoasPage() {
                   ocultarMobile: true,
                   celula: (l) => (
                     <Link to={`/pessoas/${l.pessoa.id}`} className="font-bold text-primary hover:underline">
-                      {l.pessoa.nomeSocial ?? l.pessoa.nome}
+                      {nomeDeExibicao(l.pessoa)}
                     </Link>
                   ),
                 },

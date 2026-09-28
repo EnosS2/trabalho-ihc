@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId } from 'react'
 import { Link } from 'react-router'
 import { ICONE } from '@/components/icones'
 import { AgravoBadge, Badge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
@@ -10,9 +10,11 @@ import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useNotificacoes } from '@/data/hooks'
 import { AGRAVO_NOTIFICACAO_ROTULO, DESTINO_ROTULO } from '@/domain/rotulos'
 import { diasEntre, formatarData, hojeISO } from '@/lib/datas'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 
 export default function NotificacoesPage() {
-  const [aba, setAba] = useState<'pendente' | 'enviada'>('pendente')
+  const [aba, setAba] = useEstadoNaUrl<'pendente' | 'enviada'>('aba', 'pendente', ['pendente', 'enviada'])
   const todas = useNotificacoes()
   const idBase = useId()
   const lista = (todas.data ?? []).filter((n) => n.notificacao.status === aba)
@@ -59,7 +61,7 @@ export default function NotificacoesPage() {
                   vazio={<EstadoVazio icone={ICONE.ok} titulo={aba === 'pendente' ? 'Nenhuma notificação pendente' : 'Nenhuma notificação enviada'} />}
                   principal={(n) => (
                     <Link to={`/seguimento/${n.caso.id}`} className="font-bold text-primary hover:underline">
-                      {n.pessoa.nome}
+                      {nomeDeExibicao(n.pessoa)}
                     </Link>
                   )}
                   colunas={[
@@ -69,7 +71,7 @@ export default function NotificacoesPage() {
                       ocultarMobile: true,
                       celula: (n) => (
                         <Link to={`/seguimento/${n.caso.id}`} className="font-bold text-primary hover:underline">
-                          {n.pessoa.nome}
+                          {nomeDeExibicao(n.pessoa)}
                         </Link>
                       ),
                     },
@@ -104,7 +106,7 @@ export default function NotificacoesPage() {
                       celula: (n) => (
                         <div className="flex min-w-36 items-center gap-2">
                           <div className="flex-1">
-                            <Medidor compacto rotulo={`Completude da ficha de ${n.pessoa.nome}`} valor={n.completude.percentual} tom={n.completude.percentual === 100 ? 'sucesso' : n.completude.pronta ? 'atencao' : 'perigo'} />
+                            <Medidor compacto rotulo={`Completude da ficha de ${nomeDeExibicao(n.pessoa)}`} valor={n.completude.percentual} tom={n.completude.percentual === 100 ? 'sucesso' : n.completude.pronta ? 'atencao' : 'perigo'} />
                           </div>
                           <span className="text-sm tabular">{n.completude.percentual}%</span>
                         </div>

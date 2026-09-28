@@ -1,11 +1,13 @@
 import { X } from 'lucide-react'
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 import { Button } from './Button'
 
 /**
  * Diálogo modal com <dialog> nativo: foco preso na camada superior, Esc fecha,
  * fundo escurecido (Gestalt figura-fundo) e foco devolvido ao elemento de origem.
+ * Com `alteracoesPendentes`, clicar fora, Esc e o X não descartam o que foi digitado sem
+ * perguntar antes; o botão "Cancelar" do rodapé continua fechando direto (é uma escolha explícita).
  */
 export function Dialog({
   aberto,
@@ -15,6 +17,7 @@ export function Dialog({
   children,
   rodape,
   largura = 'md',
+  alteracoesPendentes = false,
 }: {
   aberto: boolean
   aoFechar: () => void
@@ -23,11 +26,30 @@ export function Dialog({
   children?: ReactNode
   rodape?: ReactNode
   largura?: 'sm' | 'md' | 'lg'
+  alteracoesPendentes?: boolean
 }) {
   const ref = useRef<HTMLDialogElement>(null)
   const origem = useRef<Element | null>(null)
   const tituloId = useId()
   const descId = useId()
+  const [confirmandoSaida, setConfirmandoSaida] = useState(false)
+
+  /** Fechamento "implícito" (X, Esc, clique fora): pergunta antes se há algo preenchido. */
+  const pedirFechamento = () => {
+    if (alteracoesPendentes) setConfirmandoSaida(true)
+    else ref.current?.close()
+  }
+
+  useEffect(() => {
+    const d = ref.current
+    if (!d || !alteracoesPendentes) return
+    const aoCancelar = (e: Event) => {
+      e.preventDefault()
+      setConfirmandoSaida(true)
+    }
+    d.addEventListener('cancel', aoCancelar)
+    return () => d.removeEventListener('cancel', aoCancelar)
+  }, [alteracoesPendentes])
 
   useEffect(() => {
     const d = ref.current
@@ -52,6 +74,7 @@ export function Dialog({
     const d = ref.current
     if (!d) return
     const aoFecharNativo = () => {
+      setConfirmandoSaida(false)
       aoFechar()
       if (origem.current instanceof HTMLElement) origem.current.focus()
     }
@@ -69,7 +92,7 @@ export function Dialog({
         { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl' }[largura],
       )}
       onClick={(e) => {
-        if (e.target === ref.current) ref.current?.close()
+        if (e.target === ref.current) pedirFechamento()
       }}
     >
       {aberto && (
@@ -87,7 +110,7 @@ export function Dialog({
             </div>
             <button
               type="button"
-              onClick={() => ref.current?.close()}
+              onClick={pedirFechamento}
               className="-m-2 inline-flex size-11 items-center justify-center rounded-lg text-muted hover:bg-surface-3"
               aria-label="Fechar"
             >
@@ -95,10 +118,22 @@ export function Dialog({
             </button>
           </header>
           <div className="overflow-y-auto px-5 py-4">{children}</div>
-          {rodape && (
-            <footer className="flex flex-wrap justify-end gap-2 border-t border-border bg-surface-2 px-5 py-3">
-              {rodape}
+          {confirmandoSaida ? (
+            <footer role="alertdialog" aria-label="Descartar o que foi preenchido?" className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-warning-soft px-5 py-3">
+              <p className="mr-auto text-sm font-bold">Descartar o que foi preenchido?</p>
+              <Button autoFocus variante="secundario" onClick={() => setConfirmandoSaida(false)}>
+                Continuar editando
+              </Button>
+              <Button variante="perigo" onClick={() => ref.current?.close()}>
+                Descartar
+              </Button>
             </footer>
+          ) : (
+            rodape && (
+              <footer className="flex flex-wrap justify-end gap-2 border-t border-border bg-surface-2 px-5 py-3">
+                {rodape}
+              </footer>
+            )
           )}
         </div>
       )}
@@ -114,6 +149,7 @@ export function ConfirmDialog({
   titulo,
   mensagem,
   rotuloConfirmar = 'Confirmar',
+  rotuloCancelar = 'Cancelar',
   perigo,
   carregando,
 }: {
@@ -123,6 +159,7 @@ export function ConfirmDialog({
   titulo: string
   mensagem: ReactNode
   rotuloConfirmar?: string
+  rotuloCancelar?: string
   perigo?: boolean
   carregando?: boolean
 }) {
@@ -134,8 +171,8 @@ export function ConfirmDialog({
       largura="sm"
       rodape={
         <>
-          <Button variante="secundario" onClick={aoFechar}>
-            Cancelar
+          <Button variante="secundario" onClick={aoFechar} autoFocus>
+            {rotuloCancelar}
           </Button>
           <Button variante={perigo ? 'perigo' : 'primario'} onClick={aoConfirmar} carregando={carregando}>
             {rotuloConfirmar}

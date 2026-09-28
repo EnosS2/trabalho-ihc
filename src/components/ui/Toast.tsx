@@ -4,14 +4,21 @@ import { ICONE } from '@/components/icones'
 import { cn } from '@/lib/cn'
 
 type TipoToast = 'sucesso' | 'erro' | 'info'
+/** Ação dentro do aviso (ex.: "Desfazer"). O aviso fica mais tempo na tela quando tem ação. */
+export interface AcaoToast {
+  rotulo: string
+  aoClicar: () => void
+}
+
 interface ToastItem {
   id: number
   tipo: TipoToast
   mensagem: string
+  acao?: AcaoToast
 }
 
 interface ToastApi {
-  sucesso: (m: string) => void
+  sucesso: (m: string, acao?: AcaoToast) => void
   erro: (m: string | unknown) => void
   info: (m: string) => void
 }
@@ -23,16 +30,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [itens, setItens] = useState<ToastItem[]>([])
   const remover = useCallback((id: number) => setItens((xs) => xs.filter((x) => x.id !== id)), [])
   const adicionar = useCallback(
-    (tipo: TipoToast, mensagem: string) => {
+    (tipo: TipoToast, mensagem: string, acao?: AcaoToast) => {
       const id = Date.now() + Math.random()
-      setItens((xs) => [...xs.slice(-3), { id, tipo, mensagem }])
-      setTimeout(() => remover(id), tipo === 'erro' ? 9000 : 5000)
+      setItens((xs) => [...xs.slice(-3), { id, tipo, mensagem, acao }])
+      setTimeout(() => remover(id), tipo === 'erro' || acao ? 10000 : 5000)
     },
     [remover],
   )
   const api = useMemo<ToastApi>(
     () => ({
-      sucesso: (m) => adicionar('sucesso', m),
+      sucesso: (m, acao) => adicionar('sucesso', m, acao),
       info: (m) => adicionar('info', m),
       erro: (m) => adicionar('erro', m instanceof Error ? m.message : typeof m === 'string' ? m : 'Ocorreu um erro inesperado.'),
     }),
@@ -82,6 +89,18 @@ function ToastView({ item, aoFechar }: { item: ToastItem; aoFechar: () => void }
         aria-hidden
       />
       <p className="flex-1 text-sm font-bold">{item.mensagem}</p>
+      {item.acao && (
+        <button
+          type="button"
+          onClick={() => {
+            item.acao!.aoClicar()
+            aoFechar()
+          }}
+          className="-my-1 shrink-0 rounded-md px-2 py-1 text-sm font-bold text-primary underline-offset-2 hover:bg-primary-soft hover:underline"
+        >
+          {item.acao.rotulo}
+        </button>
+      )}
       <button type="button" onClick={aoFechar} aria-label="Fechar aviso" className="-m-1 rounded p-1 text-muted hover:bg-surface-3">
         <X className="size-4" aria-hidden />
       </button>

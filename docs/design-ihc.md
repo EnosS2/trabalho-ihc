@@ -183,8 +183,13 @@ universal, e a sigla é o signo que a equipe já usa no dia a dia.
 - **Prevenção de erros (Nielsen):**
   - validação de CNS e CPF por dígito verificador;
   - bloqueio de datas futuras;
-  - aviso ao sair do assistente com testes lidos;
+  - aviso ao sair do assistente com dados preenchidos, tanto ao fechar a aba quanto ao navegar pelo menu, pelo logo ou por "Cancelar" (`useBlocker`); o mesmo vale para o cadastro de pessoa;
+  - diálogos com formulário não descartam o que foi digitado ao clicar fora, apertar `Esc` ou fechar no X: perguntam antes ("Descartar o que foi preenchido?");
   - confirmação antes de ações irreversíveis;
   - botão "Desfazer último teste";
-  - detecção de cadastro duplicado.
+  - detecção de cadastro duplicado, e aviso quando a lista de resultados foi cortada (para não cadastrar de novo quem já existe).
+- **Controle e liberdade (Nielsen):** todo registro do caso (coleta, resultado, início de tratamento, dose, VDRL, encerramento) pode ser desfeito: pelo botão "Desfazer" no aviso logo após salvar, ou pelo "Desfazer" no item do histórico do caso, do mais recente para o mais antigo. Caso encerrado pode ser reaberto. Toda correção fica na auditoria.
+- **Filtros, abas e visões ficam na URL** (Testagens, Seguimento, Pessoas, Estoque, Notificações, Indicadores, Auditoria, Configurações, Busca ativa, Painel): ao abrir um detalhe e voltar, a tela reaparece como estava, e o endereço pode ser compartilhado.
+- **Busca global de pessoas** na barra superior (Trunk Test de Krug: "onde está a busca?"), com atalho `/`, padrão ARIA de combobox (setas, Enter, Esc) e, no celular, lupa que abre o campo.
+- **Nome social** (Portaria nº 1.820/2009): a regra `nomeDeExibicao` (`src/domain/rules/pessoa.ts`) é usada em todas as telas, listas e buscas; o nome civil aparece só no cadastro e na ficha de notificação.
 - Linguagem simples, sem jargão técnico de sistema.

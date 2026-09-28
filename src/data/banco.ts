@@ -33,7 +33,7 @@ export interface Banco {
   auditoria: EventoAuditoria[]
 }
 
-export const VERSAO_BANCO = 3
+export const VERSAO_BANCO = 4
 
 let contador = 0
 export function novoId(prefixo: string): string {

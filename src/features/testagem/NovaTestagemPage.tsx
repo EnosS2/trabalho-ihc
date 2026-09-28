@@ -1,11 +1,11 @@
 import { ArrowLeft, ArrowRight, Search, Undo2, UserPlus } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useBlocker, useNavigate, useSearchParams } from 'react-router'
 import { ICONE } from '@/components/icones'
 import { AgravoBadge, Badge, GestanteBadge } from '@/components/ui/Badge'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
-import { Dialog } from '@/components/ui/Dialog'
+import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoVazio } from '@/components/ui/Feedback'
 import { Checkbox, Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
 import { Meta, PageHeader, Stepper } from '@/components/ui/Layout'
@@ -14,6 +14,7 @@ import type { Caso, Pessoa, ResultadoTR, Testagem, TipoTeste } from '@/domain/ty
 import { usePessoa, usePessoas, useLotesTestagem, useRegistrarTestagem, useSalvarPessoa } from '@/data/hooks'
 import { interpretarTestagem, testagemConcluida } from '@/domain/rules/fluxograma'
 import { mascararDocumento } from '@/domain/rules/documentos'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 import {
   AGRAVO_ROTULO,
   AGRAVOS,
@@ -30,6 +31,8 @@ import { cn } from '@/lib/cn'
 import { PessoaFormulario } from '@/features/pessoas/PessoaFormulario'
 
 const PASSOS = ['Pessoa', 'Contexto', 'Testes', 'Conduta']
+/** Resultados mostrados no passo 1; acima disso, a tela pede para refinar a busca. */
+const MAX_RESULTADOS = 8
 
 interface TesteLocal {
   tipo: TipoTeste
@@ -43,6 +46,7 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
   const [termo, setTermo] = useState('')
   const [atraso, setAtraso] = useState('')
   const [cadastrando, setCadastrando] = useState(false)
+  const [cadastroAlterado, setCadastroAlterado] = useState(false)
   const { data, isFetching } = usePessoas(atraso)
   const salvar = useSalvarPessoa()
   const toast = useToast()
@@ -90,8 +94,18 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
         {data && data.length > 0 && (
           <fieldset>
             <legend className="sr-only">Resultados da busca</legend>
+            {!atraso.trim() ? (
+              <p className="mb-2 text-sm text-muted">Pessoas testadas mais recentemente. Busque para encontrar outras.</p>
+            ) : (
+              data.length > MAX_RESULTADOS && (
+                <p className="mb-2 text-sm text-muted">
+                  Mostrando {MAX_RESULTADOS} de {data.length >= 50 ? 'mais de 50' : data.length} pessoas. Se não encontrar quem
+                  procura, digite o sobrenome ou o número do documento antes de cadastrar.
+                </p>
+              )
+            )}
             <ul className="flex flex-col gap-2">
-              {data.slice(0, 8).map(({ pessoa, idade, casosAtivos, ultimaTestagem }) => {
+              {data.slice(0, MAX_RESULTADOS).map(({ pessoa, idade, casosAtivos, ultimaTestagem }) => {
                 const sel = selecionada?.id === pessoa.id
                 return (
                   <li key={pessoa.id}>
@@ -110,7 +124,7 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
                       />
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2 font-bold">
-                          {pessoa.nomeSocial ?? pessoa.nome}
+                          {nomeDeExibicao(pessoa)}
                           {pessoa.gestante && <GestanteBadge />}
                           {casosAtivos > 0 && (
                             <Badge tom="info" icone={ICONE.seguimento}>
@@ -122,8 +136,8 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
                           className="mt-0.5"
                           itens={[
                             `${idade} anos`,
-                            <span className="tabular">CNS {mascararDocumento(pessoa.cns)}</span>,
-                            <span className="tabular">CPF {mascararDocumento(pessoa.cpf)}</span>,
+                            <span key="cns" className="tabular">CNS {mascararDocumento(pessoa.cns)}</span>,
+                            <span key="cpf" className="tabular">CPF {mascararDocumento(pessoa.cpf)}</span>,
                             ultimaTestagem ? `Última testagem em ${formatarData(ultimaTestagem)}` : null,
                           ]}
                         />
@@ -136,15 +150,16 @@ function PassoPessoa({ selecionada, aoSelecionar }: { selecionada?: Pessoa; aoSe
           </fieldset>
         )}
       </CardBody>
-      <Dialog aberto={cadastrando} aoFechar={() => setCadastrando(false)} titulo="Cadastrar pessoa" largura="lg">
+      <Dialog aberto={cadastrando} aoFechar={() => setCadastrando(false)} titulo="Cadastrar pessoa" largura="lg" alteracoesPendentes={cadastroAlterado}>
         <PessoaFormulario
           rotuloSalvar="Cadastrar e selecionar"
           salvando={salvar.isPending}
+          aoMudarAlteracoes={setCadastroAlterado}
           aoCancelar={() => setCadastrando(false)}
           aoSalvar={async (dados) => {
             try {
               const p = await salvar.mutateAsync({ dados })
-              toast.sucesso(`${p.nome} cadastrada(o).`)
+              toast.sucesso(`Cadastro de ${nomeDeExibicao(p)} criado.`)
               aoSelecionar(p)
               setCadastrando(false)
             } catch (e) {
@@ -222,7 +237,6 @@ function PainelAgravo({
                 <li key={i} className="flex flex-wrap items-center gap-2 text-sm">
                   <span className="tabular text-muted">{i + 1}.</span>
                   <span className="font-bold">{TIPO_TESTE_ROTULO[t.tipo]}</span>
-                  <span>→</span>
                   <Badge tom={t.resultado === 'reagente' ? 'perigo' : t.resultado === 'nao_reagente' ? 'sucesso' : 'atencao'}>
                     {RESULTADO_TR_ROTULO[t.resultado]}
                   </Badge>
@@ -372,13 +386,16 @@ export default function NovaTestagemPage() {
   const sifilisGestanteReagente = gestante && interpretacoes.some((i) => i.agravo === 'sifilis' && i.conclusao === 'reagente')
   const abreCasos = interpretacoes.filter((i) => i.abreCaso)
 
-  // Impede sair sem querer com testes já lidos (prevenção de perda de dados).
+  // Impede sair sem querer com dados preenchidos (prevenção de perda de dados): o beforeunload cobre
+  // fechar/recarregar a aba; o useBlocker cobre a navegação dentro do app (menu, logo, trilha, Cancelar).
+  const emAndamento = !concluida && (passo > 0 || testes.length > 0)
+  const bloqueio = useBlocker(({ currentLocation, nextLocation }) => emAndamento && currentLocation.pathname !== nextLocation.pathname)
   useEffect(() => {
-    if (testes.length === 0 || concluida) return
+    if (!emAndamento) return
     const aviso = (e: BeforeUnloadEvent) => e.preventDefault()
     window.addEventListener('beforeunload', aviso)
     return () => window.removeEventListener('beforeunload', aviso)
-  }, [testes.length, concluida])
+  }, [emAndamento])
 
   function avancar() {
     const e: Record<string, string> = {}
@@ -432,7 +449,7 @@ export default function NovaTestagemPage() {
             <span className="flex size-16 items-center justify-center rounded-full bg-success-soft text-success">
               <ICONE.ok className="size-9" aria-hidden />
             </span>
-            <p className="text-xl font-bold">Testagem de {pessoa?.nome} salva.</p>
+            <p className="text-xl font-bold">Testagem de {pessoa && nomeDeExibicao(pessoa)} salva.</p>
             <p className="text-muted">
               {plural(concluida.testagem.testes.length, 'teste baixado', 'testes baixados')} do estoque.{' '}
               {concluida.casos.length > 0
@@ -446,7 +463,7 @@ export default function NovaTestagemPage() {
                 </LinkButton>
               ))}
               <LinkButton to={`/testagens/${concluida.testagem.id}`} variante="secundario">
-                Ver comprovante
+                Ver testagem
               </LinkButton>
               <Button variante="secundario" icone={ICONE.novaTestagem} onClick={reiniciar}>
                 Nova testagem
@@ -472,9 +489,9 @@ export default function NovaTestagemPage() {
       {pessoa && passo > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm">
           <ICONE.pessoas className="size-4 text-muted" aria-hidden />
-          <span className="font-bold">{pessoa.nome}</span>
+          <span className="font-bold">{nomeDeExibicao(pessoa)}</span>
           {gestante && <GestanteBadge />}
-          {motivo && <span className="text-muted">· {MOTIVO_ROTULO[motivo]}</span>}
+          {motivo && <span className="text-muted">{MOTIVO_ROTULO[motivo]}</span>}
           <button type="button" className="ml-auto font-bold text-primary hover:underline" onClick={() => setPasso(0)}>
             Trocar pessoa
           </button>
@@ -643,15 +660,16 @@ export default function NovaTestagemPage() {
       )}
 
       <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex items-center justify-between gap-2 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        {passo > 0 ? (
-          <Button variante="secundario" icone={ArrowLeft} onClick={() => setPasso((p) => p - 1)}>
-            Voltar
-          </Button>
-        ) : (
-          <Link to="/" className="font-bold text-primary hover:underline">
+        <div className="flex items-center gap-4">
+          {passo > 0 && (
+            <Button variante="secundario" icone={ArrowLeft} onClick={() => setPasso((p) => p - 1)}>
+              Voltar
+            </Button>
+          )}
+          <Link to="/" className="inline-flex min-h-11 items-center font-bold text-primary hover:underline">
             Cancelar
           </Link>
-        )}
+        </div>
         {passo < 3 ? (
           <Button iconeDireita={ArrowRight} onClick={avancar} disabled={passo === 2 && !fluxoCompleto}>
             {passo === 2 && !fluxoCompleto ? 'Conclua os testes' : 'Continuar'}
@@ -662,6 +680,20 @@ export default function NovaTestagemPage() {
           </Button>
         )}
       </div>
+      <ConfirmDialog
+        aberto={bloqueio.state === 'blocked'}
+        aoFechar={() => bloqueio.reset?.()}
+        aoConfirmar={() => bloqueio.proceed?.()}
+        perigo
+        titulo="Sair sem salvar a testagem?"
+        rotuloConfirmar="Sair sem salvar"
+        rotuloCancelar="Continuar a testagem"
+        mensagem={
+          testes.length > 0
+            ? `Nada foi salvo ainda: ${plural(testes.length, 'resultado lido', 'resultados lidos')} e a baixa dos kits usados serão perdidos.`
+            : 'Nada foi salvo ainda: os dados preenchidos serão perdidos.'
+        }
+      />
     </>
   )
 }

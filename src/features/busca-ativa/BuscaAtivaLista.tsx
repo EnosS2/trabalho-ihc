@@ -16,6 +16,8 @@ import type { ResultadoTentativa, TentativaContato } from '@/domain/types'
 import { formatarTelefone } from '@/domain/rules/documentos'
 import { formatarData } from '@/lib/datas'
 import { plural } from '@/lib/texto'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 
 const MEIOS: { valor: TentativaContato['meio']; rotulo: string; icone: typeof Phone }[] = [
   { valor: 'visita', rotulo: 'Visita domiciliar', icone: MapPin },
@@ -39,6 +41,7 @@ function DialogoTentativa({ tarefa, aoFechar }: { tarefa: TarefaResumo | null; a
     try {
       await registrar.mutateAsync({ tarefaId: tarefa!.tarefa.id, dados: { meio, resultado, observacao: obs || undefined } })
       toast.sucesso('Tentativa registrada.')
+      setMeio('visita')
       setResultado('')
       setObs('')
       aoFechar()
@@ -52,7 +55,8 @@ function DialogoTentativa({ tarefa, aoFechar }: { tarefa: TarefaResumo | null; a
       aberto={Boolean(tarefa)}
       aoFechar={aoFechar}
       titulo="Registrar tentativa de contato"
-      descricao={tarefa?.pessoa.nome}
+      alteracoesPendentes={meio !== 'visita' || resultado !== '' || obs.trim() !== ''}
+      descricao={tarefa ? nomeDeExibicao(tarefa.pessoa) : undefined}
       rodape={
         <>
           <Button variante="secundario" onClick={aoFechar}>
@@ -99,8 +103,8 @@ function DialogoTentativa({ tarefa, aoFechar }: { tarefa: TarefaResumo | null; a
 export default function BuscaAtivaLista() {
   const { usuario } = useSessaoAtiva()
   const podeRegistrar = usePode('busca.registrar')
-  const [status, setStatus] = useState<'aberta' | 'concluida'>('aberta')
-  const [microareaId, setMicroareaId] = useState('')
+  const [status, setStatus] = useEstadoNaUrl<'aberta' | 'concluida'>('situacao', 'aberta', ['aberta', 'concluida'])
+  const [microareaId, setMicroareaId] = useEstadoNaUrl('microarea', '')
   const { data, isLoading, error, refetch } = useBuscaAtiva({ status, microareaId: microareaId || undefined })
   const refs = useReferencias()
   const [selecionada, setSelecionada] = useState<TarefaResumo | null>(null)
@@ -148,7 +152,7 @@ export default function BuscaAtivaLista() {
             <li key={t.tarefa.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-card">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-lg font-bold">{t.pessoa.nome}</p>
+                  <p className="text-lg font-bold">{nomeDeExibicao(t.pessoa)}</p>
                   <Meta
                     itens={[
                       `${t.pessoa.idade} anos`,
@@ -174,7 +178,7 @@ export default function BuscaAtivaLista() {
               <address className="flex flex-col gap-1 text-sm not-italic">
                 <span className="flex items-center gap-2">
                   <MapPin className="size-4 shrink-0 text-muted" aria-hidden />
-                  {t.pessoa.endereco.logradouro}, {t.pessoa.endereco.numero} — {t.pessoa.endereco.bairro}
+                  {t.pessoa.endereco.logradouro}, {t.pessoa.endereco.numero}, {t.pessoa.endereco.bairro}
                 </span>
                 <span className="flex items-center gap-2">
                   <Phone className="size-4 shrink-0 text-muted" aria-hidden />

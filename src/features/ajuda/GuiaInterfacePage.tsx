@@ -50,7 +50,7 @@ const TELAS: Record<Perfil, { telas: string; acoes: string[] }> = {
   acs: { telas: 'Painel do ACS e busca ativa (projetada primeiro para celular)', acoes: ['Ver quem precisa voltar à UBS na sua microárea', 'Ligar com um toque (link tel:)', 'Registrar visita, telefonema ou mensagem e o resultado'] },
   executor: { telas: 'Painel do dia, Nova testagem, Testagens, Pessoas, Seguimento', acoes: ['Registrar testagem guiada pelo fluxograma (próximo teste, lote FEFO, conduta)', 'Cadastrar pessoa já com os campos da notificação', 'Registrar coleta, resultado, doses, VDRL, parcerias e desfecho'] },
   responsavel_tecnico: { telas: 'Tudo do executor, mais Estoque, Notificações, Indicadores da UBS e Auditoria', acoes: ['Entrada, baixa e ajuste de lotes; fechamento SISLOGLAB em CSV', 'Conferir completude e registrar envio ao Sentinela/DVS', 'Acompanhar a cascata do cuidado da UBS'] },
-  gestor: { telas: 'Painel da rede e indicadores por coordenadoria e UBS', acoes: ['Comparar territórios (ex.: coleta no prazo, tratamento iniciado)', 'Filtrar período, coordenadoria e UBS', 'Exportar CSV — sem dados identificados'] },
+  gestor: { telas: 'Painel da rede e indicadores por coordenadoria e UBS', acoes: ['Comparar territórios (ex.: coleta no prazo, tratamento iniciado)', 'Filtrar período, coordenadoria e UBS', 'Exportar CSV, sem dados identificados'] },
   admin: { telas: 'Painel administrativo, Configurações e Auditoria', acoes: ['Criar usuários e atribuir perfil/lotação', 'Ajustar prazos e estoque mínimo', 'Consultar a trilha de auditoria'] },
 }
 
@@ -225,7 +225,7 @@ export default function GuiaInterfacePage() {
               <div>
                 <h3 className="mb-2 font-bold">Layout adotado</h3>
                 <div aria-hidden className="grid h-52 grid-cols-[4.5rem_1fr] overflow-hidden rounded-xl border border-border text-[0.65rem] font-bold">
-                  <div className="row-span-2 flex flex-col bg-sidebar p-2 text-sidebar-fg">Navegação global<div className="mt-2 flex flex-col gap-1">{[1, 2, 3, 4, 5].map((i) => <span key={i} className="h-2 rounded bg-white/25" />)}</div><div className="mt-auto pt-2">Tema · acessib.</div></div>
+                  <div className="row-span-2 flex flex-col bg-sidebar p-2 text-sidebar-fg">Navegação global<div className="mt-2 flex flex-col gap-1">{[1, 2, 3, 4, 5].map((i) => <span key={i} className="h-2 rounded bg-white/25" />)}</div><div className="mt-auto pt-2">Tema e acessib.</div></div>
                   <div className="border-b border-border bg-surface p-2 text-muted">Barra superior: contexto e usuário</div>
                   <div className="bg-bg p-2">
                     <p className="text-fg">Título da página + ação primária</p>
@@ -245,7 +245,7 @@ export default function GuiaInterfacePage() {
                     ['Proximidade', 'Campos agrupados em blocos (Identificação, Vigilância, Endereço); menu agrupado por etapa do trabalho.'],
                     ['Região comum', 'Painéis delimitam um assunto cada, como os blocos do Business Model Canvas. Dentro deles, linhas separadas por fios finos em vez de cartões dentro de cartões.'],
                     ['Similaridade', 'Mesmo agravo = mesma sigla e cor em todas as telas; mesmo status = mesmo selo.'],
-                    ['Continuidade', 'Assistente em etapas, trilha do caso (teste → confirmação → tratamento → desfecho) e linha do tempo.'],
+                    ['Continuidade', 'Assistente em etapas, trilha do caso (teste, confirmação, tratamento, desfecho) e linha do tempo.'],
                     ['Figura-fundo', 'Diálogos sobre fundo escurecido; barra lateral escura contra conteúdo claro.'],
                     ['Fechamento', 'Barras de progresso de completude e de estoque são lidas como “quanto falta”.'],
                     ['Pregnância', 'Uma única ação primária por tela, no canto superior direito ou na barra fixa inferior.'],
@@ -262,8 +262,8 @@ export default function GuiaInterfacePage() {
             <ul className="grid gap-2 text-sm sm:grid-cols-2">
               <li>• Mobile-first; pontos de quebra em 640, 768, 1024 e 1280px.</li>
               <li>• Barra lateral fixa em ≥ 1024px; abaixo disso vira gaveta com foco preso.</li>
-              <li>• Tabelas viram cartões com pares rótulo/valor em telas pequenas — sem rolagem horizontal.</li>
-              <li>• Grades 1 → 2 → 4 colunas para indicadores; quadro de casos rola horizontalmente.</li>
+              <li>• Tabelas viram cartões com pares rótulo/valor em telas pequenas, sem rolagem horizontal.</li>
+              <li>• Grades de 1, 2 e 4 colunas para indicadores; quadro de casos rola horizontalmente.</li>
               <li>• Alvos de toque de no mínimo 44px; barra de ações fixa no rodapé do assistente.</li>
               <li>• Busca ativa pensada para o celular do ACS: telefone clicável, endereço em destaque.</li>
             </ul>

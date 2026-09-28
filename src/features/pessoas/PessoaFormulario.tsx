@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { useSessaoAtiva } from '@/app/sessao'
@@ -116,12 +117,15 @@ export function PessoaFormulario({
   aoCancelar,
   salvando,
   rotuloSalvar = 'Salvar cadastro',
+  aoMudarAlteracoes,
 }: {
   pessoa?: Pessoa
   aoSalvar: (dados: PessoaInput) => void | Promise<void>
   aoCancelar?: () => void
   salvando?: boolean
   rotuloSalvar?: string
+  /** Avisa o pai quando há algo digitado e não salvo (para proteger contra fechar sem querer). */
+  aoMudarAlteracoes?: (alterado: boolean) => void
 }) {
   const { usuario } = useSessaoAtiva()
   const refs = useReferencias()
@@ -130,8 +134,9 @@ export function PessoaFormulario({
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitted },
+    formState: { errors, isSubmitted, isDirty },
   } = useForm<Valores>({ resolver: zodResolver(esquema), defaultValues: paraValores(pessoa) })
+  useEffect(() => aoMudarAlteracoes?.(isDirty), [isDirty, aoMudarAlteracoes])
   const sexo = useWatch({ control, name: 'sexo' })
   const gestante = useWatch({ control, name: 'gestante' })
   const qtdErros = Object.keys(errors).length

@@ -222,6 +222,8 @@ export interface ItemLinhaDoTempo {
   descricao?: ReactNode
   icone: LucideIcon
   tom?: Tom
+  /** Ação discreta ao lado do título (ex.: "Desfazer" um registro). */
+  acao?: ReactNode
 }
 
 /** Linha do tempo (Gestalt continuidade): eventos do caso em sequência. */
@@ -239,7 +241,10 @@ export function LinhaDoTempo({ itens }: { itens: ItemLinhaDoTempo[] }) {
             <i.icone className="size-4" aria-hidden />
           </span>
           <p className="text-xs font-bold text-muted tabular">{i.data}</p>
-          <p className="font-bold">{i.titulo}</p>
+          <div className="flex flex-wrap items-center gap-x-3">
+            <p className="font-bold">{i.titulo}</p>
+            {i.acao}
+          </div>
           {i.descricao && <div className="text-sm text-muted">{i.descricao}</div>}
         </li>
       ))}

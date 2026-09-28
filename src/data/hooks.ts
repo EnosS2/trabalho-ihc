@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AcaoCaso } from '@/domain/rules/seguimento'
+import { useCallback } from 'react'
+import type { AcaoCaso, RegistroDesfazivel } from '@/domain/rules/seguimento'
 import type { Agravo, EventoAuditoria, ISODate, Parametros, StatusCaso, TentativaContato, TipoMovimentacao, Usuario } from '@/domain/types'
 import * as api from './api'
 
@@ -37,8 +38,8 @@ export const useReferencias = () => useQuery({ queryKey: ['referencias'], queryF
 export const useParametros = () => useQuery({ queryKey: ['parametros'], queryFn: api.obterParametros })
 
 // pessoas
-export const usePessoas = (termo: string) =>
-  useQuery({ queryKey: ['pessoas', termo], queryFn: () => api.buscarPessoas({ termo }), placeholderData: keepPreviousData })
+export const usePessoas = (termo: string, habilitado = true) =>
+  useQuery({ queryKey: ['pessoas', termo], queryFn: () => api.buscarPessoas({ termo }), placeholderData: keepPreviousData, enabled: habilitado })
 export const usePessoa = (id?: string) =>
   useQuery({ queryKey: ['pessoa', id], queryFn: () => api.obterPessoa(id!), enabled: Boolean(id) })
 export const useSalvarPessoa = () =>
@@ -58,6 +59,21 @@ export const useCasos = (filtro: { status?: StatusCaso | 'ativos'; agravo?: Agra
 export const useCaso = (id?: string) =>
   useQuery({ queryKey: ['caso', id], queryFn: () => api.obterCaso(id!), enabled: Boolean(id) })
 export const useAcaoCaso = (casoId: string) => useEscrita((acao: AcaoCaso) => api.executarAcaoCaso(casoId, acao))
+/**
+ * Desfaz um registro do caso. Devolve uma função comum, que não depende do componente continuar
+ * montado: o "Desfazer" do aviso funciona mesmo depois de o diálogo que salvou ter fechado.
+ */
+export function useDesfazerRegistroCaso() {
+  const qc = useQueryClient()
+  return useCallback(
+    async (casoId: string, registro: RegistroDesfazivel) => {
+      const r = await api.executarAcaoCaso(casoId, { tipo: 'desfazer', registro })
+      await qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'referencias' })
+      return r
+    },
+    [qc],
+  )
+}
 
 // busca ativa
 export const useBuscaAtiva = (filtro: { status?: 'aberta' | 'concluida'; microareaId?: string }, habilitado = true) =>
