@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
-import { createBrowserRouter, Navigate, Outlet } from 'react-router'
+import { createBrowserRouter, Outlet } from 'react-router'
 import { Carregando } from '@/components/ui/Feedback'
 import type { Permissao } from '@/domain/permissoes'
 import { AppShell } from './layout/AppShell'
@@ -27,6 +27,7 @@ const Ajuda = pagina(() => import('@/features/ajuda/AjudaPage'))
 const Perfis = pagina(() => import('@/features/ajuda/PerfisPage'))
 const GuiaInterface = pagina(() => import('@/features/ajuda/GuiaInterfacePage'))
 const NaoEncontrada = pagina(() => import('@/features/NaoEncontradaPage'))
+const Login = pagina(() => import('@/features/auth/LoginPage'))
 
 function com(permissao: Permissao | undefined, elemento: ReactNode) {
   return permissao ? <ExigePermissao permissao={permissao}>{elemento}</ExigePermissao> : elemento
@@ -37,8 +38,14 @@ const Carregar = ({ children }: { children: ReactNode }) => (
 )
 
 export const router = createBrowserRouter([
-  // Não há mais tela de login: links antigos para /entrar levam ao painel.
-  { path: '/entrar', element: <Navigate to="/" replace /> },
+  {
+    path: '/entrar',
+    element: (
+      <Carregar>
+        <Login />
+      </Carregar>
+    ),
+  },
   {
     element: (
       <Protegida>

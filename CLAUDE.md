@@ -37,13 +37,13 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `domain/rules/pessoa.ts` — `nomeDeExibicao` (nome social) e texto de busca.
 
 **Dados (API mock com o contrato do futuro backend)**
-- `data/api.ts` — um export por endpoint; aplica permissões e auditoria. `data/hooks.ts` — hooks TanStack Query que as telas usam.
+- `data/api.ts` — um export por endpoint; aplica permissões e auditoria. `data/hooks.ts` — hooks TanStack Query que as telas usam. Senhas fictícias do login: `SENHAS_DEMO` em `api.ts`.
 - `data/operacoes.ts` — escritas compartilhadas por API e seed (registrar testagem, ações do caso, notificação, busca ativa).
 - `data/seed.ts` — dados fictícios determinísticos; `data/banco.ts` — estrutura e `VERSAO_BANCO` (subir ao mudar o seed); `data/store.ts` — localStorage.
 
 **App e layout**
 - `app/router.tsx` — rotas e permissão por rota. `app/navegacao.ts` — itens e grupos do menu lateral.
-- `app/sessao.tsx` — sessão demo, `usePode`, bloqueio por permissão. `app/preferencias.tsx` — fonte, alto contraste, tema, animações.
+- `app/sessao.tsx` — sessão demo (sem sessão → `/entrar`), `usePode`, bloqueio por permissão. `app/preferencias.tsx` — fonte, alto contraste, tema, animações.
 - `app/versao.ts` — versão no rodapé (data do último commit, injetada pelo `vite.config.ts`).
 - `app/layout/` — `AppShell` (estrutura + rodapé), `Sidebar`, `Topbar` (menu do usuário, troca de perfil), `BuscaGlobal` (busca de pessoas, atalho `/`), `Acessibilidade`, `AlternarTema`, `Logo`.
 
@@ -61,6 +61,7 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `estadoNaUrl.ts` — `useEstadoNaUrl`/`useBooleanoNaUrl`: filtros e abas guardados na URL.
 
 **Telas (`features/`)**
+- `auth/LoginPage.tsx` — login fictício (`/entrar`): e-mail + senha da API mock e lista de acessos de demonstração.
 - `painel/` — painel por perfil (UBS, ACS, gestor, admin).
 - `testagem/` — `NovaTestagemPage` (assistente em 4 passos), `TestagensPage` (lista), `TestagemDetalhePage`.
 - `pessoas/` — lista, detalhe, `PessoaFormulario` (cadastro, zod) usado na página e no diálogo do assistente.

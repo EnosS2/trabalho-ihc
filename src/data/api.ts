@@ -5,7 +5,7 @@
  */
 import { agoraISO, diasEntre, hojeISO, idade, mesDe, somarDias } from '@/lib/datas'
 import { plural } from '@/lib/texto'
-import { pode, type Permissao } from '@/domain/permissoes'
+import { NIVEL_ACESSO, pode, type Permissao } from '@/domain/permissoes'
 import { alertasEstoque, fechamentoMensal, fechamentoParaCsv, resumoPorTipo, selecionarLoteFEFO } from '@/domain/rules/estoque'
 import { calcularIndicadores, type Indicadores } from '@/domain/rules/indicadores'
 import { calcularCompletude } from '@/domain/rules/notificacao'
@@ -116,7 +116,7 @@ export interface Sessao {
   microarea?: Microarea
 }
 
-/** Perfis de demonstração, na ordem do seletor; o primeiro ativo é o perfil de entrada. */
+/** Perfis de demonstração, na ordem do seletor de perfil e da lista de acessos da tela de login. */
 const USUARIOS_DEMO = ['usr-ana', 'usr-beatriz', 'usr-joana', 'usr-marcos', 'usr-paula', 'usr-carlos']
 
 export function listarUsuariosDemo() {
@@ -137,10 +137,37 @@ export function entrar(usuarioId: string) {
   })
 }
 
-/** Só no protótipo (não há tela de login): entra com o primeiro perfil de demonstração ativo. */
-export async function entrarComPerfilPadrao() {
-  const id = await responder((b) => USUARIOS_DEMO.find((x) => b.usuarios.some((u) => u.id === x && u.ativo)))
-  if (!id) throw new ErroDeNegocio('Nenhum perfil de demonstração ativo.')
+/**
+ * Senhas fictícias do protótipo (só existem na API mock; o backend usará gov.br / e-mail institucional).
+ * Uma por usuário de demonstração, para entrar com cada perfil.
+ */
+const SENHAS_DEMO: Record<string, string> = {
+  'usr-ana': 'executor123',
+  'usr-carlos': 'executor123',
+  'usr-beatriz': 'rt123',
+  'usr-joana': 'acs123',
+  'usr-marcos': 'gestor123',
+  'usr-paula': 'admin123',
+}
+
+/** Acessos exibidos na tela de login (protótipo), do menor ao maior nível de acesso. */
+export function listarAcessosDemo() {
+  return responder((b) =>
+    USUARIOS_DEMO.map((id) => b.usuarios.find((u) => u.id === id)!)
+      .filter((u) => u.ativo)
+      .sort((x, y) => NIVEL_ACESSO[x.perfil].nivel - NIVEL_ACESSO[y.perfil].nivel)
+      .map((u) => ({ id: u.id, nome: u.nome, cargo: u.cargo, perfil: u.perfil, email: u.email, senha: SENHAS_DEMO[u.id] })),
+  )
+}
+
+export async function entrarComCredenciais({ email, senha }: { email: string; senha: string }) {
+  const id = await responder((b) => {
+    const u = b.usuarios.find((x) => x.email && x.email.toLowerCase() === email.trim().toLowerCase())
+    // Mensagem única para e-mail ou senha errados: não revela quais e-mails existem.
+    if (!u || SENHAS_DEMO[u.id] !== senha) throw new ErroDeNegocio('E-mail ou senha incorretos. Confira e tente de novo.')
+    if (!u.ativo) throw new ErroDeNegocio('Este usuário está inativo. Fale com o suporte.')
+    return u.id
+  })
   return entrar(id)
 }
 

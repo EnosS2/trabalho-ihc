@@ -26,15 +26,16 @@ npm run build      # typecheck + build de produção
 npm run lint
 ```
 
-O sistema abre como Executor(a). Para trocar de perfil, use o menu do usuário no canto superior direito; a página `/perfis` explica o que cada um pode fazer. Cada perfil tem nível de acesso e interface próprios.
+O sistema abre na tela de login (fictício: as senhas só existem na API mock). A própria tela lista os acessos de demonstração e preenche o formulário com um clique. Depois de entrar, dá para trocar de perfil ou sair pelo menu do usuário, no canto superior direito; a página `/perfis` explica o que cada um pode fazer. Cada perfil tem nível de acesso e interface próprios.
 
-| Perfil | Pessoa demo | O que experimentar |
-|---|---|---|
-| Executor(a) | Ana Paula Ribeiro | **Nova testagem** (teste um TR1 reagente de HIV); caso da gestante *Camila Brum Vargas* (2ª dose atrasada) |
-| Responsável técnica | Beatriz Rocha | Estoque (lote vencido, HBsAg abaixo do mínimo), Notificações, Indicadores |
-| ACS | Joana Martins | Busca ativa no celular (sem diagnóstico visível) |
-| Gestão APS/DVS | Marcos Pereira | Indicadores comparando coordenadorias |
-| Administração | Paula Schmitt | Usuários, prazos, restaurar dados de demonstração |
+| Perfil | Pessoa demo | E-mail | Senha | O que experimentar |
+|---|---|---|---|---|
+| ACS | Joana Martins | `joana.martins@demo.poa` | `acs123` | Busca ativa no celular (sem diagnóstico visível) |
+| Executor(a) | Ana Paula Ribeiro | `ana.ribeiro@demo.poa` | `executor123` | **Nova testagem** (teste um TR1 reagente de HIV); caso da gestante *Camila Brum Vargas* (2ª dose atrasada) |
+| Executor(a) | Carlos Eduardo Lima | `carlos.lima@demo.poa` | `executor123` | O mesmo perfil, com outro profissional da UBS |
+| Responsável técnica | Beatriz Rocha | `beatriz.rocha@demo.poa` | `rt123` | Estoque (lote vencido, HBsAg abaixo do mínimo), Notificações, Indicadores |
+| Gestão APS/DVS | Marcos Pereira | `marcos.pereira@demo.poa` | `gestor123` | Indicadores comparando coordenadorias |
+| Administração | Paula Schmitt | `paula.schmitt@demo.poa` | `admin123` | Usuários, prazos, restaurar dados de demonstração |
 
 ## Documentação
 

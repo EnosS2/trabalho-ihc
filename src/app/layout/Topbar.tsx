@@ -1,9 +1,9 @@
-import { Check, ChevronDown, CircleHelp, Menu } from 'lucide-react'
+import { Check, ChevronDown, CircleHelp, LogOut, Menu } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { usePode, useSessaoAtiva } from '@/app/sessao'
 import { useToast } from '@/components/ui/Toast'
-import { useEntrar, useUsuariosDemo } from '@/data/hooks'
+import { useEntrar, useSair, useUsuariosDemo } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO } from '@/domain/rotulos'
 import { cn } from '@/lib/cn'
@@ -75,6 +75,7 @@ function Suspenso({
 export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
   const { usuario, ubs, territorio, microarea } = useSessaoAtiva()
   const entrar = useEntrar()
+  const sair = useSair()
   const demo = useUsuariosDemo()
   const toast = useToast()
   const navegar = useNavigate()
@@ -178,6 +179,22 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
                 >
                   <CircleHelp className="size-4" aria-hidden /> O que muda em cada perfil?
                 </Link>
+                <button
+                  type="button"
+                  disabled={sair.isPending}
+                  onClick={async () => {
+                    fechar()
+                    try {
+                      await sair.mutateAsync(undefined)
+                      navegar('/entrar', { replace: true })
+                    } catch (e) {
+                      toast.erro(e)
+                    }
+                  }}
+                  className="flex min-h-11 items-center gap-2 rounded-lg border-t border-border px-2 pt-1 text-left text-sm font-bold text-danger hover:underline"
+                >
+                  <LogOut className="size-4" aria-hidden /> Sair
+                </button>
               </div>
             )}
           </Suspenso>

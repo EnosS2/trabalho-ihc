@@ -79,11 +79,11 @@ function IconeAcessibilidade() {
 }
 
 /**
- * Botão de acessibilidade do rodapé da barra lateral. O painel abre para cima com posição fixa
- * (a barra tem overflow e cortaria um painel absoluto), mas continua no DOM logo após o botão,
- * mantendo a ordem de tabulação e o foco preso da gaveta mobile.
+ * Botão de acessibilidade do rodapé da barra lateral (e do topo da tela de login, com `abrirPara="baixo"`).
+ * O painel tem posição fixa (a barra tem overflow e cortaria um painel absoluto), mas continua no DOM
+ * logo após o botão, mantendo a ordem de tabulação e o foco preso da gaveta mobile.
  */
-export function Acessibilidade() {
+export function Acessibilidade({ abrirPara = 'cima' }: { abrirPara?: 'cima' | 'baixo' }) {
   const [posicao, setPosicao] = useState<CSSProperties | null>(null)
   const raiz = useRef<HTMLDivElement>(null)
   const botao = useRef<HTMLButtonElement>(null)
@@ -92,7 +92,11 @@ export function Acessibilidade() {
 
   function abrir() {
     const r = botao.current!.getBoundingClientRect()
-    setPosicao({ left: r.left, bottom: window.innerHeight - r.top + 8 })
+    setPosicao(
+      abrirPara === 'cima'
+        ? { left: r.left, bottom: window.innerHeight - r.top + 8 }
+        : { right: Math.max(16, window.innerWidth - r.right), top: r.bottom + 8 },
+    )
   }
 
   useEffect(() => {
@@ -111,7 +115,9 @@ export function Acessibilidade() {
     document.addEventListener('mousedown', fora)
     document.addEventListener('keydown', esc, true)
     window.addEventListener('resize', fechar)
+    window.addEventListener('scroll', fechar)
     return () => {
+      window.removeEventListener('scroll', fechar)
       document.removeEventListener('mousedown', fora)
       document.removeEventListener('keydown', esc, true)
       window.removeEventListener('resize', fechar)

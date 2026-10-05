@@ -16,11 +16,15 @@ function useEscrita<TVars, TResult>(fn: (vars: TVars) => Promise<TResult>) {
 // sessão
 export const useSessao = () => useQuery({ queryKey: ['sessao'], queryFn: api.obterSessao, staleTime: Infinity })
 export const useUsuariosDemo = () => useQuery({ queryKey: ['usuarios-demo'], queryFn: api.listarUsuariosDemo })
+export const useAcessosDemo = () => useQuery({ queryKey: ['acessos-demo'], queryFn: api.listarAcessosDemo })
 export function useEntrar() {
   return useTrocaDeSessao(api.entrar)
 }
-export function useEntrarComPerfilPadrao() {
-  return useTrocaDeSessao(api.entrarComPerfilPadrao)
+export function useEntrarComCredenciais() {
+  return useTrocaDeSessao(api.entrarComCredenciais)
+}
+export function useSair() {
+  return useTrocaDeSessao(api.sair)
 }
 function useTrocaDeSessao<TVars>(fn: (vars: TVars) => Promise<unknown>) {
   const qc = useQueryClient()
