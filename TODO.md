@@ -254,3 +254,4 @@ relógio (aguardando), X (vencido/erro).
 | 2026-09-25 | Central de ajuda: botão "Guia de interface (IHC)" virou "Guia de interface" (sem o nome da disciplina no rótulo). |
 | 2026-09-25 | Botão secundário com fundo transparente (só borda; fundo no hover). Na página cinza deixava de parecer um painel (ex.: "Guia de interface" na Central de ajuda); dentro de painéis brancos nada muda. |
 | 2026-09-25 | Deploy no GitHub Pages: `base: '/trabalho-ihc/'` no build (vite.config), `basename` do router a partir de `BASE_URL`, workflow `.github/workflows/deploy.yml` (testes + build + `404.html` como fallback de SPA). |
+| 2026-09-25 | Guia de estilo da entrega de IHC (perfis, ações por perfil, composição/Gestalt, cores, tipografia, ícones, acessibilidade, responsabilidades) em `docs/guia-de-estilo.pdf` (A4). Tema claro, fita do caso como sumário; contrastes medidos a partir dos tokens de `src/index.css`. |
