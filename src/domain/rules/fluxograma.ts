@@ -171,7 +171,7 @@ function interpretarSifilis(testes: TesteExecutado[], ctx: ContextoTestagem): In
     mensagem: 'Teste rápido reagente não define caso: coletar não treponêmico para confirmar e titular.',
     condutas: [
       'Coletar VDRL (não treponêmico) para confirmação e titulação.',
-      'Tratar após confirmação — ou imediatamente se houver sinais/sintomas ou risco de perda de seguimento.',
+      'Tratar após confirmação, ou imediatamente se houver sinais/sintomas ou risco de perda de seguimento.',
       'Investigar tratamento prévio (cicatriz sorológica).',
       'Convocar e testar as parcerias sexuais.',
     ],

@@ -1,5 +1,4 @@
 import { Columns3, List, Search } from 'lucide-react'
-import { useState } from 'react'
 import { Link } from 'react-router'
 import { ICONE } from '@/components/icones'
 import { AgravoBadge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
@@ -17,6 +16,8 @@ import type { Agravo, StatusCaso } from '@/domain/types'
 import { formatarData } from '@/lib/datas'
 import { cn } from '@/lib/cn'
 import { plural } from '@/lib/texto'
+import { useBooleanoNaUrl, useEstadoNaUrl } from '@/lib/estadoNaUrl'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 
 function CartaoCaso({ r }: { r: CasoResumo }) {
   return (
@@ -34,7 +35,7 @@ function CartaoCaso({ r }: { r: CasoResumo }) {
         </span>
         <FitaCompacta {...etapasDoCaso(r.caso.agravo, r.status)} vencida={r.proxima?.vencida} semRotulo />
       </span>
-      <span className="font-bold leading-tight">{r.pessoa.nomeSocial ?? r.pessoa.nome}</span>
+      <span className="font-bold leading-tight">{nomeDeExibicao(r.pessoa)}</span>
       {r.proxima ? (
         <span className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{r.proxima.descricao}</span>
@@ -48,11 +49,11 @@ function CartaoCaso({ r }: { r: CasoResumo }) {
 }
 
 export default function SeguimentoPage() {
-  const [visao, setVisao] = useState<'quadro' | 'lista'>('quadro')
-  const [agravo, setAgravo] = useState<Agravo | ''>('')
-  const [termo, setTermo] = useState('')
-  const [encerrados, setEncerrados] = useState(false)
-  const [soVencidos, setSoVencidos] = useState(false)
+  const [visao, setVisao] = useEstadoNaUrl<'quadro' | 'lista'>('visao', 'quadro', ['quadro', 'lista'])
+  const [agravo, setAgravo] = useEstadoNaUrl<Agravo | ''>('agravo', '', ['', ...AGRAVOS])
+  const [termo, setTermo] = useEstadoNaUrl('q', '')
+  const [encerrados, setEncerrados] = useBooleanoNaUrl('encerrados')
+  const [soVencidos, setSoVencidos] = useBooleanoNaUrl('vencidos')
   const { data, isLoading, error, refetch } = useCasos({
     status: encerrados ? undefined : 'ativos',
     agravo: agravo || undefined,
@@ -150,7 +151,7 @@ export default function SeguimentoPage() {
               chave={(r) => r.caso.id}
               principal={(r) => (
                 <Link to={`/seguimento/${r.caso.id}`} className="font-bold text-primary hover:underline">
-                  {r.pessoa.nome}
+                  {nomeDeExibicao(r.pessoa)}
                 </Link>
               )}
               colunas={[
@@ -160,7 +161,7 @@ export default function SeguimentoPage() {
                   ocultarMobile: true,
                   celula: (r) => (
                     <Link to={`/seguimento/${r.caso.id}`} className="font-bold text-primary hover:underline">
-                      {r.pessoa.nome}
+                      {nomeDeExibicao(r.pessoa)}
                     </Link>
                   ),
                 },

@@ -117,7 +117,7 @@ export function gerarBancoDemo(hoje: ISODate = hojeISO()): Banco {
       nome,
       territorioId,
       cnes: String(int(2200000, 2299999)),
-      endereco: `${pick(RUAS)}, ${int(10, 2000)} — ${nome.replace('UBS ', '')}`,
+      endereco: `${pick(RUAS)}, ${int(10, 2000)}, ${nome.replace('UBS ', '')}`,
     })
     for (let n = 1; n <= 4; n++) {
       banco.microareas.push({ id: `${id}-ma0${n}`, ubsId: id, codigo: `0${n}`, descricao: `Microárea 0${n}` })
@@ -205,15 +205,24 @@ export function gerarBancoDemo(hoje: ISODate = hojeISO()): Banco {
 
   // ---------- Pessoas ----------
   let seqPessoa = 0
+  const pessoasPorUbs = new Map<string, number>()
   function novaPessoa(ubs: Ubs, sexo: Sexo, idadeMin: number, idadeMax: number, criadoEm: ISODate, extra: Partial<Pessoa> = {}): Pessoa {
     const q = qualidade(ubs.id)
     const primeiro = pick(sexo === 'F' ? FEM : MASC)
     const nome = `${primeiro} ${pick(SOBRENOMES)} ${pick(SOBRENOMES)}`
     const nascimento = somarDias(criadoEm, -int(idadeMin * 365, idadeMax * 365))
     const semCns = chance(0.1)
+    const id = `pes-${++seqPessoa}`
+    // ~1 em 25 por UBS usa nome social. Escolhido pela ordem de cadastro (sem sortear) para não mudar o resto do seed.
+    const ordemNaUbs = (pessoasPorUbs.get(ubs.id) ?? 0) + 1
+    pessoasPorUbs.set(ubs.id, ordemNaUbs)
+    const outroGenero = sexo === 'F' ? MASC : FEM
+    // Personagens fixas da demonstração (nome vindo em `extra`) ficam como estão.
+    const nomeSocial = ordemNaUbs % 25 === 4 && !extra.nome ? `${outroGenero[seqPessoa % outroGenero.length]} ${nome.split(' ').at(-1)}` : undefined
     const pessoa: Pessoa = {
-      id: `pes-${++seqPessoa}`,
+      id,
       nome,
+      nomeSocial,
       cns: semCns ? undefined : gerarCnsProvisorio(rand),
       cpf: semCns || chance(0.6) ? gerarCpf(rand) : undefined,
       dataNascimento: nascimento,

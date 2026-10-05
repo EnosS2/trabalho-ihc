@@ -8,7 +8,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
-import { Field, Input, RadioCards, Select, Textarea } from '@/components/ui/Form'
+import { Field, Input, InputData, RadioCards, Select, Textarea } from '@/components/ui/Form'
 import { Medidor, PageHeader } from '@/components/ui/Layout'
 import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useToast } from '@/components/ui/Toast'
@@ -18,6 +18,7 @@ import type { LoteInsumo, TipoMovimentacao, TipoTeste } from '@/domain/types'
 import { diasEntre, formatarData, formatarMes, hojeISO, mesDe, somarDias } from '@/lib/datas'
 import { cn } from '@/lib/cn'
 import { plural } from '@/lib/texto'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
 
 type Aba = 'geral' | 'lotes' | 'movimentacoes' | 'fechamento'
 
@@ -38,7 +39,7 @@ function DialogoEntrada({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
     if (!f.tipo) e.tipo = 'Selecione o tipo de teste.'
     if (!f.fabricante.trim()) e.fabricante = 'Informe o fabricante.'
     if (!f.lote.trim()) e.lote = 'Informe o número do lote.'
-    if (!f.validade) e.validade = 'Informe a validade.'
+    if (!f.validade) e.validade = 'Informe a validade completa (dd/mm/aaaa).'
     else if (f.validade <= hojeISO()) e.validade = 'Lote vencido não pode entrar no estoque.'
     if (!(Number(f.quantidade) > 0)) e.quantidade = 'Informe a quantidade recebida.'
     setErros(e)
@@ -58,6 +59,7 @@ function DialogoEntrada({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
       aoFechar={aoFechar}
       titulo="Registrar entrada de lote"
       descricao="Confira os dados na caixa do kit."
+      alteracoesPendentes={Object.values(f).some((v) => v !== '')}
       rodape={
         <>
           <Button variante="secundario" onClick={aoFechar}>Cancelar</Button>
@@ -79,7 +81,7 @@ function DialogoEntrada({ aberto, aoFechar }: { aberto: boolean; aoFechar: () =>
           <Input className="tabular uppercase" value={f.lote} onChange={(e) => setF({ ...f, lote: e.target.value })} />
         </Field>
         <Field label="Validade" obrigatorio erro={erros.validade}>
-          <Input type="date" min={somarDias(hojeISO(), 1)} value={f.validade} onChange={(e) => setF({ ...f, validade: e.target.value })} />
+          <InputData value={f.validade} onChange={(v) => setF({ ...f, validade: v })} />
         </Field>
         <Field label="Quantidade (testes)" obrigatorio erro={erros.quantidade}>
           <Input type="number" inputMode="numeric" min={1} value={f.quantidade} onChange={(e) => setF({ ...f, quantidade: e.target.value })} />
@@ -96,11 +98,20 @@ function DialogoBaixa({ lote, aoFechar }: { lote: LoteInsumo | null; aoFechar: (
   const [tipo, setTipo] = useState<'perda' | 'vencimento' | 'ajuste'>(vencido ? 'vencimento' : 'perda')
   const [qtd, setQtd] = useState(vencido ? String(lote?.quantidadeAtual ?? '') : '')
   const [motivo, setMotivo] = useState(vencido ? 'Lote vencido' : '')
-  const [erro, setErro] = useState<string>()
+  const [erros, setErros] = useState<{ qtd?: string; motivo?: string }>({})
+  const qtdInicial = vencido ? String(lote?.quantidadeAtual ?? '') : ''
+  const motivoInicial = vencido ? 'Lote vencido' : ''
+  const saldo = lote?.quantidadeAtual ?? 0
   const salvar = async () => {
     const n = Number(qtd)
-    if (!n) return setErro('Informe a quantidade.')
-    if (!motivo.trim()) return setErro('Descreva o motivo.')
+    const e: typeof erros = {}
+    if (!qtd.trim() || !Number.isInteger(n) || n === 0) e.qtd = 'Informe a quantidade em unidades (número inteiro, diferente de zero).'
+    else if (tipo !== 'ajuste' && n < 0) e.qtd = 'Use um número positivo: a baixa já retira do saldo.'
+    else if (tipo !== 'ajuste' && n > saldo) e.qtd = `O lote tem só ${plural(saldo, 'unidade')}.`
+    else if (tipo === 'ajuste' && saldo + n < 0) e.qtd = `O saldo não pode ficar negativo: o lote tem ${plural(saldo, 'unidade')}.`
+    if (!motivo.trim()) e.motivo = 'Descreva o motivo.'
+    setErros(e)
+    if (Object.keys(e).length) return
     try {
       await baixa.mutateAsync({ loteId: lote!.id, dados: { tipo, quantidade: n, motivo } })
       toast.sucesso('Estoque atualizado.')
@@ -114,6 +125,7 @@ function DialogoBaixa({ lote, aoFechar }: { lote: LoteInsumo | null; aoFechar: (
       aberto={Boolean(lote)}
       aoFechar={aoFechar}
       titulo="Baixa ou ajuste de estoque"
+      alteracoesPendentes={qtd !== qtdInicial || motivo !== motivoInicial}
       descricao={lote ? `${TIPO_TESTE_ROTULO[lote.tipo]}, lote ${lote.lote}, saldo de ${plural(lote.quantidadeAtual, 'unidade')}` : undefined}
       rodape={
         <>
@@ -123,7 +135,6 @@ function DialogoBaixa({ lote, aoFechar }: { lote: LoteInsumo | null; aoFechar: (
       }
     >
       <div className="flex flex-col gap-4">
-        {erro && <Aviso tom="perigo">{erro}</Aviso>}
         <RadioCards
           legenda="Tipo de movimentação"
           nome="tipo-baixa"
@@ -135,10 +146,10 @@ function DialogoBaixa({ lote, aoFechar }: { lote: LoteInsumo | null; aoFechar: (
             { valor: 'ajuste', rotulo: 'Ajuste', descricao: 'Correção de inventário (+/−)' },
           ]}
         />
-        <Field label="Quantidade" dica={tipo === 'ajuste' ? 'Use número negativo para reduzir o saldo.' : 'Unidades a retirar do saldo.'}>
-          <Input type="number" inputMode="numeric" value={qtd} onChange={(e) => setQtd(e.target.value)} />
+        <Field label="Quantidade" obrigatorio erro={erros.qtd} dica={tipo === 'ajuste' ? 'Use número negativo para reduzir o saldo.' : 'Unidades a retirar do saldo.'}>
+          <Input type="number" inputMode="numeric" step={1} value={qtd} onChange={(e) => setQtd(e.target.value)} />
         </Field>
-        <Field label="Motivo" obrigatorio>
+        <Field label="Motivo" obrigatorio erro={erros.motivo}>
           <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} />
         </Field>
       </div>
@@ -159,7 +170,7 @@ function mesesRecentes(n = 7) {
 
 export default function EstoquePage() {
   const podeGerir = usePode('estoque.gerir')
-  const [aba, setAba] = useState<Aba>('geral')
+  const [aba, setAba] = useEstadoNaUrl<Aba>('aba', 'geral', ['geral', 'lotes', 'movimentacoes', 'fechamento'])
   const idBase = useId()
   const { data, isLoading, error } = useEstoque()
   const [entradaAberta, setEntradaAberta] = useState(false)
@@ -360,7 +371,7 @@ export default function EstoquePage() {
                   </div>
                   <Aviso tom="info">
                     Quantitativos agregados por kit no formato do boletim mensal. Os números são calculados das testagens e
-                    movimentações — sem contagem manual.
+                    movimentações, sem contagem manual.
                   </Aviso>
                   {fech.data && (
                     <Card>

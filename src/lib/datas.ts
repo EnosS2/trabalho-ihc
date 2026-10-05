@@ -73,3 +73,31 @@ export function descreverPrazo(prazo: ISODate, hoje: ISODate = hojeISO()): strin
 export function mesDe(data: ISODate): string {
   return data.slice(0, 7)
 }
+
+// ---------- Digitação de datas no formato brasileiro ----------
+// O <input type="date"> nativo segue o idioma do NAVEGADOR (mm/dd/yyyy num Chrome em inglês), não o
+// `lang` da página. Os campos de data do sistema são de texto com máscara dd/mm/aaaa.
+
+/** Aplica a máscara enquanto se digita: "0503" → "05/03", "05031990" → "05/03/1990". Aceita colar "1990-03-05". */
+export function mascararData(texto: string): string {
+  const iso = texto.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  const digitos = iso ? `${iso[3]}${iso[2]}${iso[1]}` : texto.replace(/\D/g, '').slice(0, 8)
+  return [digitos.slice(0, 2), digitos.slice(2, 4), digitos.slice(4, 8)].filter(Boolean).join('/')
+}
+
+/** "05/03/1990" → "1990-03-05"; texto incompleto ou data inexistente (31/02) → null. */
+export function dataBrParaIso(texto: string): ISODate | null {
+  const m = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+  if (!m) return null
+  const [, dd, mm, aaaa] = m
+  const d = new Date(Number(aaaa), Number(mm) - 1, Number(dd))
+  if (d.getFullYear() !== Number(aaaa) || d.getMonth() !== Number(mm) - 1 || d.getDate() !== Number(dd)) return null
+  if (Number(aaaa) < 1900) return null
+  return `${aaaa}-${mm}-${dd}`
+}
+
+/** "1990-03-05" → "05/03/1990" (vazio continua vazio). */
+export function isoParaDataBr(iso: string): string {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : ''
+}

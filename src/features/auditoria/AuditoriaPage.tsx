@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useSessaoAtiva } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
 import { Badge } from '@/components/ui/Badge'
@@ -11,6 +10,7 @@ import { useAuditoria, useReferencias } from '@/data/hooks'
 import { PERFIL_CURTO } from '@/domain/rotulos'
 import type { EventoAuditoria } from '@/domain/types'
 import { formatarDataHora } from '@/lib/datas'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
 
 const ENTIDADES: Record<EventoAuditoria['entidade'], string> = {
   pessoa: 'Pessoa',
@@ -26,8 +26,8 @@ const ENTIDADES: Record<EventoAuditoria['entidade'], string> = {
 
 export default function AuditoriaPage() {
   const { usuario } = useSessaoAtiva()
-  const [entidade, setEntidade] = useState<EventoAuditoria['entidade'] | ''>('')
-  const [usuarioId, setUsuarioId] = useState('')
+  const [entidade, setEntidade] = useEstadoNaUrl<EventoAuditoria['entidade'] | ''>('tipo', '')
+  const [usuarioId, setUsuarioId] = useEstadoNaUrl('usuario', '')
   const refs = useReferencias()
   const { data, isLoading, error } = useAuditoria({ entidade: entidade || undefined, usuarioId: usuarioId || undefined })
   const usuarios = refs.data?.usuarios.filter((u) => usuario.perfil === 'admin' || u.ubsId === usuario.ubsId) ?? []

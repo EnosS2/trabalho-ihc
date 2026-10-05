@@ -13,6 +13,7 @@ import { formatarCns, formatarCpf, formatarTelefone, mascararDocumento } from '@
 import { AGRAVO_ROTULO, ESCOLARIDADE_ROTULO, MOTIVO_ROTULO, RACA_ROTULO, SEXO_ROTULO } from '@/domain/rotulos'
 import { formatarData, semanasGestacao } from '@/lib/datas'
 import { ResultadosResumo } from '@/features/testagem/TestagensPage'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 
 export default function PessoaDetalhePage() {
   const { id } = useParams()
@@ -29,7 +30,7 @@ export default function PessoaDetalhePage() {
   return (
     <>
       <PageHeader
-        titulo={p.nomeSocial ?? p.nome}
+        titulo={nomeDeExibicao(p)}
         tituloAba="Cadastro da pessoa"
         descricao={
           <span className="flex flex-wrap items-center gap-2">
@@ -43,7 +44,7 @@ export default function PessoaDetalhePage() {
             )}
           </span>
         }
-        trilha={[{ rotulo: 'Pessoas', para: '/pessoas' }, { rotulo: p.nome }]}
+        trilha={[{ rotulo: 'Pessoas', para: '/pessoas' }, { rotulo: nomeDeExibicao(p) }]}
         acoes={
           <>
             {podeEditar && (
@@ -145,7 +146,7 @@ export default function PessoaDetalhePage() {
                 { rotulo: 'Raça/cor', valor: p.racaCor === 'ignorado' ? <Badge tom="atencao">Ignorado</Badge> : RACA_ROTULO[p.racaCor] },
                 { rotulo: 'Escolaridade', valor: p.escolaridade === 'ignorado' ? <Badge tom="atencao">Ignorado</Badge> : ESCOLARIDADE_ROTULO[p.escolaridade] },
                 { rotulo: 'Telefone', valor: p.telefone ? <a className="text-primary hover:underline" href={`tel:${p.telefone}`}>{formatarTelefone(p.telefone)}</a> : <Badge tom="atencao">Não informado</Badge> },
-                { rotulo: 'Endereço', valor: `${p.endereco.logradouro}, ${p.endereco.numero}${p.endereco.complemento ? ` (${p.endereco.complemento})` : ''} — ${p.endereco.bairro}` },
+                { rotulo: 'Endereço', valor: `${p.endereco.logradouro}, ${p.endereco.numero}${p.endereco.complemento ? ` (${p.endereco.complemento})` : ''}, ${p.endereco.bairro}` },
                 { rotulo: 'Microárea', valor: microarea?.descricao ?? 'Fora de área' },
               ]}
             />

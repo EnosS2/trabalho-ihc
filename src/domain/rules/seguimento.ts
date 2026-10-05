@@ -310,10 +310,147 @@ export type AcaoCaso =
   | { tipo: 'atualizar_parceria'; id: string; testada: boolean; tratada: boolean }
   | { tipo: 'encerrar'; desfecho: Desfecho }
   | { tipo: 'anotar'; id: string; data: ISODate; autorId: string; texto: string }
+  | { tipo: 'desfazer'; registro: RegistroDesfazivel }
+
+/**
+ * Registro do caso que pode ser desfeito. Corrigir um registro errado = desfazer e registrar de
+ * novo; a trilha de auditoria guarda as duas coisas. Anotações não se desfazem (são o próprio histórico).
+ */
+export type RegistroDesfazivel =
+  | { tipo: 'coleta' }
+  | { tipo: 'resultado' }
+  /** Início de tratamento sem doses (HIV e hepatites). Na sífilis, o início é a 1ª dose. */
+  | { tipo: 'tratamento' }
+  | { tipo: 'dose'; numero: number }
+  | { tipo: 'seguimento'; id: string }
+  | { tipo: 'desfecho' }
+
+export function descreverRegistro(r: RegistroDesfazivel): string {
+  switch (r.tipo) {
+    case 'coleta':
+      return 'a coleta do confirmatório'
+    case 'resultado':
+      return 'o resultado do confirmatório'
+    case 'tratamento':
+      return 'o início do tratamento'
+    case 'dose':
+      return `a ${r.numero}ª dose`
+    case 'seguimento':
+      return 'o exame de seguimento'
+    case 'desfecho':
+      return 'o encerramento do caso'
+  }
+}
+
+/** Por que o registro não pode ser desfeito agora (ou null se pode). Desfaz-se do fim para o começo. */
+export function motivoParaNaoDesfazer(caso: Caso, r: RegistroDesfazivel): string | null {
+  const c = caso.confirmatorio
+  const t = caso.tratamento
+  if (r.tipo === 'desfecho') {
+    if (!caso.desfecho) return 'O caso não está encerrado.'
+    if (caso.desfecho.tipo === 'descartado') return 'O caso foi encerrado pelo resultado descartado: desfaça o resultado.'
+    return null
+  }
+  if (caso.desfecho && !(r.tipo === 'resultado' && caso.desfecho.tipo === 'descartado')) {
+    return 'Reabra o caso antes de corrigir os registros.'
+  }
+  switch (r.tipo) {
+    case 'coleta':
+      if (!c.coletadoEm) return 'Não há coleta registrada.'
+      if (c.resultado) return 'Desfaça o resultado antes da coleta.'
+      return null
+    case 'resultado':
+      if (c.dispensado) return 'O diagnóstico veio de dois testes rápidos e não depende de resultado de laboratório.'
+      if (!c.resultado) return 'Não há resultado registrado.'
+      if (tratamentoIniciado(caso) && !(caso.agravo === 'sifilis' && caso.gestante)) {
+        return 'Desfaça o início do tratamento antes do resultado.'
+      }
+      return null
+    case 'tratamento':
+      if (!t?.iniciadoEm || t.doses.length > 0) return 'Não há início de tratamento para desfazer.'
+      return null
+    case 'dose': {
+      const dose = t?.doses.find((d) => d.numero === r.numero)
+      if (!dose?.aplicadaEm) return 'Esta dose não foi aplicada.'
+      if (t!.doses.some((d) => d.numero > r.numero && d.aplicadaEm)) return 'Desfaça antes a dose seguinte.'
+      return null
+    }
+    case 'seguimento':
+      if (!caso.seguimento.some((s) => s.id === r.id && !s.id.endsWith('-base'))) return 'Exame não encontrado.'
+      return null
+  }
+}
+
+function desfazerRegistro(caso: Caso, r: RegistroDesfazivel, params: Parametros): Caso {
+  const motivo = motivoParaNaoDesfazer(caso, r)
+  if (motivo) throw new AcaoInvalidaError(motivo)
+  const novo: Caso = structuredClone(caso)
+  const c = novo.confirmatorio
+  switch (r.tipo) {
+    case 'desfecho':
+      novo.desfecho = undefined
+      break
+    case 'coleta':
+      c.coletadoEm = undefined
+      break
+    case 'resultado':
+      c.resultado = undefined
+      c.resultadoEm = undefined
+      c.titulo = undefined
+      novo.seguimento = novo.seguimento.filter((s) => s.id !== `${caso.id}-base`)
+      if (novo.desfecho?.tipo === 'descartado') novo.desfecho = undefined
+      break
+    case 'tratamento':
+      novo.tratamento = undefined
+      break
+    case 'dose': {
+      const t = novo.tratamento!
+      // Gestante com sífilis: as doses já nascem programadas na abertura do caso; nos demais, a 1ª dose É o início.
+      if (r.numero === 1 && !(caso.agravo === 'sifilis' && caso.gestante)) {
+        novo.tratamento = undefined
+        break
+      }
+      const dose = t.doses.find((d) => d.numero === r.numero)!
+      dose.aplicadaEm = undefined
+      const anterior = t.doses.find((d) => d.numero === r.numero - 1)
+      if (r.numero === 1) t.iniciadoEm = undefined
+      if (anterior?.aplicadaEm) dose.previstaEm = somarDias(anterior.aplicadaEm, params.intervaloDoseSifilisDias)
+      for (const d of t.doses) {
+        if (d.numero > r.numero) d.previstaEm = somarDias(dose.previstaEm, (d.numero - r.numero) * params.intervaloDoseSifilisDias)
+      }
+      break
+    }
+    case 'seguimento':
+      novo.seguimento = novo.seguimento.filter((s) => s.id !== r.id)
+      break
+  }
+  return novo
+}
+
+/** Registro criado por uma ação, para oferecer "Desfazer" logo depois de salvar. */
+export function registroDaAcao(caso: Caso, acao: AcaoCaso): RegistroDesfazivel | null {
+  switch (acao.tipo) {
+    case 'registrar_coleta':
+      return { tipo: 'coleta' }
+    case 'registrar_resultado':
+      return { tipo: 'resultado' }
+    case 'iniciar_tratamento':
+      return caso.agravo === 'sifilis' ? { tipo: 'dose', numero: 1 } : { tipo: 'tratamento' }
+    case 'aplicar_dose':
+      return { tipo: 'dose', numero: acao.numero }
+    case 'registrar_seguimento':
+      return { tipo: 'seguimento', id: acao.id }
+    case 'encerrar':
+      return { tipo: 'desfecho' }
+    default:
+      return null
+  }
+}
 
 export class AcaoInvalidaError extends Error {}
 
 export function aplicarAcao(caso: Caso, acao: AcaoCaso, params: Parametros): Caso {
+  if (acao.tipo === 'desfazer') return desfazerRegistro(caso, acao.registro, params)
   if (caso.desfecho && acao.tipo !== 'anotar') {
     throw new AcaoInvalidaError('Caso encerrado não pode ser alterado.')
   }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import { ultimaAtualizacao, VERSAO } from '@/app/versao'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 
@@ -43,8 +44,12 @@ export function AppShell() {
         >
           <Outlet />
         </main>
-        <footer className="border-t border-border px-4 py-4 text-center text-xs text-muted sm:px-6">
-          Protótipo acadêmico de IHC, de Edgar Oliveira e Handriel Scheffer. Todos os dados exibidos são fictícios.
+        <footer className="flex flex-col gap-1 border-t border-border px-4 py-4 text-center text-xs text-muted sm:px-6">
+          <p>Protótipo acadêmico de IHC, de Edgar Oliveira e Handriel Scheffer. Todos os dados exibidos são fictícios.</p>
+          <p>
+            Última atualização do site: <time dateTime={VERSAO.data}>{ultimaAtualizacao}</time>
+            {VERSAO.hash && <span className="tabular"> (versão {VERSAO.hash})</span>}
+          </p>
         </footer>
       </div>
     </div>

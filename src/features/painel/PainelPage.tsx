@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { useSessaoAtiva } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
@@ -16,6 +16,7 @@ import type { Perfil } from '@/domain/types'
 import { cn } from '@/lib/cn'
 import { formatarData, formatarDataHora, formatarDataLonga, hojeISO, somarDias } from '@/lib/datas'
 import { plural } from '@/lib/texto'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
 import { ListaPendencias } from '@/features/seguimento/componentes'
 import BuscaAtivaLista from '@/features/busca-ativa/BuscaAtivaLista'
 
@@ -37,7 +38,7 @@ export default function PainelPage() {
 function PainelUbs() {
   const { usuario, ubs } = useSessaoAtiva()
   const { data, isLoading, error, refetch } = usePainelUbs()
-  const [janela, setJanela] = useState<'vencidas' | 'hoje' | 'semana'>('vencidas')
+  const [janela, setJanela] = useEstadoNaUrl<'vencidas' | 'hoje' | 'semana'>('pendencias', 'vencidas', ['vencidas', 'hoje', 'semana'])
   const ehRt = pode(usuario, 'estoque.gerir')
 
   const listas = useMemo(() => {

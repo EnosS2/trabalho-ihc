@@ -1,15 +1,19 @@
-import { ChevronDown, CircleX } from 'lucide-react'
+import { CalendarDays, ChevronDown, CircleX } from 'lucide-react'
 import {
   cloneElement,
   isValidElement,
   useId,
+  useRef,
+  useState,
   type InputHTMLAttributes,
+  type Ref,
   type ReactElement,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react'
 import { cn } from '@/lib/cn'
+import { dataBrParaIso, hojeISO, isoParaDataBr, mascararData } from '@/lib/datas'
 
 const controle =
   'w-full min-h-11 rounded-md border border-border-strong bg-surface px-3 py-2 text-fg placeholder:text-muted/80 aria-[invalid=true]:border-danger aria-[invalid=true]:border-2 disabled:bg-surface-3 disabled:text-muted'
@@ -101,6 +105,135 @@ export function GrupoCampos({ legenda, children, className }: { legenda: ReactNo
 
 export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(controle, className)} {...rest} />
+}
+
+/** Por que o texto digitado não é uma data aceitável (ou null se está vazio ou certo). */
+function problemaDaData(texto: string, min?: string, max?: string): string | null {
+  if (!texto) return null
+  if (texto.length < 10) return 'Data incompleta: use dia/mês/ano, por exemplo 05/03/1990.'
+  const iso = dataBrParaIso(texto)
+  if (!iso) return 'Esta data não existe. Confira o dia e o mês.'
+  if (max && iso > max) return max === hojeISO() ? 'A data não pode estar no futuro.' : `A data não pode ser depois de ${isoParaDataBr(max)}.`
+  if (min && iso < min) return `A data não pode ser antes de ${isoParaDataBr(min)}.`
+  return null
+}
+
+/**
+ * Campo de data sempre em dd/mm/aaaa. O <input type="date"> nativo segue o idioma do navegador
+ * (mm/dd/yyyy num Chrome em inglês), então aqui a data é digitada com máscara; o botão de calendário
+ * abre o seletor nativo como atalho. `value`/`onChange` usam ISO (yyyy-mm-dd); enquanto o texto está
+ * incompleto, inválido ou fora de min/max, o valor é "" e o campo explica o problema ao sair dele
+ * (a não ser que o <Field> já esteja mostrando um erro).
+ */
+export function InputData({
+  value,
+  onChange,
+  onBlur,
+  min,
+  max,
+  disabled,
+  className,
+  ref,
+  ...aria
+}: {
+  value: string
+  onChange: (iso: string) => void
+  onBlur?: () => void
+  min?: string
+  max?: string
+  disabled?: boolean
+  className?: string
+  ref?: Ref<HTMLInputElement>
+  id?: string
+  name?: string
+  'aria-describedby'?: string
+  'aria-invalid'?: boolean
+  'aria-required'?: boolean
+}) {
+  const [texto, setTexto] = useState(isoParaDataBr(value))
+  const [valorAnterior, setValorAnterior] = useState(value)
+  const [tocado, setTocado] = useState(false)
+  const nativo = useRef<HTMLInputElement>(null)
+  const idProblema = useId()
+
+  // Valor trocado por fora (reset do formulário, calendário, URL): o texto acompanha.
+  if (value !== valorAnterior) {
+    setValorAnterior(value)
+    if (value !== (dataBrParaIso(texto) ?? '')) setTexto(isoParaDataBr(value))
+  }
+
+  const problema = problemaDaData(texto, min, max)
+  const mostrarProblema = tocado && problema !== null && !aria['aria-invalid']
+
+  const digitar = (novoTexto: string) => {
+    const t = mascararData(novoTexto)
+    setTexto(t)
+    const iso = dataBrParaIso(t)
+    onChange(iso && !problemaDaData(t, min, max) ? iso : '')
+  }
+
+  return (
+    <div>
+      <div className="relative">
+        <input
+          {...aria}
+          ref={ref}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="dd/mm/aaaa"
+          maxLength={10}
+          disabled={disabled}
+          value={texto}
+          onChange={(e) => digitar(e.target.value)}
+          onBlur={() => {
+            setTocado(true)
+            onBlur?.()
+          }}
+          aria-invalid={aria['aria-invalid'] || mostrarProblema || undefined}
+          aria-describedby={[aria['aria-describedby'], mostrarProblema ? idProblema : undefined].filter(Boolean).join(' ') || undefined}
+          className={cn(controle, 'tabular pr-12', className)}
+        />
+        {/* Seletor nativo só como atalho de calendário: invisível, posicionado sob o campo para o calendário abrir ali. */}
+        <input
+          ref={nativo}
+          type="date"
+          tabIndex={-1}
+          aria-hidden
+          value={value}
+          min={min}
+          max={max}
+          onChange={(e) => {
+            if (!e.target.value || e.target.value === value) return
+            setTocado(true)
+            digitar(e.target.value)
+          }}
+          className="pointer-events-none absolute inset-0 opacity-0"
+        />
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => {
+            try {
+              nativo.current?.showPicker()
+            } catch {
+              nativo.current?.focus()
+            }
+          }}
+          aria-label="Abrir calendário"
+          className="absolute top-1/2 right-1 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted hover:bg-surface-3 disabled:opacity-50"
+        >
+          <CalendarDays className="size-5" aria-hidden />
+        </button>
+      </div>
+      {mostrarProblema && (
+        <p id={idProblema} className="mt-1 flex items-center gap-1 text-sm font-bold text-danger" role="alert">
+          <CircleX className="size-4 shrink-0" aria-hidden />
+          {problema}
+        </p>
+      )}
+    </div>
+  )
 }
 
 export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {

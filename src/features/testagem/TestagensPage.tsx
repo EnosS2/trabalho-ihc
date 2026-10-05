@@ -1,45 +1,51 @@
 import { Search } from 'lucide-react'
-import { useState } from 'react'
 import { Link } from 'react-router'
 import { usePode } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
-import { AgravoBadge, Badge, GestanteBadge } from '@/components/ui/Badge'
+import { AgravoBadge, Badge, GestanteBadge, type Tom } from '@/components/ui/Badge'
 import { LinkButton } from '@/components/ui/Button'
 import { Card, CardBody } from '@/components/ui/Card'
 import { DataTable } from '@/components/ui/DataTable'
 import { Carregando, EstadoErro, EstadoVazio } from '@/components/ui/Feedback'
-import { Checkbox, Field, Input, Select } from '@/components/ui/Form'
+import { Checkbox, Field, Input, InputData, Select } from '@/components/ui/Form'
 import { PageHeader } from '@/components/ui/Layout'
 import type { TestagemResumo } from '@/data/api'
 import { useTestagens } from '@/data/hooks'
-import { AGRAVO_ROTULO, AGRAVOS, MOTIVO_ROTULO } from '@/domain/rotulos'
-import type { Agravo } from '@/domain/types'
+import { AGRAVO_ROTULO, AGRAVOS, CONCLUSAO_ROTULO, MOTIVO_ROTULO } from '@/domain/rotulos'
+import type { Agravo, ConclusaoAgravo } from '@/domain/types'
 import { formatarData, hojeISO, somarDias } from '@/lib/datas'
 import { plural } from '@/lib/texto'
+import { useBooleanoNaUrl, useEstadoNaUrl } from '@/lib/estadoNaUrl'
 
+/** Resultado por agravo, por extenso: sigla do agravo (signo do sistema) + conclusão com cor e texto. */
 export function ResultadosResumo({ t }: { t: TestagemResumo['testagem'] }) {
   return (
-    <span className="flex flex-wrap gap-1">
+    <span className="flex flex-wrap gap-x-3 gap-y-1">
       {t.interpretacoes.map((i) => (
         <span key={i.agravo} className="inline-flex items-center gap-1">
           <AgravoBadge agravo={i.agravo} />
-          <Badge tom={i.conclusao === 'nao_reagente' ? 'sucesso' : 'perigo'} className="px-1.5">
-            {i.conclusao === 'nao_reagente' ? 'NR' : i.conclusao === 'reagente' ? 'R' : 'Disc.'}
-            <span className="sr-only">{i.conclusao === 'nao_reagente' ? ' não reagente' : i.conclusao === 'reagente' ? ' reagente' : ' discordante'}</span>
-          </Badge>
+          <Badge tom={TOM_CONCLUSAO[i.conclusao]}>{CONCLUSAO_ROTULO[i.conclusao]}</Badge>
         </span>
       ))}
     </span>
   )
 }
 
+const TOM_CONCLUSAO: Record<ConclusaoAgravo, Tom> = {
+  nao_reagente: 'sucesso',
+  reagente: 'perigo',
+  discordante: 'atencao',
+  invalido: 'atencao',
+  incompleto: 'neutro',
+}
+
 export default function TestagensPage() {
   const podeRegistrar = usePode('testagem.registrar')
-  const [inicio, setInicio] = useState(somarDias(hojeISO(), -30))
-  const [fim, setFim] = useState(hojeISO())
-  const [agravo, setAgravo] = useState<Agravo | ''>('')
-  const [reagentes, setReagentes] = useState(false)
-  const [termo, setTermo] = useState('')
+  const [inicio, setInicio] = useEstadoNaUrl('de', somarDias(hojeISO(), -30))
+  const [fim, setFim] = useEstadoNaUrl('ate', hojeISO())
+  const [agravo, setAgravo] = useEstadoNaUrl<Agravo | ''>('agravo', '', ['', ...AGRAVOS])
+  const [reagentes, setReagentes] = useBooleanoNaUrl('reagentes')
+  const [termo, setTermo] = useEstadoNaUrl('q', '')
   const { data, isLoading, error, refetch, isFetching } = useTestagens({
     inicio,
     fim,
@@ -52,7 +58,7 @@ export default function TestagensPage() {
     <>
       <PageHeader
         titulo="Testagens"
-        descricao="Histórico de testes rápidos realizados na UBS. Resultados: R = reagente, NR = não reagente."
+        descricao="Histórico de testes rápidos realizados na UBS."
         acoes={
           podeRegistrar && (
             <LinkButton to="/testagem/nova" icone={ICONE.novaTestagem}>
@@ -71,10 +77,11 @@ export default function TestagensPage() {
               </div>
             </Field>
             <Field label="De">
-              <Input type="date" value={inicio} max={fim} onChange={(e) => setInicio(e.target.value)} />
+              {/* Filtro só muda com data completa: apagar ou digitar pela metade mantém o período anterior. */}
+              <InputData value={inicio} max={fim} onChange={(v) => v && setInicio(v)} />
             </Field>
             <Field label="Até">
-              <Input type="date" value={fim} min={inicio} max={hojeISO()} onChange={(e) => setFim(e.target.value)} />
+              <InputData value={fim} min={inicio} max={hojeISO()} onChange={(v) => v && setFim(v)} />
             </Field>
             <Field label="Agravo">
               <Select value={agravo} onChange={(e) => setAgravo(e.target.value as Agravo | '')}>

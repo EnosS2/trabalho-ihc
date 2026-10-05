@@ -20,8 +20,12 @@ const PERGUNTAS: { p: string; r: string }[] = [
     r: 'Pela Nota Técnica CAIST/SMS, trata-se no mesmo dia, sem esperar o confirmatório. O assistente pergunta se a 1ª dose foi aplicada e agenda a 2ª e a 3ª. A sífilis em gestante já é notificável com um teste reagente.',
   },
   {
+    p: 'Registrei algo errado no caso. Como corrijo?',
+    r: 'Logo depois de salvar, o aviso no canto da tela traz o botão "Desfazer". Depois disso, use "Desfazer" no item do histórico do caso e registre de novo com os dados certos. Os registros se desfazem do mais recente para o mais antigo (por exemplo, o resultado antes da coleta), e um caso encerrado pode ser reaberto. Toda correção fica na auditoria.',
+  },
+  {
     p: 'Como funciona a busca ativa?',
-    r: `Se a pessoa perde um prazo presencial (coleta, dose, VDRL ou início de tratamento) por mais de ${P.toleranciaBuscaAtivaDias} dias, o ACS da microárea recebe uma tarefa. Ele vê só que há um retorno pendente — nunca o diagnóstico. A tarefa se resolve sozinha quando a pendência é registrada no caso.`,
+    r: `Se a pessoa perde um prazo presencial (coleta, dose, VDRL ou início de tratamento) por mais de ${P.toleranciaBuscaAtivaDias} dias, o ACS da microárea recebe uma tarefa. Ele vê só que há um retorno pendente, nunca o diagnóstico. A tarefa se resolve sozinha quando a pendência é registrada no caso.`,
   },
   {
     p: 'Por que o sistema insiste em raça/cor e escolaridade?',
@@ -29,7 +33,7 @@ const PERGUNTAS: { p: string; r: string }[] = [
   },
   {
     p: 'Qual lote o sistema sugere?',
-    r: 'O que vence primeiro (FEFO — first expired, first out). Cada teste registrado baixa uma unidade do lote escolhido, inclusive testes inválidos.',
+    r: 'O que vence primeiro (FEFO: first expired, first out). Cada teste registrado baixa uma unidade do lote escolhido, inclusive testes inválidos.',
   },
   {
     p: 'Meus dados ficam salvos onde?',
@@ -38,7 +42,7 @@ const PERGUNTAS: { p: string; r: string }[] = [
 ]
 
 const FLUXOS = [
-  { titulo: 'HIV', passos: ['TR1', 'Se reagente: TR2 (outro fabricante)', 'TR1 R + TR2 R: diagnóstico → SAE/TARV', 'Discordante: repetir; persistindo → amostra venosa'] },
+  { titulo: 'HIV', passos: ['TR1', 'Se reagente: TR2 (outro fabricante)', 'TR1 e TR2 reagentes: diagnóstico, encaminhar ao SAE/TARV', 'Discordante: repetir; se persistir, amostra venosa'] },
   { titulo: 'Sífilis', passos: ['Teste treponêmico', 'Reagente: coletar VDRL', 'Gestante: tratar no mesmo dia', 'VDRL mensal (gestante) / trimestral'] },
   { titulo: 'Hepatite B', passos: ['HBsAg', 'Reagente: HBV-DNA/marcadores', 'Serviço especializado', 'Testar/vacinar contatos'] },
   { titulo: 'Hepatite C', passos: ['Anti-HCV', 'Reagente: HCV-RNA', 'Tratamento com antivirais de ação direta'] },
@@ -101,6 +105,7 @@ export default function AjudaPage() {
             <CardBody>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                 {[
+                  ['/', 'Buscar pessoa (nome, CNS ou CPF) de qualquer tela'],
                   ['Tab / Shift+Tab', 'Avançar / voltar entre elementos'],
                   ['Enter / Espaço', 'Ativar botão ou opção'],
                   ['Setas', 'Mudar de opção em grupos e abas'],

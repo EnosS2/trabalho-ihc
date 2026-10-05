@@ -9,6 +9,7 @@ import { DescricaoLista, PageHeader } from '@/components/ui/Layout'
 import { useTestagem } from '@/data/hooks'
 import { AGRAVO_ROTULO, MOTIVO_ROTULO, RESULTADO_TR_ROTULO, TIPO_TESTE_AGRAVO, TIPO_TESTE_ROTULO } from '@/domain/rotulos'
 import { formatarData } from '@/lib/datas'
+import { nomeDeExibicao } from '@/domain/rules/pessoa'
 
 export default function TestagemDetalhePage() {
   const { id } = useParams()
@@ -22,7 +23,7 @@ export default function TestagemDetalhePage() {
     <>
       <PageHeader
         titulo={`Testagem de ${formatarData(t.data)}`}
-        trilha={[{ rotulo: 'Testagens', para: '/testagens' }, { rotulo: pessoa.nome }]}
+        trilha={[{ rotulo: 'Testagens', para: '/testagens' }, { rotulo: nomeDeExibicao(pessoa) }]}
         acoes={
           <>
             <Button variante="secundario" icone={Printer} onClick={() => window.print()}>
@@ -46,7 +47,10 @@ export default function TestagemDetalhePage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <AgravoBadge agravo={i.agravo} />
                     <h3 className="font-bold">{AGRAVO_ROTULO[i.agravo]}</h3>
-                    <Badge tom={i.conclusao === 'nao_reagente' ? 'sucesso' : 'perigo'} icone={i.conclusao === 'nao_reagente' ? ICONE.ok : ICONE.atencao}>
+                    <Badge
+                      tom={i.conclusao === 'nao_reagente' ? 'sucesso' : i.conclusao === 'reagente' ? 'perigo' : 'atencao'}
+                      icone={i.conclusao === 'nao_reagente' ? ICONE.ok : ICONE.atencao}
+                    >
                       {i.titulo}
                     </Badge>
                   </div>
@@ -96,7 +100,7 @@ export default function TestagemDetalhePage() {
                     rotulo: 'Pessoa',
                     valor: (
                       <Link to={`/pessoas/${pessoa.id}`} className="text-primary hover:underline">
-                        {pessoa.nome}
+                        {nomeDeExibicao(pessoa)}
                       </Link>
                     ),
                   },

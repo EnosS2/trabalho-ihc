@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
 import { usePode } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
 import { GraficoBarras } from '@/components/graficos/GraficoBarras'
@@ -75,19 +76,20 @@ function Cascata({ i }: { i: Indicadores }) {
 export default function IndicadoresPage() {
   const rede = usePode('indicadores.rede')
   const refs = useReferencias()
-  const [dias, setDias] = useState<'30' | '90' | '180'>('90')
-  const [territorioId, setTerritorioId] = useState('')
-  const [ubsId, setUbsId] = useState('')
-  const [metrica, setMetrica] = useState<Metrica>('coletaNoPrazo')
+  const [dias, setDias] = useEstadoNaUrl<'30' | '90' | '180'>('dias', '90', ['30', '90', '180'])
+  const [territorioId, setTerritorioId] = useEstadoNaUrl('coordenadoria', '')
+  const [ubsEscolhida, setUbsId] = useEstadoNaUrl('ubs', '')
+  const [metrica, setMetrica] = useEstadoNaUrl<Metrica>('metrica', 'coletaNoPrazo', Object.keys(METRICAS) as Metrica[])
   const hoje = hojeISO()
+  const ubsDoTerritorio = refs.data?.ubs.filter((u) => !territorioId || u.territorioId === territorioId) ?? []
+  // Trocar a coordenadoria invalida uma UBS de outra coordenadoria (sem precisar de dois setters na URL).
+  const ubsId = ubsDoTerritorio.some((u) => u.id === ubsEscolhida) ? ubsEscolhida : ''
   const { data, isLoading, error, isFetching } = useIndicadores({
     inicio: somarDias(hoje, -Number(dias)),
     fim: hoje,
     territorioId: territorioId || undefined,
     ubsId: ubsId || undefined,
   })
-  const ubsDoTerritorio = refs.data?.ubs.filter((u) => !territorioId || u.territorioId === territorioId) ?? []
-
   const comparacao = useMemo(() => {
     if (!data) return []
     return [...data.porUbs]
@@ -140,7 +142,7 @@ export default function IndicadoresPage() {
           {rede && (
             <>
               <Field label="Coordenadoria" className="w-56">
-                <Select value={territorioId} onChange={(e) => { setTerritorioId(e.target.value); setUbsId('') }}>
+                <Select value={territorioId} onChange={(e) => setTerritorioId(e.target.value)}>
                   <option value="">Todas</option>
                   {refs.data?.territorios.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
                 </Select>

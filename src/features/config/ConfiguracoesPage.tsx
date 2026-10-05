@@ -9,13 +9,14 @@ import { DataTable } from '@/components/ui/DataTable'
 import { ConfirmDialog, Dialog } from '@/components/ui/Dialog'
 import { Aviso, Carregando, EstadoErro } from '@/components/ui/Feedback'
 import { Checkbox, Field, GrupoCampos, Input, Select } from '@/components/ui/Form'
-import { PageHeader } from '@/components/ui/Layout'
+import { Meta, PageHeader } from '@/components/ui/Layout'
 import { TabPanel, Tabs } from '@/components/ui/Tabs'
 import { useToast } from '@/components/ui/Toast'
 import { useAtualizarParametros, useParametros, useReferencias, useRestaurarDemo, useSalvarUsuario, useUsuarios } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO, TIPO_TESTE_ROTULO, TIPOS_TESTE } from '@/domain/rotulos'
 import type { Parametros, Perfil, Usuario } from '@/domain/types'
+import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
 
 type Aba = 'usuarios' | 'parametros' | 'unidades' | 'demo'
 
@@ -24,21 +25,32 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
   const salvar = useSalvarUsuario()
   const toast = useToast()
   const existente = usuario && usuario !== 'novo' ? usuario : undefined
-  const [f, setF] = useState<Omit<Usuario, 'id'>>(
-    existente ?? { nome: '', perfil: 'executor', cargo: '', email: '', ubsId: '', microareaId: '', ativo: true },
-  )
+  const inicial: Omit<Usuario, 'id'> = existente ?? { nome: '', perfil: 'executor', cargo: '', email: '', ubsId: '', microareaId: '', ativo: true }
+  const [f, setF] = useState(inicial)
+  const [erros, setErros] = useState<{ nome?: string; email?: string; ubsId?: string; microareaId?: string }>({})
   const local = f.perfil !== 'gestor' && f.perfil !== 'admin'
+  const validar = () => {
+    const e: typeof erros = {}
+    if (f.nome.trim().split(/\s+/).length < 2) e.nome = 'Informe nome e sobrenome.'
+    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = 'E-mail inválido: confira o formato (nome@dominio).'
+    if (local && !f.ubsId) e.ubsId = 'Selecione a UBS de lotação.'
+    if (f.perfil === 'acs' && !f.microareaId) e.microareaId = 'Selecione a microárea do ACS.'
+    setErros(e)
+    return Object.keys(e).length === 0
+  }
   return (
     <Dialog
       aberto={Boolean(usuario)}
       aoFechar={aoFechar}
       titulo={existente ? `Editar ${existente.nome}` : 'Novo usuário'}
+      alteracoesPendentes={JSON.stringify(f) !== JSON.stringify(inicial)}
       rodape={
         <>
           <Button variante="secundario" onClick={aoFechar}>Cancelar</Button>
           <Button
             carregando={salvar.isPending}
             onClick={async () => {
+              if (!validar()) return
               try {
                 await salvar.mutateAsync({ dados: f, id: existente?.id })
                 toast.sucesso('Usuário salvo.')
@@ -54,10 +66,10 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
       }
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Nome" obrigatorio className="sm:col-span-2">
+        <Field label="Nome" obrigatorio erro={erros.nome} className="sm:col-span-2">
           <Input value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} />
         </Field>
-        <Field label="E-mail institucional">
+        <Field label="E-mail institucional" erro={erros.email}>
           <Input type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
         </Field>
         <Field label="Cargo">
@@ -71,7 +83,7 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
           </Select>
         </Field>
         {local && (
-          <Field label="UBS" obrigatorio>
+          <Field label="UBS" obrigatorio erro={erros.ubsId}>
             <Select value={f.ubsId ?? ''} onChange={(e) => setF({ ...f, ubsId: e.target.value, microareaId: '' })}>
               <option value="">Selecione…</option>
               {refs.data?.ubs.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
@@ -79,7 +91,7 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
           </Field>
         )}
         {f.perfil === 'acs' && (
-          <Field label="Microárea" obrigatorio>
+          <Field label="Microárea" obrigatorio erro={erros.microareaId}>
             <Select value={f.microareaId ?? ''} onChange={(e) => setF({ ...f, microareaId: e.target.value })}>
               <option value="">Selecione…</option>
               {refs.data?.microareas.filter((m) => m.ubsId === f.ubsId).map((m) => <option key={m.id} value={m.id}>{m.descricao}</option>)}
@@ -94,11 +106,28 @@ function DialogoUsuario({ usuario, aoFechar }: { usuario: Usuario | 'novo' | nul
 
 function FormParametros({ p }: { p: Parametros }) {
   const [f, setF] = useState(p)
+  const [invalidos, setInvalidos] = useState<Set<string>>(new Set())
+  // Os campos não são controlados (para aceitar vazio enquanto se digita); a versão os remonta ao descartar.
+  const [versao, setVersao] = useState(0)
   const salvar = useAtualizarParametros()
   const toast = useToast()
+  const alterado = JSON.stringify(f) !== JSON.stringify(p)
+  // Campo vazio ou negativo não vira 0 em silêncio: fica marcado e bloqueia o salvamento.
+  const aoDigitar = (chave: string, texto: string, aplicar: (n: number) => void) => {
+    const n = Number(texto)
+    const valido = texto.trim() !== '' && Number.isInteger(n) && n >= 0
+    setInvalidos((xs) => {
+      const novo = new Set(xs)
+      if (valido) novo.delete(chave)
+      else novo.add(chave)
+      return novo
+    })
+    if (valido) aplicar(n)
+  }
+  const erroDe = (chave: string) => (invalidos.has(chave) ? 'Informe um número inteiro de 0 em diante.' : undefined)
   const num = (k: keyof Omit<Parametros, 'estoqueMinimo'>, rotulo: string, dica?: string) => (
-    <Field label={rotulo} dica={dica}>
-      <Input type="number" min={0} inputMode="numeric" value={f[k]} onChange={(e) => setF({ ...f, [k]: Number(e.target.value) })} />
+    <Field label={rotulo} dica={dica} erro={erroDe(k)}>
+      <Input type="number" min={0} step={1} inputMode="numeric" defaultValue={f[k]} key={`${k}-${versao}`} onChange={(e) => aoDigitar(k, e.target.value, (n) => setF((x) => ({ ...x, [k]: n })))} />
     </Field>
   )
   return (
@@ -106,6 +135,10 @@ function FormParametros({ p }: { p: Parametros }) {
       className="flex flex-col gap-6"
       onSubmit={async (e) => {
         e.preventDefault()
+        if (invalidos.size > 0) {
+          toast.erro(invalidos.size === 1 ? 'Corrija o campo destacado para salvar.' : `Corrija os ${invalidos.size} campos destacados para salvar.`)
+          return
+        }
         try {
           await salvar.mutateAsync(f)
           toast.sucesso('Parâmetros atualizados. Prazos recalculados.')
@@ -127,21 +160,41 @@ function FormParametros({ p }: { p: Parametros }) {
       <GrupoCampos legenda="Estoque" className="lg:grid-cols-3">
         {num('alertaValidadeDias', 'Alertar validade com antecedência de')}
         {TIPOS_TESTE.map((t) => (
-          <Field key={t} label={`Mínimo de ${TIPO_TESTE_ROTULO[t]}`}>
-            <Input type="number" min={0} inputMode="numeric" value={f.estoqueMinimo[t]} onChange={(e) => setF({ ...f, estoqueMinimo: { ...f.estoqueMinimo, [t]: Number(e.target.value) } })} />
+          <Field key={t} label={`Mínimo de ${TIPO_TESTE_ROTULO[t]}`} erro={erroDe(`min-${t}`)}>
+            <Input
+              key={`min-${t}-${versao}`}
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              defaultValue={f.estoqueMinimo[t]}
+              onChange={(e) => aoDigitar(`min-${t}`, e.target.value, (n) => setF((x) => ({ ...x, estoqueMinimo: { ...x.estoqueMinimo, [t]: n } })))}
+            />
           </Field>
         ))}
       </GrupoCampos>
       <div className="flex justify-end gap-2">
-        <Button variante="secundario" onClick={() => setF(p)}>Descartar alterações</Button>
-        <Button type="submit" carregando={salvar.isPending}>Salvar parâmetros</Button>
+        <Button
+          variante="secundario"
+          disabled={!alterado && invalidos.size === 0}
+          onClick={() => {
+            setF(p)
+            setInvalidos(new Set())
+            setVersao((v) => v + 1)
+          }}
+        >
+          Descartar alterações
+        </Button>
+        <Button type="submit" carregando={salvar.isPending} disabled={!alterado && invalidos.size === 0}>
+          Salvar parâmetros
+        </Button>
       </div>
     </form>
   )
 }
 
 export default function ConfiguracoesPage() {
-  const [aba, setAba] = useState<Aba>('usuarios')
+  const [aba, setAba] = useEstadoNaUrl<Aba>('aba', 'usuarios', ['usuarios', 'parametros', 'unidades', 'demo'])
   const idBase = useId()
   const usuarios = useUsuarios()
   const params = useParametros()
@@ -186,7 +239,7 @@ export default function ConfiguracoesPage() {
                     principal={(u) => <span className="font-bold">{u.nome}</span>}
                     colunas={[
                       { chave: 'nome', cabecalho: 'Nome', celula: (u) => <span className="font-bold">{u.nome}</span>, ocultarMobile: true },
-                      { chave: 'perfil', cabecalho: 'Perfil', celula: (u) => <Badge tom="primario">N{NIVEL_ACESSO[u.perfil].nivel} · {PERFIL_ROTULO[u.perfil]}</Badge> },
+                      { chave: 'perfil', cabecalho: 'Perfil', celula: (u) => <Badge tom="primario">{PERFIL_ROTULO[u.perfil]}, nível {NIVEL_ACESSO[u.perfil].nivel}</Badge> },
                       { chave: 'ubs', cabecalho: 'Lotação', celula: (u) => (u.ubsId ? nomeUbs(u.ubsId) : 'Rede municipal') },
                       { chave: 'ativo', cabecalho: 'Situação', celula: (u) => (u.ativo ? <Badge tom="sucesso" icone={ICONE.ok}>Ativo</Badge> : <Badge>Inativo</Badge>) },
                       {
@@ -209,7 +262,7 @@ export default function ConfiguracoesPage() {
                 {refs.data?.ubs.map((u) => (
                   <li key={u.id} className="rounded-xl border border-border p-4">
                     <p className="font-bold">{u.nome}</p>
-                    <p className="text-sm text-muted">CNES {u.cnes} · {refs.data.territorios.find((t) => t.id === u.territorioId)?.nome}</p>
+                    <Meta itens={[`CNES ${u.cnes}`, refs.data.territorios.find((t) => t.id === u.territorioId)?.nome]} />
                     <p className="text-sm text-muted">{u.endereco}</p>
                   </li>
                 ))}

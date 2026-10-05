@@ -1,12 +1,13 @@
 import { Check, ChevronDown, CircleHelp, Menu } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useSessaoAtiva } from '@/app/sessao'
+import { usePode, useSessaoAtiva } from '@/app/sessao'
 import { useToast } from '@/components/ui/Toast'
 import { useEntrar, useUsuariosDemo } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO } from '@/domain/rotulos'
 import { cn } from '@/lib/cn'
+import { BuscaGlobal } from './BuscaGlobal'
 import { Logo } from './Logo'
 
 /** Painel suspenso acessível (botão com aria-expanded; fecha com Esc e clique fora). */
@@ -77,6 +78,7 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
   const demo = useUsuariosDemo()
   const toast = useToast()
   const navegar = useNavigate()
+  const podeBuscar = usePode('pessoa.ver')
   const iniciais = usuario.nome
     .split(' ')
     .filter((p) => p.length > 2)
@@ -101,6 +103,8 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
         <div className="lg:hidden">
           <Logo semSubtitulo />
         </div>
+
+        {podeBuscar && <BuscaGlobal />}
 
         <div className="ml-auto flex items-center">
           <Suspenso
