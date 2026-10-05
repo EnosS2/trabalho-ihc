@@ -12,8 +12,8 @@ import type { Perfil } from '@/domain/types'
 import { cn } from '@/lib/cn'
 
 const TAREFAS: Record<Perfil, string[]> = {
-  executor: ['Registrar testagem guiada pelo fluxograma', 'Cadastrar pessoas', 'Conduzir o seguimento dos casos'],
-  responsavel_tecnico: ['Tudo do executor', 'Estoque, lotes e fechamento SISLOGLAB', 'Enviar notificações e ver indicadores da UBS'],
+  executor: ['Registrar testagem guiada pelo fluxograma', 'Cadastrar pessoas', 'Conduzir o seguimento dos casos', 'Consultar o estoque, sem gerenciar'],
+  responsavel_tecnico: ['Tudo do executor', 'Gerenciar o estoque: lotes, baixas e fechamento SISLOGLAB', 'Enviar notificações e ver indicadores da UBS'],
   acs: ['Lista de busca ativa da microárea', 'Registrar tentativas de contato', 'Sem acesso ao diagnóstico (sigilo)'],
   gestor: ['Indicadores por UBS e território', 'Comparar coordenadorias', 'Sem dados identificados'],
   admin: ['Usuários e unidades', 'Prazos e estoque mínimo', 'Auditoria de acessos'],

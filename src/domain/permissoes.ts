@@ -61,7 +61,7 @@ export const NIVEL_ACESSO: Record<Perfil, { nivel: number; escopo: string; descr
   executor: {
     nivel: 2,
     escopo: 'Própria UBS',
-    descricao: 'Registra testagens, cadastra pessoas e conduz o seguimento dos casos da UBS.',
+    descricao: 'Registra testagens, cadastra pessoas e conduz o seguimento dos casos da UBS. Consulta o estoque, sem gerenciar.',
   },
   responsavel_tecnico: {
     nivel: 3,
