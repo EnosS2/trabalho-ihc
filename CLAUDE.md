@@ -69,4 +69,4 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `busca-ativa/`, `notificacoes/`, `estoque/`, `indicadores/`, `auditoria/`, `config/` — uma página cada.
 - `ajuda/` — Central de ajuda (FAQ, fluxogramas, teclado), `GuiaInterfacePage` (paleta, tipografia, ícones), `PerfisPage`.
 
-**Documentação**: `TODO.md` (plano e registro de alterações), `docs/design-ihc.md` (decisões de IHC), `README.md`.
+**Documentação**: `TODO.md` (plano e registro de alterações), `docs/design-ihc.md` (decisões de IHC), `docs/fluxograma-perfis.md` (fluxogramas por perfil, imagens em `docs/fluxogramas/`; atualizar ao mudar telas ou permissões), `README.md`.

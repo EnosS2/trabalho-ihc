@@ -32,7 +32,6 @@ O sistema abre na tela de login (fictício: as senhas só existem na API mock). 
 |---|---|---|---|---|
 | ACS | Joana Martins | `joana.martins@demo.poa` | `acs123` | Busca ativa no celular (sem diagnóstico visível) |
 | Executor(a) | Ana Paula Ribeiro | `ana.ribeiro@demo.poa` | `executor123` | **Nova testagem** (teste um TR1 reagente de HIV); caso da gestante *Camila Brum Vargas* (2ª dose atrasada) |
-| Executor(a) | Carlos Eduardo Lima | `carlos.lima@demo.poa` | `executor123` | O mesmo perfil, com outro profissional da UBS |
 | Responsável técnica | Beatriz Rocha | `beatriz.rocha@demo.poa` | `rt123` | Estoque (lote vencido, HBsAg abaixo do mínimo), Notificações, Indicadores |
 | Gestão APS/DVS | Marcos Pereira | `marcos.pereira@demo.poa` | `gestor123` | Indicadores comparando coordenadorias |
 | Administração | Paula Schmitt | `paula.schmitt@demo.poa` | `admin123` | Usuários, prazos, restaurar dados de demonstração |
@@ -41,6 +40,7 @@ O sistema abre na tela de login (fictício: as senhas só existem na API mock). 
 
 - [TODO.md](TODO.md): plano vivo, arquitetura, checklist e registro de alterações
 - [docs/design-ihc.md](docs/design-ihc.md): perfis, ações por perfil, composição/Gestalt, paleta, tipografia, ícones e acessibilidade
+- [docs/fluxograma-perfis.md](docs/fluxograma-perfis.md): fluxogramas do sistema por perfil de usuário (imagens em `docs/fluxogramas/`)
 - No próprio app: **Ajuda → Guia de interface**
 
 ## Arquitetura (resumo)

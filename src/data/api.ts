@@ -117,7 +117,7 @@ export interface Sessao {
 }
 
 /** Perfis de demonstração, na ordem do seletor de perfil e da lista de acessos da tela de login. */
-const USUARIOS_DEMO = ['usr-ana', 'usr-beatriz', 'usr-joana', 'usr-marcos', 'usr-paula', 'usr-carlos']
+const USUARIOS_DEMO = ['usr-ana', 'usr-beatriz', 'usr-joana', 'usr-marcos', 'usr-paula']
 
 export function listarUsuariosDemo() {
   return responder((b) =>
@@ -139,11 +139,10 @@ export function entrar(usuarioId: string) {
 
 /**
  * Senhas fictícias do protótipo (só existem na API mock; o backend usará gov.br / e-mail institucional).
- * Uma por usuário de demonstração, para entrar com cada perfil.
+ * Um usuário de demonstração por perfil.
  */
 const SENHAS_DEMO: Record<string, string> = {
   'usr-ana': 'executor123',
-  'usr-carlos': 'executor123',
   'usr-beatriz': 'rt123',
   'usr-joana': 'acs123',
   'usr-marcos': 'gestor123',
