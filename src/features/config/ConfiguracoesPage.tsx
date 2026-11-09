@@ -17,6 +17,7 @@ import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO, TIPO_TESTE_ROTULO, TIPOS_TESTE } from '@/domain/rotulos'
 import type { Parametros, Perfil, Usuario } from '@/domain/types'
 import { useEstadoNaUrl } from '@/lib/estadoNaUrl'
+import { DATA_REFERENCIA_DEMO, formatarData } from '@/lib/datas'
 
 type Aba = 'usuarios' | 'parametros' | 'unidades' | 'demo'
 
@@ -273,8 +274,8 @@ export default function ConfiguracoesPage() {
                 <CardHeader titulo="Restaurar dados de demonstração" icone={<RotateCcw className="size-5" aria-hidden />} />
                 <CardBody className="flex flex-col gap-4">
                   <Aviso tom="atencao">
-                    Apaga tudo o que foi registrado neste navegador e gera novamente os dados fictícios, com datas relativas a
-                    hoje. Útil antes de uma apresentação.
+                    Apaga tudo o que foi registrado neste navegador e gera novamente os dados fictícios, sempre iguais e com
+                    a data de referência da demonstração ({formatarData(DATA_REFERENCIA_DEMO)}). Útil antes de uma apresentação.
                   </Aviso>
                   <div>
                     <Button variante="perigo" icone={RotateCcw} onClick={() => setConfirmar(true)}>Restaurar dados</Button>

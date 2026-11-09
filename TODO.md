@@ -212,6 +212,12 @@ relógio (aguardando), X (vencido/erro).
       nome social em todas as telas, desfazer registros do caso, diálogos protegidos, filtros na URL,
       busca global, avisos de lista cortada, erros junto dos campos, uma ação primária por tela
 
+### Aula de 09/11 — deixar o que é urgente fácil de achar (formulário da turma)
+- [x] Sino de alertas na barra superior (1)
+- [x] Botão "Dar baixa" no alerta de lote vencido (3)
+- [x] Próxima ação e prazo em destaque nos cartões do Seguimento e na página da pessoa (2)
+- [x] Data de referência fixa nos dados de demonstração (8)
+
 ### Fase 4 — Backend (repositório `trabalho-ihc-backend`, depois do front)
 - [ ] Criar repositório no GitHub (requer `gh` CLI autenticado ou criação manual)
 - [ ] API REST espelhando `src/data/api` (OpenAPI)
@@ -271,3 +277,4 @@ relógio (aguardando), X (vencido/erro).
 | 2026-10-05 | Fluxogramas: versões horizontais (paisagem) dos 5 perfis em `docs/fluxogramas/*-horizontal.png`, mantendo as verticais. Cada etapa é uma faixa da esquerda para a direita (Entrada, depois as tarefas do perfil), com as faixas de cima para baixo; código Mermaid de cada uma em seções recolhíveis no fim de `docs/fluxograma-perfis.md`. |
 | 2026-10-05 | Um acesso de demonstração por perfil: Carlos Eduardo Lima (segundo executor) saiu de `USUARIOS_DEMO` e de `SENHAS_DEMO`, então não aparece mais na tela de login, na troca de perfil nem em `/perfis`, e não entra mais com senha. Ele continua no seed como profissional da UBS (autor de testagens). README sem a linha dele. |
 | 2026-10-05 | Perfis: textos deixam claro que o executor consulta o estoque mas não gerencia (`/perfis` ganhou "Consultar o estoque, sem gerenciar" e a descrição do nível 2 em `NIVEL_ACESSO` também); a responsável técnica "Gerencia o estoque: lotes, baixas e fechamento SISLOGLAB". Permissões sem mudança. |
+| 2026-11-09 | **Aula de 09/11: o que é urgente fácil de achar.** (1) **Sino de alertas** na barra superior (`app/layout/SinoAlertas.tsx`): pendências vencidas e do dia, notificações a enviar (vermelho se fora do prazo), alertas de estoque e busca ativa, conforme as permissões do perfil; número vermelho se há alerta grave; gestão e admin não veem o sino. Lista montada pela regra pura `montarAlertas` (`domain/rules/alertas.ts`, com teste). `Suspenso` saiu do Topbar para `app/layout/Suspenso.tsx` (ganhou `classeGatilho`/`classePainel`; no celular o painel do sino ocupa a largura da tela). Ícone `alertas` (sino) no mapa de ícones. (3) **"Dar baixa"** no alerta de lote vencido do sino e do Painel (só com `estoque.gerir`): leva a `/estoque?baixa=<lote>`, que abre o diálogo de baixa preenchido; mensagem do alerta sem o "Dê baixa no estoque.". (2) **Próxima ação em destaque**: componente `ProximaAcao` (`seguimento/componentes.tsx`) com o que fazer em negrito, prazo e data limite, fundo vermelho/âmbar pela urgência e "e mais N pendências"; usado nos cartões do quadro do Seguimento (a coluna da lista ficou em negrito) e numa seção "Próxima ação" no topo da página da pessoa (casos em andamento, pelo prazo). (8) **Data de referência fixa**: `hojeISO()` devolve `DATA_REFERENCIA_DEMO` = 09/11/2026 e `agoraISO()`/`tempoRelativo` usam esse dia com a hora do relógio; rodapé e Configurações informam a data; `VERSAO_BANCO` = 5 (regenera dados antigos). docs/design-ihc.md e mapa do CLAUDE.md atualizados. 65 testes passando; verificado no navegador (RT, executor, ACS, gestão; desktop e celular) sem erros de console. |

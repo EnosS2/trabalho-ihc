@@ -32,6 +32,7 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `domain/rules/seguimento.ts` — caso: criação, status derivado, pendências/prazos, ações (`aplicarAcao`), desfazer registros, etapas da fita.
 - `domain/rules/notificacao.ts` — quando o caso é notificável, destino, prazo e completude da ficha.
 - `domain/rules/estoque.ts` — FEFO, alertas de validade/mínimo, resumo por tipo, fechamento SISLOGLAB (CSV).
+- `domain/rules/alertas.ts` — `montarAlertas`: lista do sino (pendências, notificações, estoque, busca ativa), graves primeiro.
 - `domain/rules/indicadores.ts` — indicadores por UBS/território.
 - `domain/rules/documentos.ts` — CNS/CPF (validar, formatar, mascarar), telefone.
 - `domain/rules/pessoa.ts` — `nomeDeExibicao` (nome social) e texto de busca.
@@ -45,7 +46,7 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `app/router.tsx` — rotas e permissão por rota. `app/navegacao.ts` — itens e grupos do menu lateral.
 - `app/sessao.tsx` — sessão demo (sem sessão → `/entrar`), `usePode`, bloqueio por permissão. `app/preferencias.tsx` — fonte, alto contraste, tema, animações.
 - `app/versao.ts` — versão no rodapé (data do último commit, injetada pelo `vite.config.ts`).
-- `app/layout/` — `AppShell` (estrutura + rodapé), `Sidebar`, `Topbar` (menu do usuário, troca de perfil), `BuscaGlobal` (busca de pessoas, atalho `/`), `Acessibilidade`, `AlternarTema`, `Logo`.
+- `app/layout/` — `AppShell` (estrutura + rodapé com a data de referência), `Sidebar`, `Topbar` (menu do usuário, troca de perfil), `SinoAlertas` (sino da barra superior), `Suspenso` (painel suspenso do sino e do menu do usuário), `BuscaGlobal` (busca de pessoas, atalho `/`), `Acessibilidade`, `AlternarTema`, `Logo`.
 
 **Design system (`components/`)**
 - `ui/Form.tsx` — `Field` (rótulo/dica/erro), `GrupoCampos`, `Input`, `InputData` (dd/mm/aaaa), `Select`, `Textarea`, `Checkbox`, `RadioCards`, `Segmented`.
@@ -57,7 +58,7 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `index.css` — tokens de cor (claro, escuro, alto contraste), fontes, barras de rolagem.
 
 **Utilitários (`lib/`)**
-- `datas.ts` — formatar datas, somar dias, idade, máscara dd/mm/aaaa. `texto.ts` — `plural()`. `cn.ts` — classes.
+- `datas.ts` — `hojeISO`/`agoraISO` usam a data fixa `DATA_REFERENCIA_DEMO` (09/11/2026); formatar datas, somar dias, idade, máscara dd/mm/aaaa. `texto.ts` — `plural()`. `cn.ts` — classes.
 - `estadoNaUrl.ts` — `useEstadoNaUrl`/`useBooleanoNaUrl`: filtros e abas guardados na URL.
 
 **Telas (`features/`)**
@@ -65,7 +66,7 @@ Caminhos relativos a `src/`. Atualize esta seção ao criar, mover ou renomear a
 - `painel/` — painel por perfil (UBS, ACS, gestor, admin).
 - `testagem/` — `NovaTestagemPage` (assistente em 4 passos), `TestagensPage` (lista), `TestagemDetalhePage`.
 - `pessoas/` — lista, detalhe, `PessoaFormulario` (cadastro, zod) usado na página e no diálogo do assistente.
-- `seguimento/` — `SeguimentoPage` (quadro/lista), `CasoDetalhePage` (ações, histórico, notificação), `componentes.tsx` (lista de pendências).
+- `seguimento/` — `SeguimentoPage` (quadro/lista), `CasoDetalhePage` (ações, histórico, notificação), `componentes.tsx` (lista de pendências, `ProximaAcao` em destaque, usada também na página da pessoa).
 - `busca-ativa/`, `notificacoes/`, `estoque/`, `indicadores/`, `auditoria/`, `config/` — uma página cada.
 - `ajuda/` — Central de ajuda (FAQ, fluxogramas, teclado), `GuiaInterfacePage` (paleta, tipografia, ícones), `PerfisPage`.
 

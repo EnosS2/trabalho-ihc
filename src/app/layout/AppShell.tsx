@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { ultimaAtualizacao, VERSAO } from '@/app/versao'
+import { DATA_REFERENCIA_DEMO, formatarData } from '@/lib/datas'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 
@@ -46,6 +47,10 @@ export function AppShell() {
         </main>
         <footer className="flex flex-col gap-1 border-t border-border px-4 py-4 text-center text-xs text-muted sm:px-6">
           <p>Protótipo acadêmico de IHC, de Edgar Oliveira e Handriel Scheffer. Todos os dados exibidos são fictícios.</p>
+          <p>
+            Data de referência da demonstração: <time dateTime={DATA_REFERENCIA_DEMO}>{formatarData(DATA_REFERENCIA_DEMO)}</time>. Prazos e
+            alertas são calculados como se hoje fosse esse dia.
+          </p>
           <p>
             Última atualização do site: <time dateTime={VERSAO.data}>{ultimaAtualizacao}</time>
             {VERSAO.hash && <span className="tabular"> (versão {VERSAO.hash})</span>}

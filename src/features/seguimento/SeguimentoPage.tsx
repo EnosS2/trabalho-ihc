@@ -18,6 +18,7 @@ import { cn } from '@/lib/cn'
 import { plural } from '@/lib/texto'
 import { useBooleanoNaUrl, useEstadoNaUrl } from '@/lib/estadoNaUrl'
 import { nomeDeExibicao } from '@/domain/rules/pessoa'
+import { ProximaAcao } from './componentes'
 
 function CartaoCaso({ r }: { r: CasoResumo }) {
   return (
@@ -37,10 +38,7 @@ function CartaoCaso({ r }: { r: CasoResumo }) {
       </span>
       <span className="font-bold leading-tight">{nomeDeExibicao(r.pessoa)}</span>
       {r.proxima ? (
-        <span className="flex flex-col gap-1 text-sm">
-          <span className="text-muted">{r.proxima.descricao}</span>
-          <PrazoBadge prazo={r.proxima.prazo} diasRestantes={r.proxima.diasRestantes} />
-        </span>
+        <ProximaAcao pendencia={r.proxima} outras={r.pendencias.length - 1} />
       ) : (
         <span className="text-sm text-muted">Sem pendências</span>
       )}
@@ -176,7 +174,7 @@ export default function SeguimentoPage() {
                   ),
                 },
                 { chave: 'status', cabecalho: 'Etapa', celula: (r) => <FitaCompacta {...etapasDoCaso(r.caso.agravo, r.status as StatusCaso)} vencida={r.proxima?.vencida} /> },
-                { chave: 'prox', cabecalho: 'Próxima ação', celula: (r) => r.proxima?.descricao ?? '—' },
+                { chave: 'prox', cabecalho: 'Próxima ação', celula: (r) => (r.proxima ? <span className="font-bold">{r.proxima.descricao}</span> : '—') },
                 { chave: 'prazo', cabecalho: 'Prazo', celula: (r) => (r.proxima ? <PrazoBadge prazo={r.proxima.prazo} diasRestantes={r.proxima.diasRestantes} /> : '—') },
                 { chave: 'aberto', cabecalho: 'Aberto em', celula: (r) => formatarData(r.caso.abertoEm), className: 'tabular', ocultarMobile: true },
               ]}

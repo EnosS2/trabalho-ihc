@@ -90,7 +90,7 @@ export function alertasEstoque(lotes: LoteInsumo[], params: Parametros, hoje: IS
         tipoTeste: l.tipo,
         loteId: l.id,
         severidade: 'alta',
-        mensagem: `${TIPO_TESTE_ROTULO[l.tipo]}, lote ${l.lote}: venceu com ${plural(l.quantidadeAtual, 'unidade')}. Dê baixa no estoque.`,
+        mensagem: `${TIPO_TESTE_ROTULO[l.tipo]}, lote ${l.lote}: venceu com ${plural(l.quantidadeAtual, 'unidade')} no estoque.`,
       })
     } else if (dias <= params.alertaValidadeDias) {
       alertas.push({

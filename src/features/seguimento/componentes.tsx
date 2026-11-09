@@ -4,7 +4,8 @@ import { ICONE } from '@/components/icones'
 import { AgravoBadge, GestanteBadge, PrazoBadge } from '@/components/ui/Badge'
 import { FitaCompacta } from '@/components/ui/FitaDoCaso'
 import type { PendenciaPainel } from '@/data/api'
-import { etapasDoCaso, type TipoPendencia } from '@/domain/rules/seguimento'
+import { etapasDoCaso, type Pendencia, type TipoPendencia } from '@/domain/rules/seguimento'
+import { formatarData } from '@/lib/datas'
 import { cn } from '@/lib/cn'
 
 export const ICONE_PENDENCIA: Record<TipoPendencia, LucideIcon> = {
@@ -54,5 +55,40 @@ export function ListaPendencias({ itens, vazio }: { itens: PendenciaPainel[]; va
         )
       })}
     </ul>
+  )
+}
+
+/**
+ * Próxima ação do caso em destaque: o que fazer (em negrito, com o ícone da etapa) e até quando.
+ * O fundo segue a urgência (vermelho vencida, âmbar até 2 dias), para ser achada de relance no
+ * quadro do seguimento e na página da pessoa. Não é link: quem usa decide o destino.
+ */
+export function ProximaAcao({
+  pendencia: p,
+  outras = 0,
+  semRotulo,
+  className,
+}: {
+  pendencia: Pendencia
+  outras?: number
+  /** Sem o rótulo "Próxima ação" quando a seção em volta já tem esse título. */
+  semRotulo?: boolean
+  className?: string
+}) {
+  const Icone = ICONE_PENDENCIA[p.tipo]
+  const tom = p.vencida ? 'border-danger/40 bg-danger-soft' : p.diasRestantes <= 2 ? 'border-warning/40 bg-warning-soft' : 'border-border bg-surface-2'
+  return (
+    <span className={cn('flex flex-col gap-1.5 rounded-md border px-2.5 py-2', tom, className)}>
+      {!semRotulo && <span className="text-xs font-bold text-muted">Próxima ação</span>}
+      <span className="flex items-start gap-2 font-bold leading-snug text-fg">
+        <Icone className={cn('mt-0.5 size-4 shrink-0', p.vencida ? 'text-danger' : 'text-muted')} aria-hidden />
+        {p.descricao}
+      </span>
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <PrazoBadge prazo={p.prazo} diasRestantes={p.diasRestantes} />
+        <span className="text-muted tabular">até {formatarData(p.prazo)}</span>
+      </span>
+      {outras > 0 && <span className="text-xs text-muted">e mais {outras === 1 ? '1 pendência' : `${outras} pendências`}</span>}
+    </span>
   )
 }

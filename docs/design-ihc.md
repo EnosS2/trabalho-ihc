@@ -64,6 +64,20 @@ Cada perfil entra num **painel próprio** com as tarefas do dia, sem telas que n
   e na lista de casos; a completa abre o detalhe do caso. A regra que calcula a etapa é `etapasDoCaso`
   (`src/domain/rules/seguimento.ts`, com teste). É o único elemento "ousado" da interface; o resto fica quieto.
 - **Formulários longos:** barra de ações fixa no rodapé (Voltar / Continuar / Finalizar).
+- **O que é urgente, fácil de achar (aula de 09/11):**
+  - **Sino de alertas** na barra superior, ao lado do menu do usuário, visível em qualquer tela. Junta as
+    pendências vencidas e as do dia, as notificações a enviar, os alertas de estoque e a busca ativa, conforme
+    o perfil (gestão e admin não têm alertas, então não veem o sino). O número conta os alertas e fica vermelho
+    se algum é grave. Cada linha leva à tela que resolve o alerta. A regra que monta a lista é `montarAlertas`
+    (`src/domain/rules/alertas.ts`, com teste).
+  - **"Dar baixa" no próprio alerta** de lote vencido (sino, painel e estoque), para quem gerencia o estoque.
+    Leva ao Estoque com o diálogo de baixa já aberto e preenchido (vencimento, saldo do lote).
+  - **Próxima ação em destaque:** nos cartões do Seguimento e no topo da página da pessoa, a próxima ação do
+    caso fica numa caixa própria (o que fazer em negrito, prazo e data limite), com fundo vermelho se vencida
+    e âmbar se faltam até 2 dias.
+  - **Data de referência fixa:** o "hoje" da demonstração é 09/11/2026 (`DATA_REFERENCIA_DEMO` em
+    `src/lib/datas.ts`). Quem abre o protótipo em qualquer dia vê os mesmos dados, prazos e alertas; o rodapé
+    informa a data.
 
 ### Princípios de Gestalt aplicados
 | Princípio | Onde |
@@ -163,6 +177,7 @@ acompanhado de rótulo em texto. O mapa fica em `src/components/icones.ts`.
 | Tratamento / dose | seringa | aplicação |
 | Confirmatório | tubos de ensaio | exame laboratorial |
 | Status | ✓ círculo, △ triângulo, relógio, ✕ círculo | concluído, atenção, aguardando, vencido |
+| Alertas | sino | o que é urgente (barra superior); sem texto visível por falta de espaço, mas com rótulo acessível ("Alertas: 7, 3 urgentes") e o número ao lado |
 
 **Agravos são representados por siglas** (HIV, SIF, HBV, HCV) em selos coloridos. Doenças não têm pictograma
 universal, e a sigla é o signo que a equipe já usa no dia a dia.

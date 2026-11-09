@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dataBrParaIso, isoParaDataBr, mascararData } from './datas'
+import { agoraISO, DATA_REFERENCIA_DEMO, dataBrParaIso, formatarDataHora, hojeISO, isoParaDataBr, mascararData } from './datas'
 
 describe('datas no formato brasileiro', () => {
   it('aplica a máscara dd/mm/aaaa enquanto se digita', () => {
@@ -26,5 +26,12 @@ describe('datas no formato brasileiro', () => {
   it('formata ISO para exibição no campo', () => {
     expect(isoParaDataBr('2026-09-28')).toBe('28/09/2026')
     expect(isoParaDataBr('')).toBe('')
+  })
+})
+
+describe('data de referência da demonstração', () => {
+  it('"hoje" é sempre a data de referência, e "agora" cai nesse dia', () => {
+    expect(hojeISO()).toBe(DATA_REFERENCIA_DEMO)
+    expect(formatarDataHora(agoraISO()).slice(0, 10)).toBe('09/11/2026')
   })
 })
