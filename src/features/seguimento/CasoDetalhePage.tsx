@@ -36,7 +36,7 @@ import {
   SEXO_ROTULO,
 } from '@/domain/rotulos'
 import type { TipoDesfecho } from '@/domain/types'
-import { formatarData, formatarDataHora, hojeISO } from '@/lib/datas'
+import { agoraISO, formatarData, formatarDataHora, hojeISO } from '@/lib/datas'
 import { plural } from '@/lib/texto'
 import { ICONE_PENDENCIA } from './componentes'
 
@@ -127,7 +127,7 @@ function DialogoAcao({ tipo, detalhe, aoFechar }: { tipo: TipoDialogo; detalhe: 
       rotulo: 'Salvar anotação',
       sucesso: 'Anotação salva.',
       montar: () =>
-        texto.trim().length < 3 ? { campo: 'texto', mensagem: 'Escreva a anotação.' } : { tipo: 'anotar', id: idLocal(), data: new Date().toISOString(), autorId: '', texto: texto.trim() },
+        texto.trim().length < 3 ? { campo: 'texto', mensagem: 'Escreva a anotação.' } : { tipo: 'anotar', id: idLocal(), data: agoraISO(), autorId: '', texto: texto.trim() },
     },
   }
 

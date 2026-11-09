@@ -1,4 +1,4 @@
-import { addDays, differenceInCalendarDays, differenceInYears, format, formatDistanceToNowStrict, parseISO } from 'date-fns'
+import { addDays, differenceInCalendarDays, differenceInYears, format, formatDistanceStrict, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { ISODate } from '@/domain/types'
 
@@ -7,12 +7,27 @@ export function paraISO(d: Date): ISODate {
   return format(d, 'yyyy-MM-dd')
 }
 
+/**
+ * Data de referência da demonstração: o "hoje" do sistema. Fixa para que todos que abrem o
+ * protótipo (em qualquer dia) vejam os mesmos dados, prazos e alertas. Com o backend, `hojeISO`
+ * volta a ser a data do relógio.
+ */
+export const DATA_REFERENCIA_DEMO: ISODate = '2026-11-09'
+
 export function hojeISO(): ISODate {
-  return paraISO(new Date())
+  return DATA_REFERENCIA_DEMO
+}
+
+/** Agora na data de referência: o dia é o da demonstração, a hora é a do relógio. */
+export function agora(): Date {
+  const d = new Date()
+  const [a, m, dia] = DATA_REFERENCIA_DEMO.split('-').map(Number)
+  d.setFullYear(a, m - 1, dia)
+  return d
 }
 
 export function agoraISO(): string {
-  return new Date().toISOString()
+  return agora().toISOString()
 }
 
 export function somarDias(data: ISODate, dias: number): ISODate {
@@ -57,7 +72,7 @@ export function formatarMesCurto(mes: string): string {
 }
 
 export function tempoRelativo(data: string): string {
-  return formatDistanceToNowStrict(parseISO(data), { locale: ptBR, addSuffix: true })
+  return formatDistanceStrict(parseISO(data), agora(), { locale: ptBR, addSuffix: true })
 }
 
 /** Texto amigável para prazo: "vence hoje", "vence em 3 dias", "vencido há 2 dias". */

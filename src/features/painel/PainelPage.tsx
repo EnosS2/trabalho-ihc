@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react'
-import { useMemo } from 'react'
+import { PackageMinus, type LucideIcon } from 'lucide-react'
+import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useSessaoAtiva } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
@@ -144,7 +144,20 @@ function PainelUbs() {
                       />
                     )}
                     {data.alertasEstoque.slice(0, ehRt ? 4 : 2).map((a) => (
-                      <LinhaAlerta key={a.id} grave={a.severidade === 'alta'} icone={ICONE.estoque} para="/estoque" texto={a.mensagem} />
+                      <LinhaAlerta
+                        key={a.id}
+                        grave={a.severidade === 'alta'}
+                        icone={ICONE.estoque}
+                        para="/estoque"
+                        texto={a.mensagem}
+                        acao={
+                          ehRt && a.tipo === 'vencido' && a.loteId ? (
+                            <LinkButton to={`/estoque?baixa=${a.loteId}`} tamanho="sm" variante="secundario" icone={PackageMinus}>
+                              Dar baixa
+                            </LinkButton>
+                          ) : undefined
+                        }
+                      />
                     ))}
                   </ul>
                 </CardBody>
@@ -189,23 +202,28 @@ function LinhaNumero({ n, texto, detalhe, para, tom }: { n: number; texto: strin
   )
 }
 
-/** Alerta em linha: ícone e cor pela gravidade (vermelho só quando vencido ou atrasado). */
+/**
+ * Alerta em linha: ícone e cor pela gravidade (vermelho só quando vencido ou atrasado).
+ * `acao` resolve o alerta ali mesmo (ex.: "Dar baixa" no lote vencido), sem passar pela tela.
+ */
 function LinhaAlerta({
   grave,
   icone: Icone,
   texto,
   detalhe,
   para,
+  acao,
 }: {
   grave: boolean
   icone: LucideIcon
   texto: string
   detalhe?: string
   para: string
+  acao?: ReactNode
 }) {
   return (
-    <li>
-      <Link to={para} className="-mx-2 flex gap-3 rounded-md px-2 py-2.5 text-sm hover:bg-surface-2">
+    <li className="flex flex-wrap items-center gap-x-2 gap-y-1 py-0.5">
+      <Link to={para} className="-mx-2 flex min-w-0 flex-1 basis-56 gap-3 rounded-md px-2 py-2.5 text-sm hover:bg-surface-2">
         <Icone className={cn('mt-0.5 size-5 shrink-0', grave ? 'text-danger' : 'text-warning')} aria-hidden />
         <span className="min-w-0">
           <span className={cn(detalhe && 'font-bold')}>{texto}</span>
@@ -213,6 +231,7 @@ function LinhaAlerta({
           <span className="sr-only">{grave ? ' (urgente)' : ' (atenção)'}</span>
         </span>
       </Link>
+      {acao && <span className="ml-8 pb-2">{acao}</span>}
     </li>
   )
 }

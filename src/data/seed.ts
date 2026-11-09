@@ -1,5 +1,6 @@
 /**
- * Gera dados FICTÍCIOS e determinísticos de demonstração, relativos à data de hoje.
+ * Gera dados FICTÍCIOS e determinísticos de demonstração, relativos à data de referência
+ * (`DATA_REFERENCIA_DEMO`, o "hoje" do protótipo): todo mundo vê os mesmos dados e prazos.
  * Usa as mesmas operações da API (registrarTestagemOp / executarAcaoCasoOp), portanto
  * todo dado gerado respeita as regras de negócio.
  */

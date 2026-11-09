@@ -14,6 +14,8 @@ import { AGRAVO_ROTULO, ESCOLARIDADE_ROTULO, MOTIVO_ROTULO, RACA_ROTULO, SEXO_RO
 import { formatarData, semanasGestacao } from '@/lib/datas'
 import { ResultadosResumo } from '@/features/testagem/TestagensPage'
 import { nomeDeExibicao } from '@/domain/rules/pessoa'
+import { ProximaAcao } from '@/features/seguimento/componentes'
+import { cn } from '@/lib/cn'
 
 export default function PessoaDetalhePage() {
   const { id } = useParams()
@@ -25,6 +27,8 @@ export default function PessoaDetalhePage() {
   if (isLoading) return <Carregando />
   if (error || !data) return <EstadoErro erro={error} />
   const { pessoa: p, idade, microarea, testagens, casos } = data
+  // Casos em andamento com algo a fazer, pelo prazo mais próximo: a primeira coisa que se lê na página.
+  const comAcao = casos.filter((c) => c.status !== 'encerrado' && c.proxima).sort((a, b) => a.proxima!.prazo.localeCompare(b.proxima!.prazo))
   const ignorados = [p.racaCor === 'ignorado' && 'raça/cor', p.escolaridade === 'ignorado' && 'escolaridade', !p.nomeMae && 'nome da mãe', !p.telefone && 'telefone'].filter(Boolean)
 
   return (
@@ -60,6 +64,34 @@ export default function PessoaDetalhePage() {
           </>
         }
       />
+
+      {comAcao.length > 0 && (
+        <section aria-labelledby="t-proxima" className="mb-6">
+          <h2 id="t-proxima" className="mb-2 text-xl font-bold">
+            {comAcao.length === 1 ? 'Próxima ação' : 'Próximas ações'}
+          </h2>
+          <ul className="grid gap-3 md:grid-cols-2">
+            {comAcao.map((c) => (
+              <li key={c.caso.id}>
+                <Link
+                  to={`/seguimento/${c.caso.id}`}
+                  className={cn(
+                    'flex h-full flex-col gap-2 rounded-lg border bg-surface p-3 transition-colors hover:border-primary',
+                    c.proxima!.vencida ? 'border-l-4 border-danger/60' : 'border-border',
+                  )}
+                >
+                  <span className="flex flex-wrap items-center gap-2">
+                    <AgravoBadge agravo={c.caso.agravo} />
+                    {c.caso.gestante && <GestanteBadge />}
+                    <span className="ml-auto text-sm font-bold text-primary">Abrir caso</span>
+                  </span>
+                  <ProximaAcao pendencia={c.proxima!} outras={c.pendencias.length - 1} semRotulo />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {ignorados.length > 0 && (
         <Aviso tom="atencao" className="mb-6" titulo="Cadastro incompleto para a notificação">

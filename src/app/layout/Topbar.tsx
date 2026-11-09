@@ -1,76 +1,14 @@
 import { Check, ChevronDown, CircleHelp, LogOut, Menu } from 'lucide-react'
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { usePode, useSessaoAtiva } from '@/app/sessao'
 import { useToast } from '@/components/ui/Toast'
 import { useEntrar, useSair, useUsuariosDemo } from '@/data/hooks'
 import { NIVEL_ACESSO } from '@/domain/permissoes'
 import { PERFIL_ROTULO } from '@/domain/rotulos'
-import { cn } from '@/lib/cn'
 import { BuscaGlobal } from './BuscaGlobal'
 import { Logo } from './Logo'
-
-/** Painel suspenso acessível (botão com aria-expanded; fecha com Esc e clique fora). */
-function Suspenso({
-  rotulo,
-  gatilho,
-  children,
-  alinhar = 'direita',
-}: {
-  rotulo: string
-  gatilho: ReactNode
-  children: (fechar: () => void) => ReactNode
-  alinhar?: 'direita' | 'esquerda'
-}) {
-  const [aberto, setAberto] = useState(false)
-  const raiz = useRef<HTMLDivElement>(null)
-  const botao = useRef<HTMLButtonElement>(null)
-  const id = useId()
-  useEffect(() => {
-    if (!aberto) return
-    const fora = (e: MouseEvent) => {
-      if (!raiz.current?.contains(e.target as Node)) setAberto(false)
-    }
-    const esc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setAberto(false)
-        botao.current?.focus()
-      }
-    }
-    document.addEventListener('mousedown', fora)
-    document.addEventListener('keydown', esc)
-    return () => {
-      document.removeEventListener('mousedown', fora)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [aberto])
-  return (
-    <div ref={raiz} className="relative">
-      <button
-        ref={botao}
-        type="button"
-        aria-expanded={aberto}
-        aria-controls={id}
-        aria-label={rotulo}
-        onClick={() => setAberto((a) => !a)}
-        className="flex min-h-11 items-center gap-2 rounded-lg px-2 text-fg hover:bg-surface-3"
-      >
-        {gatilho}
-      </button>
-      {aberto && (
-        <div
-          id={id}
-          className={cn(
-            'absolute top-full z-30 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-border bg-surface p-4 shadow-xl',
-            alinhar === 'direita' ? 'right-0' : 'left-0',
-          )}
-        >
-          {children(() => setAberto(false))}
-        </div>
-      )}
-    </div>
-  )
-}
+import { SinoAlertas } from './SinoAlertas'
+import { Suspenso } from './Suspenso'
 
 export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
   const { usuario, ubs, territorio, microarea } = useSessaoAtiva()
@@ -107,7 +45,8 @@ export function Topbar({ aoAbrirMenu }: { aoAbrirMenu: () => void }) {
 
         {podeBuscar && <BuscaGlobal />}
 
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto flex items-center gap-1">
+          <SinoAlertas />
           <Suspenso
             rotulo={`Menu do usuário ${usuario.nome}`}
             gatilho={

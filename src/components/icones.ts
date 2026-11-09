@@ -7,6 +7,7 @@ import {
   Activity,
   BarChart3,
   Baby,
+  Bell,
   CalendarClock,
   CircleCheck,
   CircleX,
@@ -53,6 +54,7 @@ export const ICONE = {
   aguardando: Clock,
   erro: CircleX,
   info: Info,
+  alertas: Bell,
 } satisfies Record<string, LucideIcon>
 
 export type NomeIcone = keyof typeof ICONE
@@ -80,4 +82,5 @@ export const SIGNIFICADO_ICONE: Record<NomeIcone, string> = {
   aguardando: 'Aguardando',
   erro: 'Vencido / erro',
   info: 'Informação',
+  alertas: 'Sino: alertas do que é urgente (barra superior)',
 }

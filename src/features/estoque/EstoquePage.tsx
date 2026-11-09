@@ -1,5 +1,6 @@
 import { Download, PackageMinus, PackagePlus } from 'lucide-react'
 import { useId, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { usePode } from '@/app/sessao'
 import { ICONE } from '@/components/icones'
 import { Badge } from '@/components/ui/Badge'
@@ -182,6 +183,20 @@ export default function EstoquePage() {
   const movs = useMovimentacoes({ tipo: tipoMov || undefined, mes: mesMov })
   const fech = useFechamento(mesFech)
   const [mostrarVazios, setMostrarVazios] = useState(false)
+
+  // "Dar baixa" vindo de um alerta (sino ou painel): /estoque?baixa=<lote> abre o diálogo já preenchido.
+  const [params, setParams] = useSearchParams()
+  const idDoAlerta = podeGerir ? params.get('baixa') : null
+  const loteDoAlerta = idDoAlerta ? data?.lotes.find((l) => l.id === idDoAlerta && l.quantidadeAtual > 0) : undefined
+  const loteDialogo = loteBaixa ?? loteDoAlerta ?? null
+  const fecharBaixa = () => {
+    setLoteBaixa(null)
+    if (params.has('baixa')) {
+      const proximo = new URLSearchParams(params)
+      proximo.delete('baixa')
+      setParams(proximo, { replace: true })
+    }
+  }
 
   const baixarCsv = () => {
     if (!fech.data) return
@@ -409,7 +424,7 @@ export default function EstoquePage() {
         </Card>
       )}
       <DialogoEntrada aberto={entradaAberta} aoFechar={() => setEntradaAberta(false)} />
-      {loteBaixa && <DialogoBaixa key={loteBaixa.id} lote={loteBaixa} aoFechar={() => setLoteBaixa(null)} />}
+      {loteDialogo && <DialogoBaixa key={loteDialogo.id} lote={loteDialogo} aoFechar={fecharBaixa} />}
     </>
   )
 }
